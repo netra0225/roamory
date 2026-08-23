@@ -154,3 +154,42 @@ body:has(.flash-budget) .receipt-art {
 }
 @keyframes budgetInk { from { transform:scaleX(.12); transform-origin:left; } to { transform:scaleX(1); transform-origin:left; } }
 @keyframes receiptTap { 0% { transform:rotate(1deg) translateY(-8px); } 55% { transform:rotate(-1.2deg) translateY(2px); } 100% { transform:rotate(0) translateY(0); } }
+/* Homepage refinement */
+.hero-copy{
+  transform:translateY(-42px);
+}
+
+.hero-copy h1 em{
+  display:block;
+  margin-top:.13em;
+}
+
+.hero-collage{
+  transform:translateY(-42px);
+}
+
+.hero-actions{
+  margin-top:1.15rem;
+}
+
+.brand-wordmark{
+  font-family:var(--brand-serif);
+  font-size:1.82rem;
+  font-weight:700;
+  letter-spacing:-.055em;
+  color:#155f9a;
+}
+
+.brand-mark-stroke{
+  stroke:#155f9a;
+  stroke-width:2.45;
+}
+
+.brand-mark-route{
+  stroke:#e96b5a;
+  stroke-width:2.1;
+}
+
+.brand-mark-dot{
+  fill:#e96b5a;
+}
