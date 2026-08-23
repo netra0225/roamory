@@ -375,3 +375,14 @@ body:has(.flash-budget) .receipt-art {
         transform: translateY(-30px) !important;
     }
 }
+/* REGISTER PAGE — MOVE THE ACTUAL WHITE CARD */
+
+.register-shell .auth-paper {
+    transform: translateY(-95px) !important;
+}
+
+@media (max-width: 900px) {
+    .register-shell .auth-paper {
+        transform: translateY(-30px) !important;
+    }
+}
