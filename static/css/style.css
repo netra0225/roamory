@@ -361,22 +361,17 @@ body:has(.flash-budget) .receipt-art {
         font-size: clamp(3rem, 11vw, 4.4rem) !important;
     }
 }
-/* REGISTER PAGE — move form card upward */
-.auth-card,
-.register-card,
-.auth-form-card,
-.signup-card,
-.form-card {
-    transform: translateY(-100px) !important;
+/* =========================================================
+   REGISTER PAGE — CORRECT CARD POSITION
+   ========================================================= */
+
+.register-shell .auth-copy {
+    transform: translateY(-90px) !important;
 }
 
-/* keep mobile layout safe */
+/* smaller screens */
 @media (max-width: 900px) {
-    .auth-card,
-    .register-card,
-    .auth-form-card,
-    .signup-card,
-    .form-card {
-        transform: translateY(-35px) !important;
+    .register-shell .auth-copy {
+        transform: translateY(-30px) !important;
     }
-} 
+}
