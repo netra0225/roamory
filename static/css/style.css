@@ -361,3 +361,22 @@ body:has(.flash-budget) .receipt-art {
         font-size: clamp(3rem, 11vw, 4.4rem) !important;
     }
 }
+/* REGISTER PAGE — move form card upward */
+.auth-card,
+.register-card,
+.auth-form-card,
+.signup-card,
+.form-card {
+    transform: translateY(-100px) !important;
+}
+
+/* keep mobile layout safe */
+@media (max-width: 900px) {
+    .auth-card,
+    .register-card,
+    .auth-form-card,
+    .signup-card,
+    .form-card {
+        transform: translateY(-35px) !important;
+    }
+}
