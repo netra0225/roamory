@@ -193,3 +193,171 @@ body:has(.flash-budget) .receipt-art {
 .brand-mark-dot{
   fill:#e96b5a;
 }
+/* =========================================================
+   ROAMORY — HOMEPAGE VISUAL REFINEMENT
+   ========================================================= */
+
+
+/* ---------- BRAND / WORDMARK ---------- */
+
+.brand-wordmark,
+.brand-name,
+.logo-text,
+.navbar-brand span {
+    position: relative;
+    display: inline-block;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    font-style: italic;
+
+    letter-spacing: -0.055em !important;
+
+    color: #173f5f !important;
+
+    line-height: 1;
+}
+
+
+/* small travel-route accent under Roamory */
+.brand-wordmark::after,
+.brand-name::after,
+.logo-text::after,
+.navbar-brand span::after {
+    content: "";
+    position: absolute;
+
+    left: 4px;
+    bottom: -8px;
+
+    width: 38px;
+    height: 3px;
+
+    border-radius: 100px;
+
+    background: #ef765f;
+
+    transform: rotate(-2deg);
+}
+
+
+/* route endpoint dot */
+.brand-wordmark::before,
+.brand-name::before,
+.logo-text::before,
+.navbar-brand span::before {
+    content: "";
+    position: absolute;
+
+    left: 39px;
+    bottom: -10px;
+
+    width: 7px;
+    height: 7px;
+
+    background: #ef765f;
+    border-radius: 50%;
+}
+
+
+
+/* ---------- HERO POSITION ---------- */
+
+.hero-copy,
+.hero-content,
+.hero-left,
+.landing-hero-content {
+    transform: translateY(-32px);
+}
+
+
+
+/* ---------- HERO HEADLINE ---------- */
+
+.hero-copy h1,
+.hero-content h1,
+.hero-left h1,
+.landing-hero h1,
+.hero h1 {
+    font-size: clamp(3.7rem, 5.2vw, 5.4rem) !important;
+
+    line-height: 0.98 !important;
+
+    letter-spacing: -0.045em !important;
+}
+
+
+/* create deliberate breathing room between both headline lines */
+
+.hero-copy h1 em,
+.hero-content h1 em,
+.hero-left h1 em,
+.landing-hero h1 em,
+.hero h1 em {
+    display: block;
+
+    margin-top: 0.16em !important;
+}
+
+
+
+/* ---------- DESCRIPTION ---------- */
+
+.hero-copy p,
+.hero-content > p,
+.hero-left > p {
+    margin-top: 1.6rem !important;
+}
+
+
+
+/* ---------- CTA BUTTONS ---------- */
+
+.hero-actions,
+.hero-buttons,
+.cta-row {
+    margin-top: 1.5rem !important;
+}
+
+
+
+/* ---------- RIGHT-SIDE TRAVEL COLLAGE ---------- */
+
+.hero-collage,
+.hero-visual,
+.hero-art,
+.travel-collage,
+.collage {
+    transform: translateY(-34px);
+}
+
+
+
+/* ---------- KEEP MOBILE SAFE ---------- */
+
+@media (max-width: 900px) {
+
+    .hero-copy,
+    .hero-content,
+    .hero-left,
+    .landing-hero-content {
+        transform: none;
+    }
+
+    .hero-collage,
+    .hero-visual,
+    .hero-art,
+    .travel-collage,
+    .collage {
+        transform: none;
+    }
+
+    .hero-copy h1,
+    .hero-content h1,
+    .hero-left h1,
+    .landing-hero h1,
+    .hero h1 {
+        font-size: clamp(3rem, 11vw, 4.4rem) !important;
+    }
+}
