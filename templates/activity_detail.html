@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{ activity['name'] }} — Roamory{% endblock %}
+{% block content %}
+{% include '_trip_nav.html' %}
+<main class="page-shell trip-page activity-detail-page">
+  <a class="back-link" href="{{ url_for('itinerary', trip_id=trip['id'], day=activity['day_number']) }}">← Back to Day {{ activity['day_number'] }}</a>
+  <section class="activity-detail-card status-{{ activity['status'] }}">
+    <div class="activity-detail-top"><div><span class="eyebrow">DAY {{ activity['day_number'] }} · {{ activity['type']|upper }}</span><h1>{{ activity['name'] }}</h1><p>{{ activity['activity_date'] }} · {{ activity['start_time'] or 'Anytime' }}{% if activity['end_time'] %}–{{ activity['end_time'] }}{% endif %}</p></div><span class="large-status">{{ activity['status'] }}</span></div>
+    <div class="activity-detail-grid">
+      <div><span>Location</span><strong>{{ activity['location'] or 'Not added' }}</strong></div>
+      <div><span>Estimated</span><strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(activity['estimated_cost']) }}</strong></div>
+      <div><span>Actual</span><strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(activity['actual_cost']) }}</strong></div>
+    </div>
+    <div class="activity-notes"><span class="handwritten">note to future me</span><p>{{ activity['notes'] or 'No notes yet.' }}</p></div>
+    <div class="related-strip"><div><span>Related ticket</span>{% if document %}<strong>{{ document['title'] }}</strong><a class="related-action" href="{{ url_for('open_document', trip_id=trip['id'], document_id=document['id']) }}" target="_blank">Open document →</a>{% else %}<strong>No document linked yet</strong>{% endif %}</div><div><span>Related memory</span>{% if memory %}<strong>{{ memory['title'] }}</strong><a class="related-action" href="{{ url_for('journal', trip_id=trip['id']) }}">Open journal →</a>{% else %}<strong>No memory linked yet</strong>{% endif %}</div></div>
+    <div class="activity-actions">
+      <a class="button button-secondary" href="{{ url_for('edit_activity', trip_id=trip['id'], activity_id=activity['id']) }}">Edit</a>
+      {% for status, label in [('completed','Complete'),('skipped','Skip'),('changed','Changed')] %}<form method="post" action="{{ url_for('set_activity_status', trip_id=trip['id'], activity_id=activity['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="status" value="{{ status }}"><button class="button {{ 'button-primary' if status=='completed' else 'button-secondary' }}" type="submit">{{ label }}</button></form>{% endfor %}
+      <form method="post" action="{{ url_for('delete_activity', trip_id=trip['id'], activity_id=activity['id']) }}" data-confirm="Delete this activity from the route?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-danger" type="submit">Delete</button></form>
+    </div>
+  </section>
+  <div class="stamp-stage" data-stamp-stage aria-hidden="true"><div class="passport-stamp animated-stamp">ROAMORY<br>COMPLETE</div></div>
+</main>
+{% endblock %}

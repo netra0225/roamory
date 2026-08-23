@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit Trip' if trip else 'Create Trip' }} — Roamory{% endblock %}
+{% block content %}
+<main class="page-shell form-page trip-wizard-page">
+  <section class="form-editorial-header trip-form-heading">
+    <span class="eyebrow">{{ 'REVISE THE PLAN' if trip else 'NEW DEPARTURE' }}</span>
+    <h1>{{ 'Edit the trip details.' if trip else 'Where should this story begin?' }}</h1>
+    <p>Details first, then the cover, then one quick review before Roamory builds the trip desk.</p>
+  </section>
+
+  <form method="post" enctype="multipart/form-data" class="paper-form trip-form trip-wizard" data-loading-form data-trip-wizard>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <ol class="wizard-steps" aria-label="Trip creation progress">
+      <li class="active" data-wizard-indicator="1"><span>01</span><strong>Details</strong></li>
+      <li data-wizard-indicator="2"><span>02</span><strong>Cover</strong></li>
+      <li data-wizard-indicator="3"><span>03</span><strong>Review</strong></li>
+      <li data-wizard-indicator="4"><span>04</span><strong>{{ 'Save' if trip else 'Create' }}</strong></li>
+    </ol>
+
+    <section class="wizard-panel active" data-wizard-step="1">
+      <div class="wizard-panel-intro"><span class="handwritten">start with the useful bits</span><h2>Trip details</h2><p>These become the dates, route days and practical foundation of the trip.</p></div>
+      <div class="form-grid">
+        <label class="full">Trip title<input name="title" value="{{ trip['title'] if trip else '' }}" placeholder="A week between lake and sky" required></label>
+        <label>Destination<input name="destination" value="{{ trip['destination'] if trip else '' }}" placeholder="Lake Como, Italy" required></label>
+        <label>Planned budget<input type="number" min="0" step="0.01" name="planned_budget" value="{{ trip['planned_budget'] if trip else '' }}" placeholder="85000"></label>
+        <label>Start date<input type="date" name="start_date" value="{{ trip['start_date'] if trip else '' }}" required></label>
+        <label>End date<input type="date" name="end_date" value="{{ trip['end_date'] if trip else '' }}" required></label>
+        <label class="full">Description<textarea name="description" rows="5" placeholder="What kind of trip is this?">{{ trip['description'] if trip else '' }}</textarea></label>
+      </div>
+    </section>
+
+    <section class="wizard-panel" data-wizard-step="2" hidden>
+      <div class="cover-step-grid">
+        <div class="wizard-panel-intro"><span class="handwritten">set the mood</span><h2>Cover & trip accent</h2><p>The photograph leads the visual identity for this trip. The accent supports it instead of taking over.</p>
+          <label class="upload-drop cover-upload"><span>Choose cover photograph</span><input type="file" name="cover" accept="image/png,image/jpeg,image/webp" data-cover-input><small>JPG, PNG or WEBP · up to 8 MB</small></label>
+          <fieldset class="accent-picker"><legend>Trip accent</legend>
+            {% for accent in ['mediterranean','coral','sunflower','sky','turquoise'] %}<label><input type="radio" name="accent" value="{{ accent }}" {{ 'checked' if (trip and trip['accent']==accent) or (not trip and accent=='mediterranean') else '' }}><span class="accent-chip accent-{{ accent }}">{{ accent|title }}</span></label>{% endfor %}
+          </fieldset>
+        </div>
+        <figure class="cover-preview-card">
+          <div class="cover-preview-image" data-cover-preview {% if trip %}style="background-image:url('{{ cover_for_trip(trip) }}')"{% endif %}><span data-cover-placeholder>{{ '' if trip else 'Your cover appears here' }}</span></div>
+          <figcaption><span class="eyebrow">ROAMORY DEPARTURE</span><strong data-preview-destination>{{ trip['destination'] if trip else 'Destination' }}</strong><small data-preview-dates>{{ (trip['start_date'] ~ ' → ' ~ trip['end_date']) if trip else 'Dates' }}</small></figcaption>
+          <span class="tape cover-preview-tape"></span>
+        </figure>
+      </div>
+    </section>
+
+    <section class="wizard-panel" data-wizard-step="3" hidden>
+      <div class="review-spread">
+        <div class="review-copy"><span class="eyebrow">REVIEW BEFORE DEPARTURE</span><h2 data-review-title>{{ trip['title'] if trip else 'Your trip title' }}</h2><p data-review-description>{{ trip['description'] if trip else 'Your description will appear here.' }}</p><span class="handwritten">looks good? make it real.</span></div>
+        <dl class="review-ticket">
+          <div><dt>Destination</dt><dd data-review-destination>{{ trip['destination'] if trip else '—' }}</dd></div>
+          <div><dt>Dates</dt><dd data-review-dates>{{ (trip['start_date'] ~ ' → ' ~ trip['end_date']) if trip else '—' }}</dd></div>
+          <div><dt>Budget</dt><dd data-review-budget>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(trip['planned_budget']) if trip else '0' }}</dd></div>
+          <div><dt>After creation</dt><dd>Overview · Itinerary · Today · Wallet · Packing · Budget · Journal · Summary</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <div class="wizard-footer">
+      <a class="button button-secondary wizard-cancel" href="{{ url_for('trip_overview', trip_id=trip['id']) if trip else url_for('trips') }}">Cancel</a>
+      <button class="button button-secondary" type="button" data-wizard-back hidden>← Back</button>
+      <button class="button button-primary" type="button" data-wizard-next>Continue →</button>
+      <button class="button button-primary" type="submit" data-wizard-submit hidden>{{ 'Save changes' if trip else 'Create trip' }}</button>
+    </div>
+  </form>
+</main>
+{% endblock %}

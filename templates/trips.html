@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}My Trips — Roamory{% endblock %}
+{% block content %}
+<main class="page-shell trips-page">
+  <section class="page-intro"><div><span class="eyebrow">TRIP LIBRARY</span><h1>Postcards from past, present & future.</h1></div><a class="button button-primary" href="{{ url_for('create_trip') }}">+ Create another trip</a></section>
+  {% for key, label in [('ongoing','Ongoing'),('upcoming','Upcoming'),('completed','Completed')] %}
+  <section class="trip-shelf">
+    <div class="section-heading"><div><span class="shelf-index">0{{ loop.index }}</span><h2>{{ label }}</h2></div><span>{{ grouped[key]|length }} trip{{ '' if grouped[key]|length == 1 else 's' }}</span></div>
+    <div class="trip-library-grid">
+    {% for trip in grouped[key] %}
+      <article class="library-card accent-{{ trip['accent'] }}">
+        <a href="{{ url_for('trip_overview', trip_id=trip['id']) }}" class="library-image"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="library-status">{{ key|upper }}</span></a>
+        <div class="library-copy"><span>{{ trip['start_date'] }} — {{ trip['end_date'] }}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p><div class="library-actions"><a href="{{ url_for('trip_overview', trip_id=trip['id']) }}">Open trip →</a><a href="{{ url_for('edit_trip', trip_id=trip['id']) }}">Edit</a></div></div>
+      </article>
+    {% else %}<div class="small-empty shelf-empty">No {{ key }} trips.</div>{% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</main>
+{% endblock %}

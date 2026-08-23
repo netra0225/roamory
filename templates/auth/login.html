@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Login — Roamory{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block content %}
+<main class="auth-shell">
+  <a class="brand brand-dark auth-brand" href="{{ url_for('landing') }}"><span class="brand-mark" aria-hidden="true"><span class="brand-map-panel panel-left"></span><span class="brand-map-panel panel-mid"></span><span class="brand-map-panel panel-right"></span><span class="brand-route-line"></span><span class="brand-waypoint"></span></span><span class="brand-wordmark">Roamory</span></a>
+  <section class="auth-paper">
+    <div class="auth-copy"><span class="eyebrow">WELCOME BACK</span><h1>Open your travel desk.</h1><p>Plans, tickets and half-written memories are waiting where you left them.</p></div>
+    <form method="post" class="form-stack" data-loading-form><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Email<input type="email" name="email" autocomplete="email" required></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="button button-primary" type="submit">Login</button>
+    </form>
+    <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+  </section>
+  <div class="auth-photo"><img src="https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=86" alt="Travel destination"><span class="vertical-label">NOTES FROM SOMEWHERE BEAUTIFUL</span></div>
+</main>
+{% endblock %}

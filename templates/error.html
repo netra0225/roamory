@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }} — Roamory{% endblock %}
+{% block content %}<main class="not-found"><div class="postcard-404"><span>ROAMORY ROUTE NOTICE</span><strong>{{ code }}</strong><h1>{{ title }}</h1><p>{{ message }}</p><a class="button button-primary" href="{{ url_for('dashboard') if g.user else url_for('landing') }}">Back to Roamory</a></div></main>{% endblock %}

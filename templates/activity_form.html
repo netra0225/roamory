@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit Activity' if activity else 'Add Activity' }} — Roamory{% endblock %}
+{% block content %}
+{% include '_trip_nav.html' %}
+<main class="page-shell trip-page form-page">
+  <section class="form-editorial-header"><span class="eyebrow">ITINERARY STOP</span><h1>{{ 'Adjust this stop.' if activity else 'Add something to the route.' }}</h1><p>Keep it useful while travelling: time, location, costs and the note you will need later.</p></section>
+  <form method="post" class="paper-form activity-form" data-loading-form><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-grid">
+      <label class="full">Activity name<input name="name" value="{{ activity['name'] if activity else '' }}" placeholder="Ferry to Capri" required></label>
+      <label>Type<select name="type">{% for value in ['destination','stay','transport','activity','restaurant','general'] %}<option value="{{ value }}" {{ 'selected' if activity and activity['type']==value else '' }}>{{ value|title }}</option>{% endfor %}</select></label>
+      <label>Trip day<select name="day_id" required>{% for day in days %}<option value="{{ day['id'] }}" {{ 'selected' if activity and activity['day_id']==day['id'] else '' }}>Day {{ day['day_number'] }} · {{ day['date'] }}</option>{% endfor %}</select></label>
+      <label>Start time<input type="time" name="start_time" value="{{ activity['start_time'] if activity and activity['start_time'] else '' }}"></label>
+      <label>End time<input type="time" name="end_time" value="{{ activity['end_time'] if activity and activity['end_time'] else '' }}"></label>
+      <label class="full">Location<input name="location" value="{{ activity['location'] if activity else '' }}" placeholder="Marina Grande"></label>
+      <label>Estimated cost<input type="number" min="0" step="0.01" name="estimated_cost" value="{{ activity['estimated_cost'] if activity else '0' }}"></label>
+      <label>Actual cost<input type="number" min="0" step="0.01" name="actual_cost" value="{{ activity['actual_cost'] if activity else '0' }}"></label>
+      <label>Status<select name="status">{% for value in ['planned','completed','skipped','changed'] %}<option value="{{ value }}" {{ 'selected' if activity and activity['status']==value else '' }}>{{ value|title }}</option>{% endfor %}</select></label>
+      <div class="related-selects">
+        <label>Related ticket / document<select name="document_id"><option value="">None linked</option>{% for doc in documents %}<option value="{{ doc['id'] }}" {{ 'selected' if activity and activity['document_id']==doc['id'] else '' }}>{{ doc['title'] }}</option>{% endfor %}</select><small>Saved from Travel Wallet.</small></label>
+        <label>Related journal memory<select name="memory_id"><option value="">None linked</option>{% for memory in memories %}<option value="{{ memory['id'] }}" {{ 'selected' if activity and activity['memory_id']==memory['id'] else '' }}>{{ memory['title'] }}</option>{% endfor %}</select><small>Optional memory connected to this stop.</small></label>
+      </div>
+      <label class="full">Notes<textarea name="notes" rows="5" placeholder="Meet near the blue ticket booth. Keep the printed confirmation handy.">{{ activity['notes'] if activity else '' }}</textarea></label>
+    </div>
+    <div class="form-footer"><a class="button button-secondary" href="{{ url_for('activity_detail', trip_id=trip['id'], activity_id=activity['id']) if activity else url_for('itinerary', trip_id=trip['id']) }}">Cancel</a><button class="button button-primary" type="submit">{{ 'Save activity' if activity else 'Add to route' }}</button></div>
+  </form>
+</main>
+{% endblock %}

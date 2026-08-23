@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Itinerary — {{ trip['destination'] }}{% endblock %}
+{% block content %}
+{% include '_trip_nav.html' %}
+<main class="page-shell trip-page itinerary-page">
+  <section class="page-intro itinerary-intro"><div><span class="eyebrow">THE JOURNEY ROUTE</span><h1>{{ trip['destination'] }}, day by day.</h1></div><a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">+ Add activity</a></section>
+  <nav class="day-tabs" aria-label="Trip days">
+    {% for day in days %}<a class="{{ 'active' if day['day_number']==selected_day else '' }}" href="{{ url_for('itinerary', trip_id=trip['id'], day=day['day_number']) }}"><span>Day {{ day['day_number'] }}</span><small>{{ day['date'][5:] }}</small></a>{% endfor %}
+  </nav>
+  <section class="itinerary-route" data-route>
+    {% set day_activities = activities|selectattr('day_number','equalto',selected_day)|list %}
+    {% set ns = namespace(current_found=false) %}
+    {% for activity in day_activities %}
+      {% set is_current = activity['status'] in ['planned','changed'] and not ns.current_found %}
+      {% if is_current %}{% set ns.current_found = true %}{% endif %}
+      <article class="route-activity status-{{ activity['status'] }} {{ 'is-current' if is_current else '' }}">
+        <div class="route-axis"><span class="route-node"></span>{% if not loop.last %}<span class="route-segment"></span>{% endif %}</div>
+        <div class="activity-time"><strong>{{ activity['start_time'] or '—' }}</strong><span>{{ activity['end_time'] or '' }}</span></div>
+        <a class="activity-paper" href="{{ url_for('activity_detail', trip_id=trip['id'], activity_id=activity['id']) }}">
+          <div class="activity-meta"><span class="activity-type">{{ activity['type']|upper }}</span><span class="status-label">{{ activity['status'] }}</span></div>
+          <h2>{{ activity['name'] }}</h2><p>{{ activity['location'] or 'Location not added' }}</p>
+          {% if activity['notes'] %}<small>{{ activity['notes']|truncate(92) }}</small>{% endif %}
+        </a>
+      </article>
+    {% else %}
+      <div class="empty-state route-empty"><span class="doodle-arrow">↝</span><span class="eyebrow">DAY {{ selected_day }}</span><h2>No stops on this route yet.</h2><p>Add a stay, meal, activity, transport or anything else that matters.</p><a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">Add first activity</a></div>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

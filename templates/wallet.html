@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Travel Wallet — {{ trip['destination'] }}{% endblock %}
+{% block content %}
+{% include '_trip_nav.html' %}
+<main class="page-shell trip-page wallet-page">
+  <section class="page-intro"><div><span class="eyebrow">TRAVEL WALLET</span><h1>The important pieces, tucked away properly.</h1></div><span class="wallet-count">{{ documents|length }} saved</span></section>
+  <section class="wallet-layout">
+    <div class="physical-wallet" data-wallet-stage><div class="wallet-pocket"><span>ROAMORY / DOCUMENT ORGANIZER</span><div class="wallet-slot"></div><strong>{{ trip['destination'] }}</strong><small>KEEP CLOSE WHILE TRAVELLING</small></div><div class="sliding-ticket" data-sliding-ticket><span>BOARDING / ENTRY / STAY</span><strong>ROAMORY</strong><small>FILED SAFELY</small></div></div>
+    <form method="post" enctype="multipart/form-data" class="paper-form wallet-form" data-wallet-form data-loading-form><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <span class="eyebrow">ADD A DOCUMENT</span><label>Title<input name="title" placeholder="Flight to Milan" required></label><label>Type<select name="type">{% for value in ['flight','train','bus','hotel','activity','reservation','identification','other'] %}<option value="{{ value }}">{{ value|title }}</option>{% endfor %}</select></label><label>Date<input type="date" name="document_date"></label><label>Note<textarea name="note" rows="3" placeholder="Terminal 2 · baggage 20kg"></textarea></label><label class="upload-drop"><span>Choose document</span><input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt" required data-wallet-file><small>PDF, image or TXT · max 8 MB</small></label>
+      <div class="wallet-file-preview" data-wallet-preview hidden aria-live="polite">
+        <div class="wallet-preview-thumb" data-wallet-preview-thumb><span>FILE</span></div>
+        <div><span class="eyebrow">PREVIEW BEFORE FILING</span><strong data-wallet-preview-name>Selected document</strong><small data-wallet-preview-meta>Ready to confirm</small></div>
+      </div>
+      <button class="button button-primary" type="submit" data-wallet-submit>Confirm & place in wallet</button>
+    </form>
+  </section>
+  <section class="document-drawer"><div class="section-heading"><div><span class="eyebrow">FILED DOCUMENTS</span><h2>Ready when you need them.</h2></div></div><div class="document-list">
+    {% for doc in documents %}<article class="document-ticket"><div class="doc-icon">{{ doc['type'][:2]|upper }}</div><div><span>{{ doc['document_date'] or 'No date' }} · {{ doc['type']|upper }}</span><h3>{{ doc['title'] }}</h3><p>{{ doc['note'] or doc['original_filename'] }}</p></div><div class="doc-actions"><a href="{{ url_for('open_document', trip_id=trip['id'], document_id=doc['id']) }}" target="_blank">Open</a><a href="{{ url_for('download_document', trip_id=trip['id'], document_id=doc['id']) }}">Download</a><a href="{{ url_for('edit_document', trip_id=trip['id'], document_id=doc['id']) }}">Edit</a><form method="post" action="{{ url_for('delete_document', trip_id=trip['id'], document_id=doc['id']) }}" data-confirm="Delete this travel document?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-button danger-text">Delete</button></form></div></article>{% else %}<div class="empty-state compact"><h2>The wallet is still empty.</h2><p>Upload tickets, bookings and reference documents before departure.</p></div>{% endfor %}
+  </div></section>
+</main>
+{% endblock %}

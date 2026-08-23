@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}Edit Expense — Roamory{% endblock %}
+{% block content %}
+{% include '_trip_nav.html' %}
+<main class="page-shell trip-page form-page"><section class="form-editorial-header"><span class="eyebrow">TRAVEL LEDGER</span><h1>Edit the expense.</h1></section><form method="post" class="paper-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="form-grid"><label class="full">Name<input name="name" value="{{ expense['name'] }}" required></label><label>Category<select name="category">{% for value in ['Stay','Transport','Food','Activities','Shopping','Other'] %}<option {{ 'selected' if expense['category']==value else '' }}>{{ value }}</option>{% endfor %}</select></label><label>Date<input type="date" name="expense_date" value="{{ expense['expense_date'] }}" required></label><label>Amount<input type="number" min="0" step="0.01" name="amount" value="{{ expense['amount'] }}" required></label><label class="full">Note<textarea name="note" rows="4">{{ expense['note'] or '' }}</textarea></label></div><div class="form-footer"><a class="button button-secondary" href="{{ url_for('budget', trip_id=trip['id']) }}">Cancel</a><button class="button button-primary" type="submit">Save expense</button></div></form></main>
+{% endblock %}

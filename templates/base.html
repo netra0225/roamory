@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" data-appearance="{{ g.settings['appearance'] if g.settings else 'sunlit' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1769B0">
+  <title>{% block title %}Roamory{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% if g.user %}
+  <header class="app-header">
+    <a class="brand" href="{{ url_for('dashboard') }}" aria-label="Roamory dashboard">
+      <span class="brand-mark" aria-hidden="true"><span class="brand-map-panel panel-left"></span><span class="brand-map-panel panel-mid"></span><span class="brand-map-panel panel-right"></span><span class="brand-route-line"></span><span class="brand-waypoint"></span></span><span class="brand-wordmark">Roamory</span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">Dashboard</a>
+      <a href="{{ url_for('trips') }}" class="{{ 'active' if request.endpoint == 'trips' else '' }}">My Trips</a>
+      <a class="nav-create" href="{{ url_for('create_trip') }}">+ Create Trip</a>
+    </nav>
+    <div class="account-menu">
+      <a href="{{ url_for('profile') }}" class="avatar-link" aria-label="Profile">
+        {% if g.user['avatar_filename'] %}
+          <img src="{{ url_for('static', filename='uploads/' + g.user['avatar_filename']) }}" alt="">
+        {% else %}
+          <span>{{ g.user['full_name'][0]|upper }}</span>
+        {% endif %}
+      </a>
+      <div class="account-links">
+        <a href="{{ url_for('profile') }}">Profile</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
+        <form action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="link-button">Logout</button></form>
+      </div>
+    </div>
+  </header>
+  {% endif %}
+
+  <div class="flash-stack" aria-live="polite">
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="flash flash-{{ category }}" data-flash="{{ category }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <dialog id="confirmDialog" class="confirm-dialog" aria-labelledby="confirmTitle">
+    <div class="dialog-paper">
+      <span class="stamp-mini">CONFIRM</span>
+      <h2 id="confirmTitle">Are you sure?</h2>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="dialog-actions">
+        <button type="button" class="button button-secondary" data-dialog-cancel>Keep it</button>
+        <button type="button" class="button button-danger" data-dialog-confirm>Delete</button>
+      </div>
+    </div>
+  </dialog>
+  <div class="stamp-stage global-stamp-stage" data-stamp-stage aria-hidden="true"><div class="passport-stamp animated-stamp">ROAMORY<br>COMPLETE</div></div>
+</body>
+</html>

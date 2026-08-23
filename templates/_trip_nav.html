@@ -1,0 +1,10 @@
+<nav class="trip-nav" aria-label="Trip sections">
+  <a href="{{ url_for('trip_overview', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'trip_overview' else '' }}">Overview</a>
+  <a href="{{ url_for('itinerary', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint in ['itinerary','add_activity','edit_activity','activity_detail'] else '' }}">Itinerary</a>
+  <a href="{{ url_for('today', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'today' else '' }}">Today</a>
+  <a href="{{ url_for('wallet', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'wallet' else '' }}">Wallet</a>
+  <a href="{{ url_for('packing', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'packing' else '' }}">Packing</a>
+  <a href="{{ url_for('budget', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'budget' else '' }}">Budget</a>
+  <a href="{{ url_for('journal', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'journal' else '' }}">Journal</a>
+  <a href="{{ url_for('summary', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'summary' else '' }}">Summary</a>
+</nav>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Journal — {{ trip['destination'] }}{% endblock %}
+{% block content %}
+{% include '_trip_nav.html' %}
+<main class="journal-shell trip-page">
+  <section class="journal-heading"><div><span class="eyebrow">DIGITAL TRAVEL JOURNAL</span><h1>{{ trip['destination'] }}</h1><p>Turn the pages. This is a book, not a gallery.</p></div><button class="button button-primary" type="button" data-open-memory-form>+ Add memory</button></section>
+  <section class="journal-stage" data-journal>
+    <div class="book-spine" aria-hidden="true"></div>
+    <div class="journal-book">
+      {% for memory in memories %}
+      <article class="journal-sheet mood-{{ memory['mood'] }} {{ 'active' if loop.first else '' }}" data-page="{{ loop.index0 }}" style="--page-z:{{ memories|length - loop.index0 }}">
+        <div class="page-front">
+          <span class="page-number">0{{ loop.index }}</span><span class="tape tape-left"></span>
+          <div class="journal-photo instant-develop"><div class="photo-wash"></div>{% if memory['image_filename'] %}<img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="{{ memory['title'] }}">{% elif memory['image_url'] %}<img src="{{ memory['image_url'] }}" alt="{{ memory['title'] }}">{% else %}<img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1100&q=86" alt="Travel memory">{% endif %}</div>
+          <div class="journal-copy"><span class="eyebrow">{{ memory['memory_date'] or trip['start_date'] }}</span><h2>{{ memory['title'] }}</h2><p class="journal-location">{{ memory['location'] or trip['destination'] }}</p><p>{{ memory['note'] or 'A memory without a caption yet.' }}</p><span class="handwritten">keep this one.</span></div>
+          <div class="postage-stamp">AIR<br>MAIL</div><div class="pressed-flower">✾</div>
+          <div class="journal-ticket-mini">{{ memory['location']|upper if memory['location'] else trip['destination']|upper }}<br>MEMORY / 0{{ loop.index }}</div>
+          <figure class="journal-secondary-photo"><img src="{{ cover_for_trip(trip) }}" alt=""><span>somewhere along the route</span></figure>
+          <svg class="journal-route-mark" viewBox="0 0 120 54" aria-hidden="true"><path d="M5 45 C 24 3, 71 5, 110 34"/><path d="M106 28 L114 35 L104 39"/></svg>
+          <div class="journal-page-actions"><a href="{{ url_for('edit_memory', trip_id=trip['id'], memory_id=memory['id']) }}">Edit page</a><form method="post" action="{{ url_for('delete_memory', trip_id=trip['id'], memory_id=memory['id']) }}" data-confirm="Remove this memory from the journal?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-button danger-text">Delete page</button></form></div>
+        </div>
+        <div class="page-back"><span>ROAMORY · {{ trip['destination']|upper }}</span><p class="handwritten">another page from the road</p></div>
+      </article>
+      {% else %}
+      <article class="journal-sheet active empty-journal-sheet" data-page="0"><div class="page-front"><span class="tape tape-left"></span><div class="empty-state"><span class="pressed-flower">✾</span><span class="eyebrow">FIRST BLANK PAGE</span><h2>Your journal starts after something happens.</h2><p>Add a photograph, a place and the small detail you do not want to forget.</p><button class="button button-primary" type="button" data-open-memory-form>Add first memory</button></div></div><div class="page-back"></div></article>
+      {% endfor %}
+    </div>
+    <div class="journal-controls"><button class="journal-arrow" type="button" data-prev-page aria-label="Previous journal page">←</button><span data-page-indicator>1 / {{ memories|length if memories else 1 }}</span><button class="journal-arrow" type="button" data-next-page aria-label="Next journal page">→</button></div>
+  </section>
+
+  <dialog class="memory-dialog" data-memory-dialog>
+    <form id="add-memory" method="post" enctype="multipart/form-data" class="paper-form memory-form" data-memory-form data-loading-form><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="dialog-close" type="button" data-close-memory-form aria-label="Close">×</button><span class="eyebrow">NEW JOURNAL PAGE</span><h2>Develop a memory.</h2><label>Title<input name="title" placeholder="Limoncello after sunset" required></label><label>Date<input type="date" name="memory_date"></label><label>Location<input name="location" placeholder="Positano"></label><label>Photograph<input type="file" name="image" accept="image/png,image/jpeg,image/webp"></label><label>Memory<textarea name="note" rows="4" placeholder="What do you want to remember about this moment?"></textarea></label><label>Mood<select name="mood"><option value="postcard">Postcard blue</option><option value="sunset">Sunset coral</option><option value="lemon">Lemon yellow</option><option value="lake">Lake turquoise</option></select></label><button class="button button-primary" type="submit">Add to journal</button>
+    </form>
+  </dialog>
+</main>
+{% endblock %}
