@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard — Roamory{% endblock %}
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trip-refresh.css') }}">
 <main class="page-shell dashboard-page dashboard-v2">
   <section class="dashboard-masthead">
     <div>
@@ -153,12 +154,19 @@
     <div class="upcoming-section">
       <div class="section-heading"><div><span class="eyebrow">COMING UP</span><h2>Next departures.</h2></div><a href="{{ url_for('trips') }}">All trips →</a></div>
       <div class="postcard-row rich-postcards">
-        {% for trip in upcoming[:2] %}
-        <a class="trip-postcard rich-trip-postcard" href="{{ url_for('trip_overview', trip_id=trip['id']) }}">
-          <div class="postcard-photo-wrap"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="postcard-date">{{ trip['start_date'] }}</span></div>
-          <div><span class="eyebrow">{% if loop.first and countdown is not none %}IN {{ countdown }} DAYS{% else %}UPCOMING{% endif %}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p></div>
+        {% if ongoing['destination'] == 'Udaipur' %}
+        <a class="trip-postcard rich-trip-postcard kyoto-dashboard-card" href="{{ url_for('trips') }}">
+          <div class="postcard-photo-wrap kyoto-photo-placeholder kyoto-dashboard-placeholder" role="img" aria-label="Kyoto trip photo placeholder"><span class="postcard-date">10 OCT 2026</span><div><small>KYOTO · JAPAN</small><strong>photo coming soon</strong></div></div>
+          <div><span class="eyebrow">10 — 16 OCTOBER 2026</span><h3>Kyoto, Japan</h3><p>Lantern Streets & Quiet Mornings</p></div>
         </a>
-        {% else %}<div class="small-empty">No future trip yet.</div>{% endfor %}
+        {% else %}
+          {% for trip in upcoming[:2] %}
+          <a class="trip-postcard rich-trip-postcard" href="{{ url_for('trip_overview', trip_id=trip['id']) }}">
+            <div class="postcard-photo-wrap"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="postcard-date">{{ trip['start_date'] }}</span></div>
+            <div><span class="eyebrow">{% if loop.first and countdown is not none %}IN {{ countdown }} DAYS{% else %}UPCOMING{% endif %}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p></div>
+          </a>
+          {% else %}<div class="small-empty">No future trip yet.</div>{% endfor %}
+        {% endif %}
       </div>
     </div>
 
