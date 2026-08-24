@@ -181,7 +181,26 @@
   color:#fff8d9 !important;
 }
 
+/* Stamp now sits like a scrapbook layer over the lunch Polaroid. */
+.curated-journal .curated-venice-sheet .venice-stamp{
+  left:40px !important;
+  top:246px !important;
+  width:158px !important;
+  height:88px !important;
+  z-index:26 !important;
+  transform:rotate(-8deg) !important;
+  background:transparent !important;
+  box-shadow:0 11px 20px rgba(83,48,45,.16) !important;
+}
+.curated-journal .curated-venice-sheet .venice-stamp img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  display:block !important;
+}
+
 @media(max-width:760px){
   .curated-venice-sheet .venice-title{left:24px !important;top:72px !important;transform:scale(.73);transform-origin:top left;width:500px !important;}
   .curated-venice-sheet .venice-kicker{left:24px !important;top:28px !important;}
+  .curated-journal .curated-venice-sheet .venice-stamp{left:14px !important;top:244px !important;width:112px !important;height:63px !important;}
 }
