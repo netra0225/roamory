@@ -9,6 +9,13 @@ from flask import current_app, g
 from asset_bootstrap import materialize_dashboard_assets
 
 
+ARCHIVE_TITLE = 'Places that stayed with me'
+ARCHIVE_DESCRIPTION = (
+    'A finished journey gathered into journal pages of coast, lake, spring streets, '
+    'mountains and palace light.'
+)
+
+
 class _PostgresResult:
     def __init__(self, cursor, lastrowid=None):
         self._cursor = cursor
@@ -34,7 +41,6 @@ class _PostgresConnection:
 
     @staticmethod
     def _adapt_sql(sql: str) -> str:
-        # Roamory's existing queries use SQLite qmark placeholders.
         return sql.replace('?', '%s')
 
     def execute(self, sql: str, params=()):
@@ -42,8 +48,6 @@ class _PostgresConnection:
         adapted = self._adapt_sql(statement)
         is_insert = bool(re.match(r'^INSERT\s+INTO\b', statement, flags=re.IGNORECASE))
 
-        # Every table written through this adapter has an integer id. RETURNING
-        # keeps the cursor.lastrowid contract used throughout the Flask app.
         if is_insert and ' RETURNING ' not in adapted.upper():
             adapted = adapted.rstrip().rstrip(';') + ' RETURNING id'
 
@@ -51,7 +55,6 @@ class _PostgresConnection:
         try:
             cursor.execute(adapted, tuple(params))
         except self._psycopg.errors.UniqueViolation as exc:
-            # Preserve the error shape the existing registration flow expects.
             self._connection.rollback()
             raise sqlite3.IntegrityError('UNIQUE constraint failed') from exc
 
@@ -131,6 +134,25 @@ def _init_postgres_schema(db, schema_path: Path):
            )'''
     )
 
+    db.execute(
+        f'''CREATE OR REPLACE FUNCTION normalize_roamory_starter_archive()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                IF NEW.destination = 'Summer Atlas' THEN
+                    NEW.title := '{ARCHIVE_TITLE}';
+                    NEW.description := '{ARCHIVE_DESCRIPTION}';
+                END IF;
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql'''
+    )
+    db.execute('DROP TRIGGER IF EXISTS normalize_roamory_starter_archive_trigger ON trips')
+    db.execute(
+        '''CREATE TRIGGER normalize_roamory_starter_archive_trigger
+           BEFORE INSERT OR UPDATE ON trips
+           FOR EACH ROW EXECUTE FUNCTION normalize_roamory_starter_archive()'''
+    )
+
 
 def _init_sqlite_schema(db, schema_path: Path):
     db.executescript(schema_path.read_text(encoding='utf-8'))
@@ -144,6 +166,20 @@ def _init_sqlite_schema(db, schema_path: Path):
                meta_key TEXT NOT NULL UNIQUE,
                meta_value TEXT NOT NULL
            )'''
+    )
+
+    title = ARCHIVE_TITLE.replace("'", "''")
+    description = ARCHIVE_DESCRIPTION.replace("'", "''")
+    db.executescript(
+        f'''DROP TRIGGER IF EXISTS normalize_roamory_starter_archive_insert;
+            CREATE TRIGGER normalize_roamory_starter_archive_insert
+            AFTER INSERT ON trips
+            WHEN NEW.destination = 'Summer Atlas'
+            BEGIN
+                UPDATE trips
+                SET title = '{title}', description = '{description}'
+                WHERE id = NEW.id;
+            END;'''
     )
 
 
@@ -178,17 +214,11 @@ def init_db():
     else:
         _init_sqlite_schema(db, schema_path)
 
-    # Migrate existing starter archive copy to the open-ended wording.
     db.execute(
         '''UPDATE trips
            SET title = ?, description = ?
-           WHERE destination = ? AND title = ?''',
-        (
-            'Places that stayed with me',
-            'A finished journey gathered into journal pages of coast, lake, spring streets, mountains and palace light.',
-            'Summer Atlas',
-            'Five Places I Keep Thinking About',
-        ),
+           WHERE destination = ?''',
+        (ARCHIVE_TITLE, ARCHIVE_DESCRIPTION, 'Summer Atlas'),
     )
     _configure_persistent_secret(db)
     db.commit()
