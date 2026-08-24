@@ -386,3 +386,81 @@ body:has(.flash-budget) .receipt-art {
         transform: translateY(-30px) !important;
     }
 }
+/* =========================================================
+   ROAMORY REGISTER PAGE — FINAL SPACING FIX
+   ========================================================= */
+
+/* No unnecessary scrolling on this screen */
+body.auth-body {
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+.register-shell {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* Move card up through layout, not transform,
+   so we don't create hidden overflow below */
+.register-shell .auth-paper {
+    transform: none !important;
+    margin-top: -95px !important;
+}
+
+/* REMOVE "YOUR FIRST PAGE" COMPLETELY */
+.register-shell .eyebrow {
+    display: none !important;
+}
+
+/* Give the content proper breathing room inside the card */
+.register-shell .auth-copy {
+    padding-top: 38px !important;
+    padding-bottom: 30px !important;
+}
+
+/* Heading should not begin at the literal top edge */
+.register-shell .auth-copy h1 {
+    margin-top: 12px !important;
+    margin-bottom: 14px !important;
+}
+
+/* Description spacing */
+.register-shell .auth-copy > p {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Pull the entire form section upward.
+   Negative margin also pulls Login upward naturally. */
+.register-shell .form-stack {
+    margin-top: 26px !important;
+}
+
+/* Tighten form rhythm slightly */
+.register-shell .form-stack label {
+    margin-bottom: 10px !important;
+}
+
+.register-shell .auth-switch {
+    margin-top: 18px !important;
+}
+
+/* Mobile: allow scrolling because forms may need it */
+@media (max-width: 900px) {
+    body.auth-body,
+    .register-shell {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow-y: auto !important;
+    }
+
+    .register-shell .auth-paper {
+        margin-top: -30px !important;
+    }
+
+    .register-shell .auth-copy {
+        padding-top: 30px !important;
+    }
+}
