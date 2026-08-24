@@ -1,0 +1,16 @@
+/* Restore only the original red accent behind NEW YORK, USA. */
+.curated-journal .curated-nyc-sheet .page-front::before{
+  content:"";
+  position:absolute;
+  left:-50px;
+  top:42px;
+  width:310px;
+  height:54px;
+  background:#ef424b;
+  transform:rotate(-5deg);
+  opacity:.92;
+  z-index:2;
+}
+.curated-journal .curated-nyc-sheet .nyc-kicker{
+  z-index:12;
+}
