@@ -1,0 +1,67 @@
+/* Scoped refresh for My Trips, Overview and Summary. No journal styling lives here. */
+
+.trips-page .legacy-journal-card .library-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+.trips-page .journal-trip-library .legacy-journal-card:nth-child(1) .library-image img{object-position:center 42%;}
+.trips-page .journal-trip-library .legacy-journal-card:nth-child(2) .library-image img{object-position:center 48%;}
+.trips-page .journal-trip-library .legacy-journal-card:nth-child(3) .library-image img{object-position:center 56%;}
+
+.overview-page .trip-hero{
+  min-height:0 !important;
+  grid-template-columns:minmax(0,.96fr) minmax(0,1.04fr) !important;
+  gap:26px !important;
+  padding:24px !important;
+}
+.overview-page .trip-hero-image{
+  height:330px !important;
+  min-height:330px !important;
+  overflow:hidden !important;
+}
+.overview-page .trip-hero-image img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center 52% !important;
+}
+.overview-page .trip-hero-copy{
+  align-self:center !important;
+  padding:8px 12px !important;
+}
+.overview-page .trip-hero-copy h1{
+  font-size:clamp(3rem,5vw,5.1rem) !important;
+  margin-bottom:.35rem !important;
+}
+.overview-page .trip-hero-copy .trip-title{margin-bottom:.55rem !important;}
+.overview-page .trip-hero-copy p{margin-bottom:.65rem;}
+.overview-page .trip-hero-copy .hero-actions{margin-top:1rem !important;}
+.overview-page .overview-tag{right:18px !important;bottom:16px !important;}
+
+.overview-page .memory-strip .instant-mini>div{
+  overflow:hidden;
+}
+.overview-page .memory-strip .instant-mini img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.summary-shell .summary-image{
+  background-position:center !important;
+}
+
+@media(max-width:800px){
+  .overview-page .trip-hero{
+    grid-template-columns:1fr !important;
+    padding:18px !important;
+    gap:16px !important;
+  }
+  .overview-page .trip-hero-image{
+    height:265px !important;
+    min-height:265px !important;
+  }
+  .overview-page .trip-hero-copy{padding:4px 2px 12px !important;}
+}
