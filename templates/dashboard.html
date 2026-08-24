@@ -163,7 +163,7 @@
     </div>
 
     <aside class="archive-scrapbook">
-      <div class="archive-copy"><span class="eyebrow">FROM THE ARCHIVE</span><h2>{{ archive_trip['title'] if archive_trip else 'Your finished trips live here.' }}</h2><p>{{ archive_trip['destination'] if archive_trip else 'Complete a trip to make the first archive edition.' }}</p>{% if archive_trip %}<div class="archive-links"><a class="text-link" href="{{ url_for('journal', trip_id=archive_trip['id']) }}">Turn the 5-page journal →</a><a class="text-link" href="{{ url_for('summary', trip_id=archive_trip['id']) }}">Open trip summary →</a></div>{% endif %}</div>
+      <div class="archive-copy"><span class="eyebrow">FROM THE ARCHIVE</span><h2>{{ 'Places that stayed with me' if archive_trip else 'Your finished trips live here.' }}</h2><p>{{ archive_trip['destination'] if archive_trip else 'Complete a trip to make the first archive edition.' }}</p>{% if archive_trip %}<div class="archive-links"><a class="text-link" href="{{ url_for('journal', trip_id=archive_trip['id']) }}">Flip through the journal →</a><a class="text-link" href="{{ url_for('summary', trip_id=archive_trip['id']) }}">Open trip summary →</a></div>{% endif %}</div>
       <div class="archive-photo-fan">
         {% for memory in archive_memories[:4] %}<figure class="archive-photo archive-photo-{{ loop.index }}">{% if memory['image_url'] %}<img src="{{ memory['image_url'] }}" alt="{{ memory['location'] }}">{% elif memory['image_filename'] %}<img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="">{% endif %}<figcaption>{{ memory['location'] }}</figcaption></figure>{% endfor %}
       </div>
