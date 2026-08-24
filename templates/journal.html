@@ -5,7 +5,9 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-curated.css') }}">
 <style>
 /* Critical fallback: keep Page 01 visible even before any image file exists. */
-.curated-journal .journal-stage{width:min(1180px,100%);margin:auto;padding:24px 0 70px}
+.curated-journal .journal-heading{margin-bottom:0!important;padding-bottom:0!important}
+.curated-journal .journal-heading p{margin:.35rem 0 0!important;max-width:620px}
+.curated-journal .journal-stage{width:min(1180px,100%);margin:auto;padding:8px 0 70px}
 .curated-journal .journal-book{position:relative!important;height:720px!important;min-height:720px!important}
 .curated-journal .curated-udaipur-sheet{position:relative!important;inset:auto!important;width:100%!important;height:720px!important;min-height:720px!important;transform:none!important;opacity:1!important;visibility:visible!important;display:block!important;pointer-events:auto!important}
 .curated-journal .curated-udaipur-sheet .page-front{position:relative!important;inset:auto!important;width:100%!important;height:720px!important;min-height:720px!important;backface-visibility:visible!important;display:block!important;overflow:hidden!important;background:#f7ead8!important;border:1px solid rgba(40,37,34,.14);box-shadow:0 20px 50px rgba(65,50,34,.14)}
@@ -36,7 +38,6 @@
   <section class="journal-heading">
     <div>
       <span class="eyebrow">DIGITAL TRAVEL JOURNAL</span>
-      <h1>Udaipur</h1>
       <p>The first page belongs to the journey happening now. Finished places will follow as you build the book.</p>
     </div>
   </section>
