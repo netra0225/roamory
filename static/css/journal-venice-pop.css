@@ -1,5 +1,5 @@
 /* Bright Venice title treatment — scoped only to Page 04. */
-.curated-venice-sheet .page-front{
+.curated-journal .journal-book .curated-venice-sheet .page-front{
   background:
     radial-gradient(circle at 88% 14%,rgba(255,96,150,.20),transparent 24%),
     radial-gradient(circle at 12% 86%,rgba(255,188,74,.18),transparent 28%),
