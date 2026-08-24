@@ -43,7 +43,7 @@
     <div class="journey-cover-collage">
       <figure class="journey-main-photo">
         {% if ongoing['destination'] == 'Udaipur' %}
-        <img src="{{ url_for('static', filename='uploads/dashboard-palace.svg') }}" alt="Udaipur palace beside the water">
+        <img src="{{ url_for('static', filename='uploads/dashboard-palace-original.jpg') }}" alt="Udaipur palace beside the water">
         {% else %}
         <img src="{{ cover_for_trip(ongoing) }}" alt="{{ ongoing['destination'] }}">
         {% endif %}
