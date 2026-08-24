@@ -2,6 +2,8 @@ import sqlite3
 from pathlib import Path
 from flask import current_app, g
 
+from asset_bootstrap import materialize_dashboard_assets
+
 
 def get_db():
     if 'db' not in g:
@@ -29,6 +31,7 @@ def init_db():
 
 
 def init_app(app):
+    materialize_dashboard_assets(app.root_path)
     app.teardown_appcontext(close_db)
     with app.app_context():
         init_db()
