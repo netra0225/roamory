@@ -16,14 +16,13 @@
 .udaipur-title-cluster h2{margin:0;font-family:var(--serif);font-size:5.5rem;line-height:.82;font-weight:400}
 .udaipur-title-cluster .handwritten{display:block;margin:18px 0 0 45px;color:#c65443;transform:rotate(-5deg)}
 .udaipur-date{display:block;margin-top:22px;padding-top:9px;border-top:1px solid rgba(40,37,34,.55);font-size:.63rem;font-weight:900;letter-spacing:.12em}
-.udaipur-photo-slot{position:absolute;margin:0;background:#eadfce;border:2px dashed #9d8d79;box-shadow:0 18px 35px rgba(55,39,27,.16);overflow:visible}
-.udaipur-photo-slot .slot-code{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:max-content;padding:7px 10px;background:rgba(255,253,250,.9);font-size:.58rem;font-weight:900;letter-spacing:.12em}
-.udaipur-photo-slot figcaption{position:absolute;left:12px;bottom:-31px;font-family:var(--hand);font-size:1.05rem}
-.udaipur-arch-photo{left:350px;top:88px;width:350px;height:500px;transform:rotate(-4.2deg);z-index:6;background-image:url('/static/uploads/journal-udaipur-arch.jpg'),linear-gradient(145deg,#ecd6d5,#e7c4c4)}
-.udaipur-arch-photo,.udaipur-lake-photo,.udaipur-stamp-slot{background-size:cover;background-position:center}
-.udaipur-lake-photo{right:52px;bottom:72px;width:375px;height:335px;transform:rotate(3.4deg);z-index:9;background-image:url('/static/uploads/journal-udaipur-lake.jpg'),linear-gradient(145deg,#cfe4e5,#e7d6b7)}
-.udaipur-stamp-slot{position:absolute;right:82px;top:54px;width:190px;height:215px;z-index:5;transform:rotate(7deg);display:grid;place-items:center;background-image:url('/static/uploads/journal-udaipur-stamp.png'),linear-gradient(145deg,#d9cef2,#fff0b8);border:3px dashed #8c78c7;color:#362c56}
-.udaipur-stamp-slot span{padding:6px 8px;background:rgba(255,245,199,.9);font-size:.55rem;font-weight:900;letter-spacing:.12em}
+.udaipur-photo-slot{position:absolute;margin:0;background:#fffdfa;border:0;box-shadow:0 18px 35px rgba(55,39,27,.16);overflow:visible;padding:10px 10px 36px;box-sizing:border-box}
+.udaipur-photo-slot img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:2}
+.udaipur-photo-slot figcaption{position:absolute;left:14px;bottom:7px;font-family:var(--hand);font-size:1.05rem;z-index:3}
+.udaipur-arch-photo{left:350px;top:88px;width:350px;height:500px;transform:rotate(-4.2deg);z-index:6}
+.udaipur-lake-photo{right:52px;bottom:72px;width:375px;height:335px;transform:rotate(3.4deg);z-index:9}
+.udaipur-stamp-slot{position:absolute;right:82px;top:54px;width:190px;height:215px;z-index:5;transform:rotate(7deg);display:block;background:transparent;border:0;overflow:hidden}
+.udaipur-stamp-slot img{width:100%;height:100%;object-fit:contain;display:block}
 .udaipur-note-card{position:absolute;left:61px;bottom:126px;width:255px;padding:18px;background:#fff4c8;transform:rotate(-2.7deg);box-shadow:0 9px 18px rgba(64,48,31,.09);z-index:7}
 .udaipur-note-card p{margin:0;font-family:var(--serif);font-size:1.12rem;line-height:1.25}.udaipur-note-card small{display:block;margin-top:12px;font-size:.58rem;font-weight:900;letter-spacing:.13em}
 .udaipur-margin-note{position:absolute;left:92px;bottom:55px;color:#1769b0;font-family:var(--hand);font-size:1.35rem;transform:rotate(5deg);z-index:8}
@@ -45,7 +44,6 @@
   <section class="journal-stage" data-journal>
     <div class="book-spine" aria-hidden="true"></div>
     <div class="journal-book">
-      <!-- Final files later: journal-udaipur-arch.jpg / journal-udaipur-lake.jpg / journal-udaipur-stamp.png -->
       <article class="journal-sheet curated-udaipur-sheet active" data-page="0" style="--page-z:1">
         <div class="page-front curated-udaipur-front">
           <span class="page-number udaipur-page-no">01</span>
@@ -58,16 +56,18 @@
           </div>
 
           <figure class="udaipur-photo-slot udaipur-arch-photo">
-            <span class="slot-code">PHOTO 01 · PALACE ARCH</span>
+            <img src="{{ url_for('static', filename='uploads/journal-udaipur-arch.jpg') }}" alt="Pink palace arch in Udaipur">
             <figcaption>framed in pink</figcaption>
           </figure>
 
           <figure class="udaipur-photo-slot udaipur-lake-photo">
-            <span class="slot-code">PHOTO 02 · LAKESIDE PALACE</span>
+            <img src="{{ url_for('static', filename='uploads/journal-udaipur-lake.jpg') }}" alt="Lakeside palace in Udaipur">
             <figcaption>domes floating beside the water</figcaption>
           </figure>
 
-          <div class="udaipur-stamp-slot"><span>RAJASTHAN STAMP</span></div>
+          <div class="udaipur-stamp-slot">
+            <img src="{{ url_for('static', filename='uploads/journal-udaipur-stamp.png') }}" alt="Rajasthan travel stamp">
+          </div>
 
           <aside class="udaipur-note-card">
             <p>Rose-toned arches, carved facades and chandeliers first. Then the city opens into domes, gardens and long strips of blue water.</p>
