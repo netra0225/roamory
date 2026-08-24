@@ -1,5 +1,6 @@
 import os
 import re
+import secrets
 import sqlite3
 from pathlib import Path
 
@@ -41,8 +42,8 @@ class _PostgresConnection:
         adapted = self._adapt_sql(statement)
         is_insert = bool(re.match(r'^INSERT\s+INTO\b', statement, flags=re.IGNORECASE))
 
-        # Every Roamory table has an integer id. RETURNING keeps the existing
-        # cursor.lastrowid contract used throughout the Flask app.
+        # Every table written through this adapter has an integer id. RETURNING
+        # keeps the cursor.lastrowid contract used throughout the Flask app.
         if is_insert and ' RETURNING ' not in adapted.upper():
             adapted = adapted.rstrip().rstrip(';') + ' RETURNING id'
 
@@ -75,7 +76,6 @@ def _connect_postgres(database_url: str):
     import psycopg
     from psycopg.rows import dict_row
 
-    # Render currently supplies postgresql:// URLs. Accept the legacy alias too.
     if database_url.startswith('postgres://'):
         database_url = 'postgresql://' + database_url[len('postgres://'):]
     connection = psycopg.connect(database_url, row_factory=dict_row, connect_timeout=10)
@@ -123,12 +123,50 @@ def _init_postgres_schema(db, schema_path: Path):
     if 'starter_seeded' not in settings_columns:
         db.execute('ALTER TABLE settings ADD COLUMN starter_seeded INTEGER NOT NULL DEFAULT 0')
 
+    db.execute(
+        '''CREATE TABLE IF NOT EXISTS app_meta (
+               id SERIAL PRIMARY KEY,
+               meta_key TEXT NOT NULL UNIQUE,
+               meta_value TEXT NOT NULL
+           )'''
+    )
+
 
 def _init_sqlite_schema(db, schema_path: Path):
     db.executescript(schema_path.read_text(encoding='utf-8'))
     settings_columns = {row['name'] for row in db.execute('PRAGMA table_info(settings)').fetchall()}
     if 'starter_seeded' not in settings_columns:
         db.execute('ALTER TABLE settings ADD COLUMN starter_seeded INTEGER NOT NULL DEFAULT 0')
+
+    db.execute(
+        '''CREATE TABLE IF NOT EXISTS app_meta (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               meta_key TEXT NOT NULL UNIQUE,
+               meta_value TEXT NOT NULL
+           )'''
+    )
+
+
+def _configure_persistent_secret(db):
+    explicit_secret = os.getenv('ROAMORY_SECRET_KEY', '').strip()
+    if explicit_secret:
+        current_app.config['SECRET_KEY'] = explicit_secret
+        return
+
+    row = db.execute(
+        'SELECT meta_value FROM app_meta WHERE meta_key = ?',
+        ('session_secret',),
+    ).fetchone()
+    if row:
+        current_app.config['SECRET_KEY'] = row['meta_value']
+        return
+
+    generated = secrets.token_hex(32)
+    db.execute(
+        'INSERT INTO app_meta (meta_key, meta_value) VALUES (?, ?)',
+        ('session_secret', generated),
+    )
+    current_app.config['SECRET_KEY'] = generated
 
 
 def init_db():
@@ -152,6 +190,7 @@ def init_db():
             'Five Places I Keep Thinking About',
         ),
     )
+    _configure_persistent_secret(db)
     db.commit()
 
 
