@@ -156,8 +156,8 @@
       <div class="postcard-row rich-postcards">
         {% if ongoing['destination'] == 'Udaipur' %}
         <a class="trip-postcard rich-trip-postcard kyoto-dashboard-card" href="{{ url_for('trips') }}">
-          <div class="postcard-photo-wrap kyoto-photo-placeholder kyoto-dashboard-placeholder" role="img" aria-label="Kyoto trip photo placeholder"><span class="postcard-date">10 OCT 2026</span><div><small>KYOTO · JAPAN</small><strong>photo coming soon</strong></div></div>
-          <div><span class="eyebrow">10 — 16 OCTOBER 2026</span><h3>Kyoto, Japan</h3><p>Lantern Streets & Quiet Mornings</p></div>
+          <div class="postcard-photo-wrap"><img src="{{ url_for('static', filename='uploads/kyoto-sakura-pagoda.jpg') }}" alt="Cherry blossoms around a pagoda in Kyoto"><span class="postcard-date">05 APR 2027</span></div>
+          <div><span class="eyebrow">05 — 11 APRIL 2027</span><h3>Kyoto, Japan</h3><p>Sakura Paths & Temple Mornings</p></div>
         </a>
         {% else %}
           {% for trip in upcoming[:2] %}
