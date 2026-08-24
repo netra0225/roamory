@@ -464,3 +464,77 @@ body.auth-body {
         padding-top: 30px !important;
     }
 }
+/* =========================================================
+   REGISTER PAGE — CORRECT FINAL LAYOUT
+   Keep card position stable, refine ONLY internal spacing
+   ========================================================= */
+
+/* Restore the card to the position that was working earlier */
+.register-shell .auth-paper {
+    margin-top: 0 !important;
+    transform: translateY(-95px) !important;
+}
+
+/* Remove unnecessary eyebrow */
+.register-shell .eyebrow {
+    display: none !important;
+}
+
+/* Make the content flow naturally instead of stretching vertically */
+.register-shell .auth-copy {
+    display: block !important;
+    padding: 58px 52px 34px !important;
+    box-sizing: border-box !important;
+}
+
+/* Heading: breathable top spacing */
+.register-shell .auth-copy h1 {
+    margin: 0 0 14px 0 !important;
+}
+
+/* Intro line */
+.register-shell .auth-copy > p:not(.auth-switch) {
+    margin: 0 0 26px 0 !important;
+}
+
+/* Bring the form naturally closer to the intro */
+.register-shell .form-stack {
+    margin-top: 0 !important;
+    row-gap: 18px !important;
+}
+
+/* Keep the login line comfortably close to the button */
+.register-shell .auth-switch {
+    margin-top: 16px !important;
+}
+
+/* Desktop register screen should not scroll */
+body.auth-body {
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+.register-shell {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* Mobile remains usable */
+@media (max-width: 900px) {
+    body.auth-body,
+    .register-shell {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow-y: auto !important;
+    }
+
+    .register-shell .auth-paper {
+        margin-top: 0 !important;
+        transform: translateY(-30px) !important;
+    }
+
+    .register-shell .auth-copy {
+        padding: 38px 28px 30px !important;
+    }
+}
