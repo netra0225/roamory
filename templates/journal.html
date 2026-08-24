@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}Journal — {{ trip['destination'] }}{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/journal-curated.css') }}">{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/journal-curated.css') }}">
+<script defer src="{{ url_for('static', filename='js/journal-curated.js') }}"></script>
+{% endblock %}
 {% block content %}
 {% include '_trip_nav.html' %}
 {% set has_udaipur_opening = journal_opening_trip and journal_opening_trip['destination']|lower == 'udaipur' %}
@@ -110,7 +113,7 @@
 
     <div class="journal-controls">
       <button class="journal-arrow" type="button" data-prev-page aria-label="Previous journal page">←</button>
-      <span data-page-indicator>1 / {{ total_pages if total_pages else 1 }}</span>
+      <span data-page-indicator>PAGE 01</span>
       <button class="journal-arrow" type="button" data-next-page aria-label="Next journal page">→</button>
     </div>
   </section>
