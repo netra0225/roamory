@@ -64,21 +64,46 @@
 .nyc-stamp .nyc-photo-placeholder{inset:0;background:#fff7f7;border-color:#d83c48}
 .nyc-subway-strip{position:absolute;left:558px;top:245px;z-index:10;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 9px;background:#1769b0;color:#fff;box-shadow:0 7px 14px rgba(23,105,176,.18);transform:rotate(1.5deg)}
 .nyc-subway-strip b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;color:#1769b0;font-size:.78rem}.nyc-subway-strip span{font-size:.67rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
-
-/* Restore the original small CSS flag sticker. */
 .nyc-flag-sticker{position:absolute;left:818px;top:225px;width:88px;height:56px;z-index:19;border:5px solid #fff;box-shadow:0 8px 15px rgba(39,48,64,.14);transform:rotate(7deg);background:repeating-linear-gradient(to bottom,#d9484f 0 7.7%,#fff 7.7% 15.4%)}
 .nyc-flag-sticker:before{content:"";position:absolute;left:0;top:0;width:43%;height:54%;background-color:#254f91;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.2px);background-size:8px 7px;background-position:2px 2px}
-
 .nyc-note{position:absolute;left:548px;top:326px;width:255px;padding:19px 20px 21px;background:#ffdede;box-shadow:0 10px 20px rgba(54,49,53,.09);transform:rotate(-3deg);z-index:10}
 .nyc-note:before{content:"";position:absolute;left:91px;top:-10px;width:72px;height:22px;background:rgba(255,213,86,.76);transform:rotate(7deg)}
 .nyc-note p{margin:0;font-family:var(--serif);font-size:1.07rem;line-height:1.28}.nyc-note small{display:block;margin-top:12px;font-size:.57rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
-
-/* Empty taxi placeholder. Drop journal-nyc-cab.jpg into static/uploads and it fills automatically. */
 .nyc-cab-sticker{position:absolute;left:536px;bottom:42px;width:196px;height:126px;z-index:18;transform:rotate(4deg);background-image:url('/static/uploads/journal-nyc-cab.jpg'),repeating-linear-gradient(-45deg,#fff7cf 0 13px,#f7f0df 13px 26px);background-size:cover,auto;background-position:center,center;background-repeat:no-repeat,repeat;border:8px solid #fff;box-sizing:border-box;overflow:hidden;box-shadow:0 13px 23px rgba(48,43,30,.16);border-radius:7px}
 .nyc-cab-sticker:before{content:"";position:absolute;inset:-1px;border:1px dashed rgba(32,38,51,.25);border-radius:3px}
-
 .nyc-hand-note{position:absolute;left:760px;bottom:52px;z-index:16;font-family:var(--hand);font-size:1.3rem;color:#d83c48;transform:rotate(-6deg)}
 .nyc-red-arrow{position:absolute;left:796px;bottom:96px;width:90px;height:60px;fill:none;stroke:#d83c48;stroke-width:2.5;stroke-linecap:round;opacity:.85}
+
+/* PAGE 03 — QUEENSTOWN */
+.curated-journal .curated-queenstown-sheet .page-front{display:block!important;border:1px solid rgba(42,62,66,.14);box-shadow:0 20px 50px rgba(39,55,57,.16);background:radial-gradient(circle at 12% 88%,rgba(57,105,92,.12),transparent 26%),radial-gradient(circle at 84% 15%,rgba(196,145,74,.14),transparent 22%),linear-gradient(122deg,#edf4f3 0%,#e4eeec 54%,#d8e5e5 54%,#edf2ee 100%)!important}
+.curated-queenstown-front:before{content:"";position:absolute;left:-80px;bottom:-95px;width:420px;height:260px;border:1px solid rgba(47,111,133,.2);border-radius:50%;box-shadow:0 0 0 28px rgba(47,111,133,.04),0 0 0 58px rgba(47,111,133,.035);transform:rotate(-11deg)}
+.curated-queenstown-front:after{content:"";position:absolute;right:-55px;top:235px;width:300px;height:420px;background:linear-gradient(155deg,transparent 0 48%,rgba(255,255,255,.34) 48% 51%,transparent 51% 100%);opacity:.8}
+.qt-page-no{position:absolute;right:24px;top:18px;z-index:30;font-weight:900;color:#263d45}
+.qt-kicker{position:absolute;left:58px;top:40px;z-index:14;font-size:.7rem;font-weight:900;letter-spacing:.2em;color:#35565e;text-transform:uppercase}
+.qt-title{position:absolute;left:456px;top:54px;width:420px;z-index:16}
+.qt-title h2{margin:0;font-family:var(--sans);font-size:4.55rem;line-height:.88;font-weight:900;letter-spacing:.045em;color:#203e4a;text-transform:uppercase}
+.qt-title .handwritten{display:block;margin:14px 0 0 55px;font-family:var(--hand);font-size:1.25rem;color:#b4763e;transform:rotate(-3deg)}
+.qt-title:after{content:"";display:block;width:285px;height:3px;margin:15px 0 0 4px;background:linear-gradient(90deg,#2f6f85 0 48%,#c4914a 48% 67%,#456d59 67%)}
+.qt-photo{position:absolute;margin:0;background:#fdfcf7;box-shadow:0 17px 34px rgba(35,53,56,.16);box-sizing:border-box;overflow:visible;padding:9px 9px 34px}
+.qt-photo img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:2}
+.qt-photo figcaption{position:absolute;left:14px;bottom:6px;font-family:var(--hand);font-size:1.02rem;color:#29434b}
+.qt-placeholder{position:absolute;inset:9px 9px 34px;display:grid;place-items:center;border:2px dashed rgba(50,78,84,.24);background:repeating-linear-gradient(-45deg,#eef4f2 0 13px,#f8faf8 13px 26px);font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#667b80;text-align:center;padding:18px}
+.qt-photo-slot.has-image .qt-placeholder{display:none}
+.qt-lake-photo{left:62px;top:164px;width:382px;height:500px;transform:rotate(-2.2deg);z-index:9}
+.qt-gondola-photo{right:62px;top:156px;width:330px;height:270px;transform:rotate(3.2deg);z-index:11}
+.qt-central-photo{right:91px;bottom:48px;width:300px;height:238px;transform:rotate(-4deg);z-index:13}
+.qt-stamp{position:absolute;left:58px;top:72px;width:245px;height:132px;z-index:18;transform:rotate(-5deg);background:#f7f5ee;box-shadow:0 10px 20px rgba(39,56,59,.12);overflow:hidden}
+.qt-stamp img{width:100%;height:100%;object-fit:contain;display:block;position:relative;z-index:2}
+.qt-stamp .qt-placeholder{inset:0;background:#eef2ef;border-color:#6f8390}
+.qt-flag-sticker{position:absolute;left:320px;top:92px;width:92px;height:58px;z-index:19;border:5px solid #fff;box-sizing:border-box;box-shadow:0 8px 15px rgba(39,48,64,.14);transform:rotate(6deg);background:#12356c url('https://flagcdn.com/w160/nz.png') center/cover no-repeat}
+.qt-note{position:absolute;left:470px;top:306px;width:255px;padding:19px 20px 21px;background:#f4edda;box-shadow:0 10px 20px rgba(43,57,56,.08);transform:rotate(2deg);z-index:12;border-left:5px solid #456d59}
+.qt-note:before{content:"";position:absolute;left:94px;top:-11px;width:72px;height:22px;background:rgba(196,145,74,.42);transform:rotate(-5deg)}
+.qt-note p{margin:0;font-family:var(--serif);font-size:1.04rem;line-height:1.3;color:#263a3f}.qt-note small{display:block;margin-top:12px;font-size:.56rem;font-weight:900;letter-spacing:.12em;color:#456d59;text-transform:uppercase}
+.qt-travel-tag{position:absolute;left:485px;top:252px;z-index:15;padding:9px 14px;background:#2f6f85;color:#fff;font-size:.62rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;transform:rotate(-1.5deg);box-shadow:0 7px 14px rgba(47,111,133,.17)}
+.qt-hand-note{position:absolute;left:493px;bottom:64px;z-index:17;font-family:var(--hand);font-size:1.28rem;color:#b4763e;transform:rotate(-5deg)}
+.qt-cable-line{position:absolute;right:360px;top:116px;width:280px;height:100px;z-index:4;fill:none;stroke:#38535d;stroke-width:2;opacity:.42}
+.qt-cable-dot{position:absolute;right:514px;top:154px;width:38px;height:25px;border:2px solid #38535d;border-radius:7px;background:#e7f0ee;z-index:5;transform:rotate(-8deg);opacity:.72}
+.qt-cable-dot:before{content:"";position:absolute;left:17px;top:-14px;width:2px;height:14px;background:#38535d}
 
 .journal-controls button:disabled{opacity:.34;cursor:not-allowed}
 
@@ -86,6 +111,7 @@
   .curated-journal .journal-book,.curated-journal .journal-book>.journal-sheet,.curated-journal .journal-sheet>.page-front,.curated-journal .journal-sheet>.page-back{height:860px!important;min-height:860px!important}
   .udaipur-title-cluster{left:24px;top:58px}.udaipur-title-cluster h2{font-size:4.25rem}.udaipur-kicker{left:24px;top:24px}.udaipur-arch-photo{left:38px;top:235px;width:55%;height:360px}.udaipur-lake-photo{right:23px;bottom:118px;width:57%;height:270px}.udaipur-stamp-slot{right:18px;top:45px;width:122px;height:145px}.udaipur-note-card{left:24px;bottom:70px;width:48%}.udaipur-margin-note{left:auto;right:24px;bottom:45px}.udaipur-color-note,.udaipur-route-doodle{display:none}
   .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:3.55rem}.nyc-look-note{left:34px;top:205px;font-size:1.05rem}.nyc-times-photo{left:28px;top:250px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:220px}.nyc-flag-sticker{left:auto;right:44px;top:348px;width:68px;height:43px}.nyc-liberty-photo{right:24px;top:450px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-cab-sticker{left:auto;right:20px;bottom:20px;width:154px;height:98px}.nyc-hand-note,.nyc-red-arrow{display:none}
+  .qt-kicker{left:24px;top:25px}.qt-title{left:24px;top:76px;width:300px}.qt-title h2{font-size:3.1rem}.qt-title .handwritten{margin-left:20px;font-size:1rem}.qt-stamp{right:18px;left:auto;top:48px;width:145px;height:78px}.qt-flag-sticker{left:auto;right:40px;top:138px;width:68px;height:43px}.qt-lake-photo{left:24px;top:215px;width:58%;height:380px}.qt-gondola-photo{right:22px;top:300px;width:46%;height:235px}.qt-central-photo{right:26px;bottom:86px;width:48%;height:225px}.qt-note{left:24px;top:auto;bottom:56px;width:45%;padding:14px}.qt-travel-tag{left:26px;top:610px}.qt-hand-note,.qt-cable-line,.qt-cable-dot{display:none}
 }
 </style>
 
@@ -183,6 +209,61 @@
           <div class="nyc-cab-sticker" aria-label="New York yellow taxi image placeholder"></div>
           <span class="nyc-hand-note">the city does not do quiet.</span>
           <svg class="nyc-red-arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M4 51 C25 20,48 12,79 17"/><path d="M69 8 L82 17 L70 27"/></svg>
+        </div>
+        <div class="page-back" aria-hidden="true"></div>
+      </article>
+
+      <!--
+        PAGE 03 — QUEENSTOWN, NEW ZEALAND
+        Upload these exact filenames:
+        static/uploads/journal-queenstown-lake.jpg
+        static/uploads/journal-queenstown-gondola.jpg
+        static/uploads/journal-queenstown-central.jpg
+        static/uploads/journal-queenstown-stamp.png
+      -->
+      <article class="journal-sheet curated-queenstown-sheet" data-page="2">
+        <div class="page-front curated-queenstown-front">
+          <span class="qt-page-no">03</span>
+          <span class="qt-kicker">QUEENSTOWN · NEW ZEALAND</span>
+
+          <div class="qt-title">
+            <h2>QUEENSTOWN</h2>
+            <span class="handwritten">mountains on every side.</span>
+          </div>
+
+          <div class="qt-stamp qt-photo-slot">
+            <span class="qt-placeholder">NEW ZEALAND STAMP<br>journal-queenstown-stamp.png</span>
+            <img src="{{ url_for('static', filename='uploads/journal-queenstown-stamp.png') }}" alt="Vintage New Zealand Lake Wakatipu stamp" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'">
+          </div>
+          <div class="qt-flag-sticker" aria-label="Small New Zealand flag sticker"></div>
+
+          <figure class="qt-photo qt-lake-photo qt-photo-slot">
+            <span class="qt-placeholder">LAKE WAKATIPU<br>journal-queenstown-lake.jpg</span>
+            <img src="{{ url_for('static', filename='uploads/journal-queenstown-lake.jpg') }}" alt="Queenstown waterfront and mountains" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'">
+            <figcaption>gold light on Lake Wakatipu</figcaption>
+          </figure>
+
+          <figure class="qt-photo qt-gondola-photo qt-photo-slot">
+            <span class="qt-placeholder">SKYLINE GONDOLA<br>journal-queenstown-gondola.jpg</span>
+            <img src="{{ url_for('static', filename='uploads/journal-queenstown-gondola.jpg') }}" alt="Queenstown Skyline gondola over Lake Wakatipu" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'">
+            <figcaption>up above the blue</figcaption>
+          </figure>
+
+          <figure class="qt-photo qt-central-photo qt-photo-slot">
+            <span class="qt-placeholder">QUEENSTOWN CENTRAL<br>journal-queenstown-central.jpg</span>
+            <img src="{{ url_for('static', filename='uploads/journal-queenstown-central.jpg') }}" alt="Queenstown Central with the Remarkables behind it" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'">
+            <figcaption>the Remarkables at the end of the road</figcaption>
+          </figure>
+
+          <div class="qt-travel-tag">SKYLINE / LAKE WAKATIPU</div>
+          <aside class="qt-note">
+            <p>Here, the town never really gets the last word. Glass storefronts and traffic lights sit beneath ridgelines; a gondola climbs out over the lake, and the mountains keep finding their way into every frame.</p>
+            <small>LAKE WAKATIPU / SKYLINE / THE REMARKABLES</small>
+          </aside>
+
+          <span class="qt-hand-note">the view keeps interrupting everything.</span>
+          <svg class="qt-cable-line" viewBox="0 0 280 100" aria-hidden="true"><path d="M4 16 C90 25,178 42,276 83"/></svg>
+          <span class="qt-cable-dot" aria-hidden="true"></span>
         </div>
         <div class="page-back" aria-hidden="true"></div>
       </article>
