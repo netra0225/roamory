@@ -64,12 +64,19 @@
 .nyc-stamp .nyc-photo-placeholder{inset:0;background:#fff7f7;border-color:#d83c48}
 .nyc-subway-strip{position:absolute;left:558px;top:245px;z-index:10;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 9px;background:#1769b0;color:#fff;box-shadow:0 7px 14px rgba(23,105,176,.18);transform:rotate(1.5deg)}
 .nyc-subway-strip b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;color:#1769b0;font-size:.78rem}.nyc-subway-strip span{font-size:.67rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
-.nyc-flag-sticker{position:absolute;left:836px;top:218px;width:96px;height:64px;z-index:19;border:6px solid #fff;box-sizing:border-box;overflow:hidden;box-shadow:0 10px 18px rgba(39,48,64,.18);transform:rotate(7deg);background:#fff url('https://images.unsplash.com/photo-1464462605615-4ff728ecc301?auto=format&fit=crop&w=500&q=82') center/cover no-repeat}
+
+/* Restore the original small CSS flag sticker. */
+.nyc-flag-sticker{position:absolute;left:818px;top:225px;width:88px;height:56px;z-index:19;border:5px solid #fff;box-shadow:0 8px 15px rgba(39,48,64,.14);transform:rotate(7deg);background:repeating-linear-gradient(to bottom,#d9484f 0 7.7%,#fff 7.7% 15.4%)}
+.nyc-flag-sticker:before{content:"";position:absolute;left:0;top:0;width:43%;height:54%;background-color:#254f91;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.2px);background-size:8px 7px;background-position:2px 2px}
+
 .nyc-note{position:absolute;left:548px;top:326px;width:255px;padding:19px 20px 21px;background:#ffdede;box-shadow:0 10px 20px rgba(54,49,53,.09);transform:rotate(-3deg);z-index:10}
 .nyc-note:before{content:"";position:absolute;left:91px;top:-10px;width:72px;height:22px;background:rgba(255,213,86,.76);transform:rotate(7deg)}
 .nyc-note p{margin:0;font-family:var(--serif);font-size:1.07rem;line-height:1.28}.nyc-note small{display:block;margin-top:12px;font-size:.57rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
-.nyc-cab-sticker{position:absolute;left:536px;bottom:42px;width:196px;height:126px;z-index:18;transform:rotate(4deg);background:#fff url('https://images.unsplash.com/photo-1570466153480-ad80ec511246?auto=format&fit=crop&w=800&q=84') center/cover no-repeat;border:8px solid #fff;box-sizing:border-box;overflow:hidden;box-shadow:0 13px 23px rgba(48,43,30,.2);border-radius:7px}
-.nyc-cab-sticker:before{content:"";position:absolute;inset:-1px;border:1px solid rgba(32,38,51,.08);border-radius:3px}
+
+/* Empty taxi placeholder. Drop journal-nyc-cab.jpg into static/uploads and it fills automatically. */
+.nyc-cab-sticker{position:absolute;left:536px;bottom:42px;width:196px;height:126px;z-index:18;transform:rotate(4deg);background-image:url('/static/uploads/journal-nyc-cab.jpg'),repeating-linear-gradient(-45deg,#fff7cf 0 13px,#f7f0df 13px 26px);background-size:cover,auto;background-position:center,center;background-repeat:no-repeat,repeat;border:8px solid #fff;box-sizing:border-box;overflow:hidden;box-shadow:0 13px 23px rgba(48,43,30,.16);border-radius:7px}
+.nyc-cab-sticker:before{content:"";position:absolute;inset:-1px;border:1px dashed rgba(32,38,51,.25);border-radius:3px}
+
 .nyc-hand-note{position:absolute;left:760px;bottom:52px;z-index:16;font-family:var(--hand);font-size:1.3rem;color:#d83c48;transform:rotate(-6deg)}
 .nyc-red-arrow{position:absolute;left:796px;bottom:96px;width:90px;height:60px;fill:none;stroke:#d83c48;stroke-width:2.5;stroke-linecap:round;opacity:.85}
 
@@ -78,7 +85,7 @@
 @media(max-width:760px){
   .curated-journal .journal-book,.curated-journal .journal-book>.journal-sheet,.curated-journal .journal-sheet>.page-front,.curated-journal .journal-sheet>.page-back{height:860px!important;min-height:860px!important}
   .udaipur-title-cluster{left:24px;top:58px}.udaipur-title-cluster h2{font-size:4.25rem}.udaipur-kicker{left:24px;top:24px}.udaipur-arch-photo{left:38px;top:235px;width:55%;height:360px}.udaipur-lake-photo{right:23px;bottom:118px;width:57%;height:270px}.udaipur-stamp-slot{right:18px;top:45px;width:122px;height:145px}.udaipur-note-card{left:24px;bottom:70px;width:48%}.udaipur-margin-note{left:auto;right:24px;bottom:45px}.udaipur-color-note,.udaipur-route-doodle{display:none}
-  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:3.55rem}.nyc-look-note{left:34px;top:205px;font-size:1.05rem}.nyc-times-photo{left:28px;top:250px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:220px}.nyc-flag-sticker{left:auto;right:44px;top:355px;width:72px;height:48px}.nyc-liberty-photo{right:24px;top:450px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-cab-sticker{left:auto;right:20px;bottom:20px;width:154px;height:98px}.nyc-hand-note,.nyc-red-arrow{display:none}
+  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:3.55rem}.nyc-look-note{left:34px;top:205px;font-size:1.05rem}.nyc-times-photo{left:28px;top:250px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:220px}.nyc-flag-sticker{left:auto;right:44px;top:348px;width:68px;height:43px}.nyc-liberty-photo{right:24px;top:450px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-cab-sticker{left:auto;right:20px;bottom:20px;width:154px;height:98px}.nyc-hand-note,.nyc-red-arrow{display:none}
 }
 </style>
 
@@ -136,6 +143,7 @@
         static/uploads/journal-nyc-times-square.jpg
         static/uploads/journal-nyc-liberty.jpg
         static/uploads/journal-nyc-stamp.png
+        static/uploads/journal-nyc-cab.jpg
       -->
       <article class="journal-sheet curated-nyc-sheet" data-page="1">
         <div class="page-front curated-nyc-front">
@@ -154,7 +162,7 @@
           </figure>
 
           <div class="nyc-subway-strip"><b>42</b><span>Times Sq · Manhattan</span></div>
-          <div class="nyc-flag-sticker" aria-label="Small American flag photo sticker"></div>
+          <div class="nyc-flag-sticker" aria-label="Small American flag sticker"></div>
 
           <figure class="nyc-liberty-photo nyc-photo-slot">
             <span class="nyc-photo-placeholder">STATUE OF LIBERTY<br>journal-nyc-liberty.jpg</span>
@@ -172,7 +180,7 @@
             <small>NEON / YELLOW CABS / BLUE SKY / MANHATTAN</small>
           </aside>
 
-          <div class="nyc-cab-sticker" aria-label="New York yellow taxi photo sticker"></div>
+          <div class="nyc-cab-sticker" aria-label="New York yellow taxi image placeholder"></div>
           <span class="nyc-hand-note">the city does not do quiet.</span>
           <svg class="nyc-red-arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M4 51 C25 20,48 12,79 17"/><path d="M69 8 L82 17 L70 27"/></svg>
         </div>
