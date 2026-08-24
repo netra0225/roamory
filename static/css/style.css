@@ -421,64 +421,65 @@ body.auth-body {
     }
 }
 /* =========================================================
-   REGISTER CARD — BALANCED INTERNAL LAYOUT
-   Card position is NOT changed
+   REGISTER CARD — MATCH LOGIN CARD ALIGNMENT
+   Card itself does NOT move
    ========================================================= */
 
-/* Move only the CONTENT upward inside the card */
+/* Position only the content inside the card */
 .register-shell .auth-copy {
     position: relative !important;
-    top: -38px !important;
+    top: -52px !important;
 
     display: block !important;
     padding: 46px 52px 32px !important;
     box-sizing: border-box !important;
 }
 
-/* Editorial heading — centered and balanced */
+/* Match login: strong LEFT alignment */
 .register-shell .auth-copy h1 {
     width: 100% !important;
-    max-width: 390px !important;
+    max-width: 420px !important;
 
-    margin: 0 auto 12px !important;
+    margin: 0 0 12px 0 !important;
 
-    text-align: center !important;
+    text-align: left !important;
 }
 
-/* Supporting sentence — centered, one line */
+/* Supporting copy also follows login alignment */
 .register-shell .auth-copy > p:not(.auth-switch) {
     width: 100% !important;
     max-width: none !important;
 
     margin: 0 !important;
 
-    text-align: center !important;
+    text-align: left !important;
     white-space: nowrap !important;
 
-    font-size: 13.5px !important;
+    font-size: 14px !important;
     line-height: 1.45 !important;
 }
 
-/* Form stays clean and left aligned */
-.register-shell .form-stack {
+/* Remove the oversized gap before Full name */
+.register-shell .form-stack.two-col-form {
     width: 100% !important;
 
-    margin-top: 30px !important;
+    margin-top: 24px !important;
     padding-top: 0 !important;
 
-    row-gap: 18px !important;
+    row-gap: 17px !important;
+    column-gap: 18px !important;
 
     text-align: left !important;
 }
 
-/* Slight breathing room before primary CTA */
+/* Controlled space before Create account */
 .register-shell .form-stack .button {
-    margin-top: 10px !important;
+    margin-top: 12px !important;
 }
 
-/* Login stays connected to CTA */
+/* Login link stays close to the primary CTA */
 .register-shell .auth-switch {
-    margin-top: 15px !important;
+    margin-top: 14px !important;
     text-align: left !important;
 }
 
