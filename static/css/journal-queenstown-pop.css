@@ -1,21 +1,20 @@
-/* Bright Queenstown treatment — scoped only to Page 03. */
+/* Retro editorial Queenstown treatment — scoped only to Page 03. */
 .curated-journal .curated-queenstown-sheet .page-front{
   background:
-    radial-gradient(circle at 86% 16%,rgba(255,112,28,.25),transparent 23%),
-    radial-gradient(circle at 14% 84%,rgba(170,205,48,.22),transparent 27%),
-    linear-gradient(122deg,#fff4bd 0%,#ffd7a0 49%,#fff7d6 49%,#e9efad 100%) !important;
-  border-color:rgba(78,55,30,.17) !important;
+    repeating-linear-gradient(90deg,rgba(216,74,47,.065) 0 82px,rgba(255,255,255,0) 82px 164px),
+    linear-gradient(122deg,#f8f1e5 0%,#efe3d2 49%,#f7eddf 49%,#eadfce 100%) !important;
+  border-color:rgba(79,52,37,.16) !important;
 }
 
 .curated-journal .curated-queenstown-sheet .qt-page-no{
-  color:#33271d !important;
+  color:#3a2a21 !important;
 }
 
 .curated-journal .curated-queenstown-sheet .qt-kicker{
-  color:#352b1d !important;
-  background:#c8dc43 !important;
+  color:#3b2a20 !important;
+  background:#e2bd63 !important;
   padding:7px 11px !important;
-  box-shadow:6px 6px 0 rgba(255,126,34,.24) !important;
+  box-shadow:6px 6px 0 rgba(118,74,45,.12) !important;
   transform:rotate(-2deg) !important;
 }
 
@@ -26,16 +25,26 @@
   transform:rotate(-1deg) !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-title h2{
-  color:#3a2b20 !important;
-  font-family:Georgia,'Times New Roman',serif !important;
-  font-size:4.75rem !important;
-  font-weight:800 !important;
-  letter-spacing:-.045em !important;
-  text-shadow:5px 5px 0 #ff8a24 !important;
-  text-transform:uppercase !important;
+  position:relative !important;
+  margin:0 !important;
+  font-size:0 !important;
+  line-height:1 !important;
+  text-shadow:none !important;
+  text-transform:none !important;
+}
+.curated-journal .curated-queenstown-sheet .qt-title h2::before{
+  content:"Queenstown";
+  display:block;
+  color:#d9472b;
+  font-family:var(--serif) !important;
+  font-size:5.2rem !important;
+  font-weight:400 !important;
+  line-height:.9 !important;
+  letter-spacing:-.055em !important;
+  text-transform:none !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-title .handwritten{
-  color:#df641d !important;
+  color:#87523a !important;
   font-size:1.35rem !important;
   margin:16px 0 0 60px !important;
   transform:rotate(-4deg) !important;
@@ -47,13 +56,13 @@
   height:auto !important;
   margin:9px 0 0 9px !important;
   background:none !important;
-  color:#94ad20 !important;
+  color:#c18b35 !important;
   box-shadow:none !important;
   font-size:1rem !important;
   letter-spacing:.48em !important;
 }
 
-/* Make the stamp overlap the large mountain Polaroid. */
+/* Keep the stamp overlapping the large mountain Polaroid. */
 .curated-journal .curated-queenstown-sheet .qt-lake-photo{
   z-index:10 !important;
   box-shadow:0 20px 38px rgba(67,48,30,.18) !important;
@@ -65,7 +74,7 @@
   height:122px !important;
   z-index:24 !important;
   transform:rotate(-7deg) !important;
-  background:#fff9e9 !important;
+  background:#fff9ed !important;
   box-shadow:0 14px 24px rgba(70,50,30,.20) !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-stamp img{
@@ -74,72 +83,63 @@
 }
 
 .curated-journal .curated-queenstown-sheet .qt-flag-sticker{
-  border-color:#fff7d5 !important;
-  box-shadow:7px 7px 0 rgba(255,142,35,.20) !important;
+  border-color:#fff8ec !important;
+  box-shadow:7px 7px 0 rgba(118,74,45,.12) !important;
 }
 
 .curated-journal .curated-queenstown-sheet .qt-photo{
-  background:#fffdf4 !important;
+  background:#fffdf7 !important;
   box-shadow:0 18px 34px rgba(66,48,31,.17) !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-photo figcaption{
-  color:#c45519 !important;
+  color:#9a4c34 !important;
   font-size:1.08rem !important;
 }
 
 .curated-journal .curated-queenstown-sheet .qt-travel-tag{
-  background:#f36f21 !important;
-  color:#fff8cf !important;
+  background:#4a3429 !important;
+  color:#f7e7bd !important;
   border:0 !important;
-  box-shadow:6px 6px 0 rgba(166,195,45,.32) !important;
+  box-shadow:6px 6px 0 rgba(193,139,53,.20) !important;
   transform:rotate(-2deg) !important;
 }
 
 .curated-journal .curated-queenstown-sheet .qt-note{
-  background:#ffe56c !important;
-  border-left:7px solid #93ad27 !important;
-  box-shadow:9px 10px 0 rgba(242,111,31,.20) !important;
+  background:#f2dfb2 !important;
+  border-left:7px solid #d9472b !important;
+  box-shadow:9px 10px 0 rgba(99,65,45,.12) !important;
   transform:rotate(1.5deg) !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-note:before{
-  background:rgba(255,132,33,.32) !important;
+  background:rgba(206,170,91,.34) !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-note p{
-  color:#33291e !important;
+  color:#352820 !important;
   font-family:Georgia,'Times New Roman',serif !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-note small{
-  color:#6f7d1f !important;
+  color:#a34c31 !important;
   font-weight:900 !important;
 }
 
 .curated-journal .curated-queenstown-sheet .qt-hand-note{
-  color:#e3661d !important;
+  color:#b45538 !important;
   font-size:1.36rem !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-postmark{
-  color:#d75c19 !important;
-  border-color:rgba(215,92,25,.72) !important;
-  background:rgba(255,245,184,.48) !important;
+  color:#a9573d !important;
+  border-color:rgba(169,87,61,.62) !important;
+  background:rgba(248,239,216,.60) !important;
 }
 .curated-journal .curated-queenstown-sheet .qt-south-tag{
-  background:#b8cf37 !important;
-  color:#3d321f !important;
-  box-shadow:5px 5px 0 rgba(239,112,28,.18) !important;
-}
-
-/* Queenstown uses orange, lime and yellow accents against the cool photography. */
-.curated-journal .curated-queenstown-sheet .qt-title,
-.curated-journal .curated-queenstown-sheet .qt-note,
-.curated-journal .curated-queenstown-sheet .qt-hand-note,
-.curated-journal .curated-queenstown-sheet .qt-travel-tag,
-.curated-journal .curated-queenstown-sheet .qt-kicker{
-  --queenstown-pop:#f36f21;
+  background:#c89a45 !important;
+  color:#39291f !important;
+  box-shadow:5px 5px 0 rgba(84,56,39,.10) !important;
 }
 
 @media(max-width:760px){
   .curated-journal .curated-queenstown-sheet .qt-title{left:24px !important;top:76px !important;width:330px !important;}
-  .curated-journal .curated-queenstown-sheet .qt-title h2{font-size:3.05rem !important;text-shadow:3px 3px 0 #ff8a24 !important;}
+  .curated-journal .curated-queenstown-sheet .qt-title h2::before{font-size:3.35rem !important;}
   .curated-journal .curated-queenstown-sheet .qt-stamp{left:18px !important;top:185px !important;width:138px !important;height:76px !important;}
   .curated-journal .curated-queenstown-sheet .qt-kicker{left:24px !important;top:25px !important;}
 }
