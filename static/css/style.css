@@ -420,3 +420,54 @@ body.auth-body {
         padding: 36px 28px 30px !important;
     }
 }
+/* =========================================================
+   REGISTER CARD — INTERNAL ALIGNMENT REFINEMENT
+   Do NOT move the card itself
+   ========================================================= */
+
+/* Stop the content from being vertically stretched */
+.register-shell .auth-copy {
+    display: block !important;
+    padding: 46px 52px 34px !important;
+}
+
+/* Align heading with the form fields */
+.register-shell .auth-copy h1 {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 12px 0 !important;
+}
+
+/* Keep supporting copy on one line on desktop */
+.register-shell .auth-copy > p:not(.auth-switch) {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    font-size: 14px !important;
+}
+
+/* Pull the form upward into a cleaner relationship
+   with the heading and description */
+.register-shell .form-stack {
+    width: 100% !important;
+    margin-top: 28px !important;
+    row-gap: 18px !important;
+}
+
+/* Slight breathing room before Create account */
+.register-shell .form-stack .button {
+    margin-top: 10px !important;
+}
+
+/* Login stays visually connected to the CTA */
+.register-shell .auth-switch {
+    margin-top: 16px !important;
+}
+
+/* Smaller screens can wrap the supporting sentence */
+@media (max-width: 900px) {
+    .register-shell .auth-copy > p:not(.auth-switch) {
+        white-space: normal !important;
+    }
+}
