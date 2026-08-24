@@ -2,6 +2,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-venice-pop.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-queenstown-pop.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-nyc-accent.css') }}">
+<script defer src="{{ url_for('static', filename='js/journal-page-order.js') }}"></script>
 {% endif %}
 <nav class="trip-nav" aria-label="Trip sections">
   <a href="{{ url_for('trip_overview', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'trip_overview' else '' }}">Overview</a>
