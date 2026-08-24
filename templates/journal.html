@@ -8,15 +8,20 @@
 .curated-journal .journal-heading .eyebrow{display:inline-block;font-size:1.08rem!important;font-weight:900!important;letter-spacing:.11em!important;color:#1f1b18!important;line-height:1.1}
 .curated-journal .journal-heading p{margin:.35rem 0 0!important;max-width:620px}
 .curated-journal .journal-stage{width:min(1180px,100%);margin:auto;padding:8px 0 70px}
-.curated-journal .journal-book{position:relative!important;height:720px!important;min-height:720px!important}
+
+/* NOTEBOOK FLIP */
+.curated-journal .journal-book{position:relative!important;height:720px!important;min-height:720px!important;perspective:2200px;transform-style:preserve-3d;overflow:visible}
 .curated-journal .book-spine{display:none!important}
-.curated-journal .journal-book>.journal-sheet{display:none!important}
-.curated-journal .journal-book>.journal-sheet.active{display:block!important}
+.curated-journal .journal-book>.journal-sheet{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:720px!important;min-height:720px!important;transform-origin:0% 50%;transform:rotateY(0deg);transform-style:preserve-3d;transition:transform .92s cubic-bezier(.62,.02,.28,1),filter .45s ease;will-change:transform;pointer-events:none}
+.curated-journal .journal-book>.journal-sheet.active{pointer-events:auto}
+.curated-journal .journal-book>.journal-sheet.turned{transform:rotateY(-180deg)!important}
+.curated-journal .journal-sheet>.page-front,
+.curated-journal .journal-sheet>.page-back{position:absolute!important;inset:0!important;width:100%!important;height:720px!important;min-height:720px!important;backface-visibility:hidden!important;-webkit-backface-visibility:hidden!important;overflow:hidden!important}
+.curated-journal .journal-sheet>.page-back{display:block!important;transform:rotateY(180deg);background:linear-gradient(90deg,#ece1d2,#faf4ea 48%,#e9dece);box-shadow:inset -18px 0 28px rgba(62,45,33,.08)}
+.curated-journal .journal-sheet.flip-live{filter:drop-shadow(18px 12px 20px rgba(38,35,33,.2))}
 
 /* PAGE 01 — UDAIPUR */
-.curated-journal .curated-udaipur-sheet{position:relative!important;inset:auto!important;width:100%!important;height:720px!important;min-height:720px!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
-.curated-journal .curated-udaipur-sheet .page-front{position:relative!important;inset:auto!important;width:100%!important;height:720px!important;min-height:720px!important;backface-visibility:visible!important;display:block!important;overflow:hidden!important;background:radial-gradient(circle at 82% 72%,rgba(136,181,190,.16),transparent 32%),linear-gradient(135deg,#f1d7d3 0%,#f7e7dc 52%,#eadbd4 100%)!important;border:1px solid rgba(95,66,62,.14);box-shadow:0 20px 50px rgba(65,50,34,.14)}
-.curated-journal .curated-udaipur-sheet .page-back{display:none!important}
+.curated-journal .curated-udaipur-sheet .page-front{display:block!important;background:radial-gradient(circle at 82% 72%,rgba(136,181,190,.16),transparent 32%),linear-gradient(135deg,#f1d7d3 0%,#f7e7dc 52%,#eadbd4 100%)!important;border:1px solid rgba(95,66,62,.14);box-shadow:0 20px 50px rgba(65,50,34,.14)}
 .udaipur-kicker{position:absolute;left:54px;top:42px;font-size:.68rem;font-weight:900;letter-spacing:.18em;z-index:8}
 .udaipur-title-cluster{position:absolute;left:54px;top:88px;width:252px;z-index:8}
 .udaipur-title-cluster h2{margin:0;font-family:var(--serif);font-size:5.12rem;line-height:.82;font-weight:400;letter-spacing:-.025em}
@@ -37,59 +42,43 @@
 .udaipur-page-no{position:absolute;right:24px;top:18px;z-index:20}
 
 /* PAGE 02 — NEW YORK CITY */
-.curated-journal .curated-nyc-sheet{position:relative!important;inset:auto!important;width:100%!important;height:720px!important;min-height:720px!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
-.curated-journal .curated-nyc-sheet .page-front{position:relative!important;inset:auto!important;width:100%!important;height:720px!important;min-height:720px!important;display:block!important;overflow:hidden!important;border:1px solid rgba(40,47,61,.15);box-shadow:0 20px 50px rgba(45,50,62,.16);background:radial-gradient(circle at 82% 14%,rgba(232,70,76,.14),transparent 23%),radial-gradient(circle at 58% 78%,rgba(255,198,45,.2),transparent 28%),linear-gradient(112deg,#f7f0df 0 64%,#dceafa 64% 100%)!important}
-.curated-journal .curated-nyc-sheet .page-back{display:none!important}
+.curated-journal .curated-nyc-sheet .page-front{display:block!important;border:1px solid rgba(40,47,61,.15);box-shadow:0 20px 50px rgba(45,50,62,.16);background:radial-gradient(circle at 82% 14%,rgba(232,70,76,.14),transparent 23%),radial-gradient(circle at 58% 78%,rgba(255,198,45,.2),transparent 28%),linear-gradient(112deg,#f7f0df 0 64%,#dceafa 64% 100%)!important}
 .curated-nyc-sheet .page-front:before{content:"";position:absolute;left:-50px;top:42px;width:310px;height:54px;background:#ef424b;transform:rotate(-5deg);opacity:.92}
 .curated-nyc-sheet .page-front:after{content:"";position:absolute;right:-38px;bottom:70px;width:330px;height:82px;background:#1769b0;transform:rotate(5deg);opacity:.13}
 .nyc-page-no{position:absolute;right:24px;top:18px;z-index:30;font-weight:900}
-.nyc-kicker{position:absolute;left:58px;top:48px;z-index:12;font-size:.68rem;font-weight:900;letter-spacing:.2em;color:#fff;text-transform:uppercase}
-.nyc-title{position:absolute;left:540px;top:62px;width:370px;z-index:14;transform:rotate(-1deg)}
-.nyc-title .nyc-new{display:block;font-family:var(--sans);font-size:2rem;font-weight:900;letter-spacing:.18em;color:#1769b0;line-height:1}
-.nyc-title h2{margin:2px 0 0;font-family:var(--serif);font-size:5.25rem;line-height:.78;font-weight:500;letter-spacing:-.045em;color:#202633}
-.nyc-title .nyc-city{display:inline-block;margin-left:116px;margin-top:10px;padding:7px 13px 6px;background:#ffd34d;font-size:.78rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;transform:rotate(2deg)}
-.nyc-title .handwritten{display:block;margin:13px 0 0 70px;color:#d83c48;font-size:1.25rem;transform:rotate(-4deg)}
+.nyc-kicker{position:absolute;left:58px;top:48px;z-index:12;font-size:.72rem;font-weight:900;letter-spacing:.2em;color:#fff;text-transform:uppercase}
+.nyc-title{position:absolute;left:548px;top:58px;width:370px;z-index:14;transform:rotate(-1deg)}
+.nyc-title h2{margin:0;font-family:var(--serif);font-size:4.65rem;line-height:.84;font-weight:600;letter-spacing:-.045em;color:#162d4e;text-transform:uppercase;text-shadow:2px 2px 0 rgba(255,255,255,.65)}
+.nyc-title:after{content:"";display:block;width:208px;height:11px;margin:13px 0 0 8px;background:#ffd34d;transform:rotate(-2deg);box-shadow:82px 0 0 #ef424b}
+.nyc-look-note{position:absolute;left:568px;top:202px;z-index:15;width:275px;font-family:var(--hand);font-size:1.25rem;line-height:1.05;color:#d83c48;transform:rotate(-3deg);white-space:nowrap}
 .nyc-times-photo,.nyc-liberty-photo{position:absolute;margin:0;background:#fff;box-shadow:0 18px 32px rgba(31,40,55,.18);box-sizing:border-box;overflow:visible}
 .nyc-times-photo{left:72px;top:146px;width:455px;height:500px;padding:10px 10px 36px;transform:rotate(-2.4deg);z-index:8}
-.nyc-liberty-photo{right:72px;top:274px;width:270px;height:346px;padding:9px 9px 34px;transform:rotate(4.5deg);z-index:11}
+.nyc-liberty-photo{right:72px;top:290px;width:270px;height:340px;padding:9px 9px 34px;transform:rotate(4.5deg);z-index:11}
 .nyc-times-photo img,.nyc-liberty-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .nyc-times-photo figcaption,.nyc-liberty-photo figcaption{position:absolute;left:14px;bottom:7px;font-family:var(--hand);font-size:1.03rem;color:#202633}
 .nyc-photo-placeholder{position:absolute;inset:10px 10px 36px;display:grid;place-items:center;border:2px dashed rgba(32,38,51,.26);background:repeating-linear-gradient(-45deg,#edf3f8 0 12px,#f8fafb 12px 24px);font-size:.62rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#647080;text-align:center;padding:20px}
 .nyc-photo-slot.has-image .nyc-photo-placeholder{display:none}
 .nyc-photo-slot img{position:relative;z-index:2}
-.nyc-stamp{position:absolute;right:64px;top:48px;width:190px;height:190px;z-index:17;transform:rotate(6deg)}
+.nyc-stamp{position:absolute;right:62px;top:48px;width:190px;height:190px;z-index:17;transform:rotate(6deg)}
 .nyc-stamp img{width:100%;height:100%;object-fit:contain;display:block;position:relative;z-index:2}
 .nyc-stamp .nyc-photo-placeholder{inset:0;background:#fff7f7;border-color:#d83c48}
-.nyc-subway-strip{position:absolute;left:560px;top:212px;z-index:10;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 9px;background:#1769b0;color:#fff;box-shadow:0 7px 14px rgba(23,105,176,.18);transform:rotate(1.5deg)}
+.nyc-subway-strip{position:absolute;left:558px;top:245px;z-index:10;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 9px;background:#1769b0;color:#fff;box-shadow:0 7px 14px rgba(23,105,176,.18);transform:rotate(1.5deg)}
 .nyc-subway-strip b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;color:#1769b0;font-size:.78rem}.nyc-subway-strip span{font-size:.67rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
-.nyc-flag-sticker{position:absolute;left:818px;top:225px;width:88px;height:56px;z-index:19;border:5px solid #fff;box-shadow:0 8px 15px rgba(39,48,64,.14);transform:rotate(7deg);background:repeating-linear-gradient(to bottom,#d9484f 0 7.7%,#fff 7.7% 15.4%)}
-.nyc-flag-sticker:before{content:"";position:absolute;left:0;top:0;width:43%;height:54%;background-color:#254f91;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.2px);background-size:8px 7px;background-position:2px 2px}
+.nyc-flag-sticker{position:absolute;left:836px;top:218px;width:96px;height:64px;z-index:19;border:6px solid #fff;box-sizing:border-box;overflow:hidden;box-shadow:0 10px 18px rgba(39,48,64,.18);transform:rotate(7deg);background:#fff url('https://images.unsplash.com/photo-1464462605615-4ff728ecc301?auto=format&fit=crop&w=500&q=82') center/cover no-repeat}
 .nyc-note{position:absolute;left:548px;top:326px;width:255px;padding:19px 20px 21px;background:#ffdede;box-shadow:0 10px 20px rgba(54,49,53,.09);transform:rotate(-3deg);z-index:10}
 .nyc-note:before{content:"";position:absolute;left:91px;top:-10px;width:72px;height:22px;background:rgba(255,213,86,.76);transform:rotate(7deg)}
 .nyc-note p{margin:0;font-family:var(--serif);font-size:1.07rem;line-height:1.28}.nyc-note small{display:block;margin-top:12px;font-size:.57rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
-.nyc-yellow-cab{position:absolute;left:520px;bottom:64px;width:205px;height:84px;z-index:18;transform:rotate(4deg);filter:drop-shadow(0 8px 7px rgba(48,43,30,.13))}
-.nyc-yellow-cab .cab-body{position:absolute;left:10px;bottom:19px;width:180px;height:48px;background:#f8c928;border:3px solid #292929;border-radius:17px 22px 9px 9px}
-.nyc-yellow-cab .cab-roof{position:absolute;left:53px;bottom:60px;width:88px;height:27px;background:#f8c928;border:3px solid #292929;border-bottom:0;border-radius:14px 14px 0 0;transform:skew(-9deg)}
-.nyc-yellow-cab .cab-window{position:absolute;left:68px;bottom:64px;width:52px;height:18px;background:#9bd4ec;border:2px solid #292929;transform:skew(-9deg);z-index:2}
-.nyc-yellow-cab .wheel{position:absolute;bottom:8px;width:29px;height:29px;border-radius:50%;background:#292929;border:5px solid #555;z-index:3}.nyc-yellow-cab .wheel.one{left:39px}.nyc-yellow-cab .wheel.two{right:29px}.nyc-yellow-cab .checker{position:absolute;left:27px;bottom:45px;width:138px;height:9px;background:repeating-linear-gradient(90deg,#292929 0 9px,#fff 9px 18px)}
-.nyc-yellow-cab .cab-label{position:absolute;left:76px;bottom:31px;font-size:.54rem;font-weight:900;letter-spacing:.1em;z-index:4}
-
-/* Real photo stickers from Unsplash: keep these secondary to the user's NYC photos. */
-.nyc-flag-sticker{width:98px;height:66px;background-image:url('https://images.unsplash.com/photo-1479685299024-787b75aea174?auto=format&fit=crop&w=500&q=82')!important;background-size:cover!important;background-position:center 42%!important;background-repeat:no-repeat!important;border:6px solid #fff!important;box-sizing:border-box;overflow:hidden;box-shadow:0 10px 18px rgba(39,48,64,.18)!important}
-.nyc-flag-sticker:before{display:none!important;content:none!important}
-.nyc-yellow-cab{left:520px;bottom:46px;width:196px;height:126px;background:#fff url('https://images.unsplash.com/photo-1570466153480-ad80ec511246?auto=format&fit=crop&w=800&q=82') center/cover no-repeat!important;border:8px solid #fff;box-sizing:border-box;overflow:hidden;filter:none!important;box-shadow:0 13px 23px rgba(48,43,30,.18)}
-.nyc-yellow-cab>*{display:none!important}
-.nyc-yellow-cab:after{content:"NYC CAB";position:absolute;right:8px;bottom:7px;padding:4px 7px;background:rgba(255,255,255,.9);font-size:.52rem;font-weight:900;letter-spacing:.11em;color:#202633}
-
-.nyc-hand-note{position:absolute;left:754px;bottom:53px;z-index:16;font-family:var(--hand);font-size:1.3rem;color:#d83c48;transform:rotate(-6deg)}
-.nyc-red-arrow{position:absolute;left:790px;bottom:96px;width:90px;height:60px;fill:none;stroke:#d83c48;stroke-width:2.5;stroke-linecap:round;opacity:.85}
+.nyc-cab-sticker{position:absolute;left:536px;bottom:42px;width:196px;height:126px;z-index:18;transform:rotate(4deg);background:#fff url('https://images.unsplash.com/photo-1570466153480-ad80ec511246?auto=format&fit=crop&w=800&q=84') center/cover no-repeat;border:8px solid #fff;box-sizing:border-box;overflow:hidden;box-shadow:0 13px 23px rgba(48,43,30,.2);border-radius:7px}
+.nyc-cab-sticker:before{content:"";position:absolute;inset:-1px;border:1px solid rgba(32,38,51,.08);border-radius:3px}
+.nyc-hand-note{position:absolute;left:760px;bottom:52px;z-index:16;font-family:var(--hand);font-size:1.3rem;color:#d83c48;transform:rotate(-6deg)}
+.nyc-red-arrow{position:absolute;left:796px;bottom:96px;width:90px;height:60px;fill:none;stroke:#d83c48;stroke-width:2.5;stroke-linecap:round;opacity:.85}
 
 .journal-controls button:disabled{opacity:.34;cursor:not-allowed}
 
 @media(max-width:760px){
-  .curated-journal .journal-book,.curated-journal .curated-udaipur-sheet,.curated-journal .curated-udaipur-sheet .page-front,.curated-journal .curated-nyc-sheet,.curated-journal .curated-nyc-sheet .page-front{height:860px!important;min-height:860px!important}
+  .curated-journal .journal-book,.curated-journal .journal-book>.journal-sheet,.curated-journal .journal-sheet>.page-front,.curated-journal .journal-sheet>.page-back{height:860px!important;min-height:860px!important}
   .udaipur-title-cluster{left:24px;top:58px}.udaipur-title-cluster h2{font-size:4.25rem}.udaipur-kicker{left:24px;top:24px}.udaipur-arch-photo{left:38px;top:235px;width:55%;height:360px}.udaipur-lake-photo{right:23px;bottom:118px;width:57%;height:270px}.udaipur-stamp-slot{right:18px;top:45px;width:122px;height:145px}.udaipur-note-card{left:24px;bottom:70px;width:48%}.udaipur-margin-note{left:auto;right:24px;bottom:45px}.udaipur-color-note,.udaipur-route-doodle{display:none}
-  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:4.2rem}.nyc-title .nyc-city{margin-left:80px}.nyc-times-photo{left:28px;top:230px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:215px}.nyc-flag-sticker{left:auto;right:44px;top:348px;width:72px;height:48px}.nyc-liberty-photo{right:24px;top:440px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-yellow-cab{left:auto;right:20px;bottom:20px;width:154px;height:98px;transform:rotate(4deg);transform-origin:right bottom}.nyc-hand-note,.nyc-red-arrow{display:none}
+  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:3.55rem}.nyc-look-note{left:34px;top:205px;font-size:1.05rem}.nyc-times-photo{left:28px;top:250px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:220px}.nyc-flag-sticker{left:auto;right:44px;top:355px;width:72px;height:48px}.nyc-liberty-photo{right:24px;top:450px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-cab-sticker{left:auto;right:20px;bottom:20px;width:154px;height:98px}.nyc-hand-note,.nyc-red-arrow{display:none}
 }
 </style>
 
@@ -101,7 +90,7 @@
     </div>
   </section>
 
-  <section class="journal-stage" data-journal>
+  <section class="journal-stage" data-curated-journal>
     <div class="book-spine" aria-hidden="true"></div>
     <div class="journal-book">
       <article class="journal-sheet curated-udaipur-sheet active" data-page="0">
@@ -138,12 +127,12 @@
           <span class="udaipur-color-note">follow the pink</span>
           <svg class="udaipur-route-doodle" viewBox="0 0 180 85" aria-hidden="true"><path d="M7 68 C 44 8, 101 10, 166 52"/><path d="M158 44 L171 53 L157 59"/></svg>
         </div>
-        <div class="page-back"></div>
+        <div class="page-back" aria-hidden="true"></div>
       </article>
 
       <!--
         PAGE 02 — NEW YORK CITY
-        Upload these exact filenames later:
+        Upload these exact filenames:
         static/uploads/journal-nyc-times-square.jpg
         static/uploads/journal-nyc-liberty.jpg
         static/uploads/journal-nyc-stamp.png
@@ -151,14 +140,12 @@
       <article class="journal-sheet curated-nyc-sheet" data-page="1">
         <div class="page-front curated-nyc-front">
           <span class="nyc-page-no">02</span>
-          <span class="nyc-kicker">ARCHIVE PAGE · NEW YORK, USA</span>
+          <span class="nyc-kicker">NEW YORK, USA</span>
 
           <div class="nyc-title">
-            <span class="nyc-new">NEW</span>
-            <h2>YORK</h2>
-            <span class="nyc-city">CITY</span>
-            <span class="handwritten">look up. then look up again.</span>
+            <h2>NEW YORK<br>CITY</h2>
           </div>
+          <span class="nyc-look-note">look up. then look up again.</span>
 
           <figure class="nyc-times-photo nyc-photo-slot">
             <span class="nyc-photo-placeholder">TIMES SQUARE<br>journal-nyc-times-square.jpg</span>
@@ -185,13 +172,11 @@
             <small>NEON / YELLOW CABS / BLUE SKY / MANHATTAN</small>
           </aside>
 
-          <div class="nyc-yellow-cab" aria-label="New York yellow taxi photo sticker">
-            <span class="cab-roof"></span><span class="cab-window"></span><span class="cab-body"></span><span class="checker"></span><span class="cab-label">NYC CAB</span><span class="wheel one"></span><span class="wheel two"></span>
-          </div>
+          <div class="nyc-cab-sticker" aria-label="New York yellow taxi photo sticker"></div>
           <span class="nyc-hand-note">the city does not do quiet.</span>
           <svg class="nyc-red-arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M4 51 C25 20,48 12,79 17"/><path d="M69 8 L82 17 L70 27"/></svg>
         </div>
-        <div class="page-back"></div>
+        <div class="page-back" aria-hidden="true"></div>
       </article>
     </div>
 
@@ -205,24 +190,66 @@
 
 <script>
 (() => {
-  const journal = document.querySelector('[data-journal]');
+  const journal = document.querySelector('[data-curated-journal]');
   if (!journal) return;
+
   const pages = [...journal.querySelectorAll('.journal-book > [data-page]')];
   const prev = journal.querySelector('[data-prev-page]');
   const next = journal.querySelector('[data-next-page]');
   const indicator = journal.querySelector('[data-page-indicator]');
   let current = 0;
+  let animating = false;
 
-  const render = () => {
-    pages.forEach((page, index) => page.classList.toggle('active', index === current));
+  const syncStack = () => {
+    pages.forEach((sheet, index) => {
+      sheet.classList.toggle('active', index === current);
+      sheet.classList.toggle('turned', index < current);
+      sheet.style.zIndex = index < current ? String(index + 1) : String(100 - index);
+    });
     indicator.textContent = `PAGE ${String(current + 1).padStart(2, '0')}`;
-    prev.disabled = current === 0;
-    next.disabled = current === pages.length - 1;
+    prev.disabled = current === 0 || animating;
+    next.disabled = current === pages.length - 1 || animating;
   };
 
-  prev.addEventListener('click', () => { if (current > 0) { current -= 1; render(); } });
-  next.addEventListener('click', () => { if (current < pages.length - 1) { current += 1; render(); } });
-  render();
+  const finishFlip = (sheet) => {
+    sheet.classList.remove('flip-live');
+    animating = false;
+    syncStack();
+  };
+
+  next.addEventListener('click', () => {
+    if (animating || current >= pages.length - 1) return;
+    animating = true;
+    const leaving = pages[current];
+    const entering = pages[current + 1];
+    leaving.style.zIndex = '120';
+    entering.style.zIndex = '110';
+    leaving.classList.add('flip-live');
+    prev.disabled = true;
+    next.disabled = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => leaving.classList.add('turned')));
+    current += 1;
+    indicator.textContent = `PAGE ${String(current + 1).padStart(2, '0')}`;
+    setTimeout(() => finishFlip(leaving), 960);
+  });
+
+  prev.addEventListener('click', () => {
+    if (animating || current <= 0) return;
+    animating = true;
+    const returning = pages[current - 1];
+    const leaving = pages[current];
+    returning.style.zIndex = '120';
+    leaving.style.zIndex = '110';
+    returning.classList.add('flip-live');
+    prev.disabled = true;
+    next.disabled = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => returning.classList.remove('turned')));
+    current -= 1;
+    indicator.textContent = `PAGE ${String(current + 1).padStart(2, '0')}`;
+    setTimeout(() => finishFlip(returning), 960);
+  });
+
+  syncStack();
 })();
 </script>
 {% endblock %}
