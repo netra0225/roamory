@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Shrikhand&display=swap');
+
 /* Retro editorial Queenstown treatment — scoped only to Page 03. */
 .curated-journal .curated-queenstown-sheet .page-front{
   background:
@@ -36,12 +38,14 @@
   content:"Queenstown";
   display:block;
   color:#d9472b;
-  font-family:var(--serif) !important;
-  font-size:5.2rem !important;
+  font-family:'Shrikhand','Cooper Black',Georgia,serif !important;
+  font-size:5rem !important;
   font-weight:400 !important;
-  line-height:.9 !important;
-  letter-spacing:-.055em !important;
+  line-height:.82 !important;
+  letter-spacing:-.045em !important;
   text-transform:none !important;
+  transform:scaleX(1.035);
+  transform-origin:left center;
 }
 .curated-journal .curated-queenstown-sheet .qt-title .handwritten{
   color:#87523a !important;
@@ -49,17 +53,26 @@
   margin:16px 0 0 60px !important;
   transform:rotate(-4deg) !important;
 }
+.curated-journal .curated-queenstown-sheet .qt-title:before{
+  content:"✦" !important;
+  position:absolute !important;
+  left:-20px !important;
+  top:17px !important;
+  color:#d9472b !important;
+  font-size:1.35rem !important;
+  transform:rotate(-10deg) !important;
+}
 .curated-journal .curated-queenstown-sheet .qt-title:after{
-  content:"✦  ✦  ✦" !important;
+  content:"✦   ✹   ✦" !important;
   display:block !important;
   width:auto !important;
   height:auto !important;
-  margin:9px 0 0 9px !important;
+  margin:10px 0 0 12px !important;
   background:none !important;
   color:#c18b35 !important;
   box-shadow:none !important;
-  font-size:1rem !important;
-  letter-spacing:.48em !important;
+  font-size:.95rem !important;
+  letter-spacing:.34em !important;
 }
 
 /* Keep the stamp overlapping the large mountain Polaroid. */
@@ -139,7 +152,8 @@
 
 @media(max-width:760px){
   .curated-journal .curated-queenstown-sheet .qt-title{left:24px !important;top:76px !important;width:330px !important;}
-  .curated-journal .curated-queenstown-sheet .qt-title h2::before{font-size:3.35rem !important;}
+  .curated-journal .curated-queenstown-sheet .qt-title h2::before{font-size:3.15rem !important;}
+  .curated-journal .curated-queenstown-sheet .qt-title:before{left:-10px !important;top:8px !important;font-size:1rem !important;}
   .curated-journal .curated-queenstown-sheet .qt-stamp{left:18px !important;top:185px !important;width:138px !important;height:76px !important;}
   .curated-journal .curated-queenstown-sheet .qt-kicker{left:24px !important;top:25px !important;}
 }
