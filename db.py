@@ -2,6 +2,7 @@ import os
 import re
 import secrets
 import sqlite3
+from datetime import date
 from pathlib import Path
 
 from flask import current_app, g
@@ -205,6 +206,46 @@ def _configure_persistent_secret(db):
     current_app.config['SECRET_KEY'] = generated
 
 
+def _journal_template_context():
+    """Provide one curated journal: ongoing Udaipur first, completed memories after it."""
+    if not getattr(g, 'user', None):
+        return {
+            'journal_opening_trip': None,
+            'completed_journal_memories': [],
+        }
+
+    today_value = date.today().isoformat()
+    db = get_db()
+    opening_trip = db.execute(
+        '''SELECT * FROM trips
+           WHERE user_id=? AND start_date<=? AND end_date>=?
+           ORDER BY start_date DESC, id DESC LIMIT 1''',
+        (g.user['id'], today_value, today_value),
+    ).fetchone()
+
+    completed_memories = db.execute(
+        '''SELECT m.*, t.id AS source_trip_id, t.destination AS trip_destination,
+                  t.title AS trip_title, t.start_date AS trip_start_date,
+                  t.end_date AS trip_end_date, t.cover_filename AS trip_cover_filename,
+                  t.cover_url AS trip_cover_url
+           FROM memories m
+           JOIN trips t ON t.id=m.trip_id
+           WHERE t.user_id=?
+             AND t.end_date < ?
+             AND LOWER(COALESCE(m.location, '')) NOT LIKE '%udaipur%'
+             AND LOWER(COALESCE(m.title, '')) NOT LIKE '%udaipur%'
+           ORDER BY t.end_date DESC,
+                    COALESCE(m.memory_date, t.end_date) DESC,
+                    m.id DESC''',
+        (g.user['id'], today_value),
+    ).fetchall()
+
+    return {
+        'journal_opening_trip': opening_trip,
+        'completed_journal_memories': completed_memories,
+    }
+
+
 def init_db():
     db = get_db()
     schema_path = Path(current_app.root_path) / 'schema.sql'
@@ -220,6 +261,16 @@ def init_db():
            WHERE destination = ?''',
         (ARCHIVE_TITLE, ARCHIVE_DESCRIPTION, 'Summer Atlas'),
     )
+
+    # Remove the old starter Udaipur archive page. The curated Udaipur page now
+    # opens the journal and must not be duplicated by the original demo memory.
+    db.execute(
+        '''DELETE FROM memories
+           WHERE title=? AND location=?
+             AND trip_id IN (SELECT id FROM trips WHERE destination=?)''',
+        ('Udaipur Blue Hour', 'Udaipur', 'Summer Atlas'),
+    )
+
     _configure_persistent_secret(db)
     db.commit()
 
@@ -227,5 +278,6 @@ def init_db():
 def init_app(app):
     materialize_dashboard_assets(app.root_path)
     app.teardown_appcontext(close_db)
+    app.context_processor(_journal_template_context)
     with app.app_context():
         init_db()
