@@ -1,0 +1,187 @@
+/* Bright Venice title treatment — scoped only to Page 04. */
+.curated-venice-sheet .page-front{
+  background:
+    radial-gradient(circle at 88% 14%,rgba(255,96,150,.20),transparent 24%),
+    radial-gradient(circle at 12% 86%,rgba(255,188,74,.18),transparent 28%),
+    linear-gradient(118deg,#fff4cf 0%,#ffd9df 54%,#fff0c2 54%,#ffd4c8 100%) !important;
+}
+
+.curated-venice-sheet .venice-kicker{
+  left:58px !important;
+  top:34px !important;
+  width:auto !important;
+  font-size:0 !important;
+  letter-spacing:0 !important;
+  color:transparent !important;
+  background:#ff6fa4 !important;
+  padding:7px 13px 6px !important;
+  transform:rotate(-2deg) !important;
+  box-shadow:0 6px 0 rgba(186,42,89,.12) !important;
+  z-index:22 !important;
+}
+.curated-venice-sheet .venice-kicker::before{
+  content:"ITALY";
+  display:block;
+  color:#fff8d9;
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:.88rem;
+  font-weight:900;
+  letter-spacing:.18em;
+}
+
+.curated-venice-sheet .venice-title{
+  left:58px !important;
+  top:73px !important;
+  width:500px !important;
+  height:138px !important;
+  z-index:21 !important;
+  transform:rotate(-1deg);
+}
+.curated-venice-sheet .venice-title h2{
+  position:relative !important;
+  height:102px !important;
+  margin:0 !important;
+  font-size:0 !important;
+  line-height:1 !important;
+  color:transparent !important;
+  text-shadow:none !important;
+  letter-spacing:0 !important;
+}
+.curated-venice-sheet .venice-title h2 span{
+  position:static !important;
+  font-size:0 !important;
+  color:transparent !important;
+}
+.curated-venice-sheet .venice-title > span.venice-hand{
+  position:absolute !important;
+  left:126px !important;
+  top:108px !important;
+  margin:0 !important;
+  color:#d51f67 !important;
+  font-size:1.24rem !important;
+  transform:rotate(-4deg) !important;
+  z-index:25 !important;
+}
+.curated-venice-sheet .venice-title::before,
+.curated-venice-sheet .venice-title::after,
+.curated-venice-sheet .venice-title h2::before,
+.curated-venice-sheet .venice-title h2::after,
+.curated-venice-sheet .venice-title h2 span::before,
+.curated-venice-sheet .venice-title h2 span::after{
+  position:absolute;
+  top:0;
+  display:grid;
+  place-items:center;
+  width:70px;
+  height:92px;
+  box-sizing:border-box;
+  box-shadow:0 8px 18px rgba(117,43,58,.12);
+  line-height:1;
+  z-index:24;
+}
+.curated-venice-sheet .venice-title::before{
+  content:"V";
+  left:0;
+  top:7px;
+  width:66px;
+  background:#ffd0df;
+  color:#c64070;
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:4.7rem;
+  font-weight:700;
+  transform:rotate(-2deg);
+  clip-path:polygon(4% 3%,96% 0,100% 95%,2% 100%);
+}
+.curated-venice-sheet .venice-title h2::before{
+  content:"E";
+  left:72px;
+  top:0;
+  width:68px;
+  background:#ff2d86;
+  color:#fff3d8;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:4.55rem;
+  font-weight:900;
+  transform:rotate(2deg);
+  clip-path:polygon(2% 1%,98% 4%,95% 98%,5% 95%);
+}
+.curated-venice-sheet .venice-title h2::after{
+  content:"N";
+  left:146px;
+  top:9px;
+  width:74px;
+  background:#ffe7a6;
+  color:#b6235c;
+  font-family:'Courier New',monospace;
+  font-size:4.3rem;
+  font-weight:900;
+  transform:rotate(-4deg);
+  clip-path:polygon(5% 0,97% 5%,100% 96%,0 100%);
+}
+.curated-venice-sheet .venice-title h2 span::before{
+  content:"I";
+  left:226px;
+  top:3px;
+  width:56px;
+  background:#ffb9c9;
+  color:#8f263e;
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:4.65rem;
+  font-weight:700;
+  transform:rotate(3deg);
+  clip-path:polygon(3% 5%,96% 0,100% 100%,0 95%);
+}
+.curated-venice-sheet .venice-title h2 span::after{
+  content:"C";
+  left:288px;
+  top:8px;
+  width:75px;
+  background:#fff0c5;
+  color:#ef4f90;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:4.45rem;
+  font-weight:800;
+  transform:rotate(-2deg);
+  clip-path:polygon(0 4%,96% 0,100% 94%,5% 100%);
+}
+.curated-venice-sheet .venice-title::after{
+  content:"E";
+  left:370px;
+  top:2px;
+  width:78px;
+  background:#ec2d84;
+  color:#ffd5df;
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:4.7rem;
+  font-weight:800;
+  transform:rotate(4deg);
+  clip-path:polygon(4% 0,100% 5%,96% 100%,0 96%);
+}
+
+/* Remove the older underline/bar so the cut-paper letters stay clean. */
+.curated-venice-sheet .venice-title h2 + .venice-hand::after,
+.curated-venice-sheet .venice-title > h2::marker{
+  display:none !important;
+}
+
+.curated-venice-sheet .venice-photo figcaption{
+  color:#c51f62 !important;
+}
+.curated-venice-sheet .venice-note{
+  background:#ffe3a6 !important;
+  border-left-color:#ec2d84 !important;
+}
+.curated-venice-sheet .venice-note small,
+.curated-venice-sheet .venice-script,
+.curated-venice-sheet .venice-postmark{
+  color:#c51f62 !important;
+}
+.curated-venice-sheet .venice-mini-tag{
+  background:#ff4f8f !important;
+  color:#fff8d9 !important;
+}
+
+@media(max-width:760px){
+  .curated-venice-sheet .venice-title{left:24px !important;top:72px !important;transform:scale(.73);transform-origin:top left;width:500px !important;}
+  .curated-venice-sheet .venice-kicker{left:24px !important;top:28px !important;}
+}
