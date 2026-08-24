@@ -1,20 +1,60 @@
 {% extends 'base.html' %}
 {% block title %}My Trips — Roamory{% endblock %}
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trip-refresh.css') }}">
 <main class="page-shell trips-page">
   <section class="page-intro"><div><span class="eyebrow">TRIP LIBRARY</span><h1>Postcards from past, present & future.</h1></div><a class="button button-primary" href="{{ url_for('create_trip') }}">+ Create another trip</a></section>
-  {% for key, label in [('ongoing','Ongoing'),('upcoming','Upcoming'),('completed','Completed')] %}
-  <section class="trip-shelf">
-    <div class="section-heading"><div><span class="shelf-index">0{{ loop.index }}</span><h2>{{ label }}</h2></div><span>{{ grouped[key]|length }} trip{{ '' if grouped[key]|length == 1 else 's' }}</span></div>
-    <div class="trip-library-grid">
-    {% for trip in grouped[key] %}
-      <article class="library-card accent-{{ trip['accent'] }}">
-        <a href="{{ url_for('trip_overview', trip_id=trip['id']) }}" class="library-image"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="library-status">{{ key|upper }}</span></a>
-        <div class="library-copy"><span>{{ trip['start_date'] }} — {{ trip['end_date'] }}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p><div class="library-actions"><a href="{{ url_for('trip_overview', trip_id=trip['id']) }}">Open trip →</a><a href="{{ url_for('edit_trip', trip_id=trip['id']) }}">Edit</a></div></div>
-      </article>
-    {% else %}<div class="small-empty shelf-empty">No {{ key }} trips.</div>{% endfor %}
-    </div>
-  </section>
-  {% endfor %}
+
+  {% set legacy_showcase = grouped['ongoing']|length > 0 and grouped['completed']|length > 0 and grouped['ongoing'][0]['destination'] == 'Udaipur' and grouped['completed'][0]['destination'] == 'Summer Atlas' %}
+  {% if legacy_showcase %}
+    {% set udaipur_trip = grouped['ongoing'][0] %}
+
+    <section class="trip-shelf">
+      <div class="section-heading"><div><span class="shelf-index">01</span><h2>Ongoing</h2></div><span>1 trip</span></div>
+      <div class="trip-library-grid">
+        <article class="library-card accent-{{ udaipur_trip['accent'] }} legacy-journal-card">
+          <a href="{{ url_for('trip_overview', trip_id=udaipur_trip['id']) }}" class="library-image"><img src="{{ url_for('static', filename='uploads/udaipur-palace-hq.jpg') }}" alt="Udaipur palace"><span class="library-status">ONGOING</span></a>
+          <div class="library-copy"><span>{{ udaipur_trip['start_date'] }} — {{ udaipur_trip['end_date'] }}</span><h3>Udaipur</h3><p>Palaces, lakes & late sunsets</p><div class="library-actions"><a href="{{ url_for('trip_overview', trip_id=udaipur_trip['id']) }}">Open trip →</a><a href="{{ url_for('edit_trip', trip_id=udaipur_trip['id']) }}">Edit</a></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="trip-shelf">
+      <div class="section-heading"><div><span class="shelf-index">02</span><h2>Upcoming</h2></div><span>0 trips</span></div>
+      <div class="trip-library-grid"><div class="small-empty shelf-empty">No upcoming trips.</div></div>
+    </section>
+
+    <section class="trip-shelf">
+      <div class="section-heading"><div><span class="shelf-index">03</span><h2>Completed</h2></div><span>3 trips</span></div>
+      <div class="trip-library-grid journal-trip-library">
+        <article class="library-card accent-mediterranean legacy-journal-card">
+          <a href="{{ url_for('journal', trip_id=udaipur_trip['id']) }}" class="library-image"><img src="{{ url_for('static', filename='uploads/journal-nyc-times-square.jpg') }}" alt="Times Square in New York"><span class="library-status">COMPLETED</span></a>
+          <div class="library-copy"><span>JOURNAL PAGE 02</span><h3>New York City</h3><p>Neon, yellow cabs & skyline hours</p><div class="library-actions"><a href="{{ url_for('journal', trip_id=udaipur_trip['id']) }}">Open journal →</a></div></div>
+        </article>
+        <article class="library-card accent-coral legacy-journal-card">
+          <a href="{{ url_for('journal', trip_id=udaipur_trip['id']) }}" class="library-image"><img src="{{ url_for('static', filename='uploads/journal-venice-flowers.jpg') }}" alt="Flower-lined canal in Venice"><span class="library-status">COMPLETED</span></a>
+          <div class="library-copy"><span>JOURNAL PAGE 03</span><h3>Venice, Italy</h3><p>Canals, flowers & aperitivo</p><div class="library-actions"><a href="{{ url_for('journal', trip_id=udaipur_trip['id']) }}">Open journal →</a></div></div>
+        </article>
+        <article class="library-card accent-sunflower legacy-journal-card">
+          <a href="{{ url_for('journal', trip_id=udaipur_trip['id']) }}" class="library-image"><img src="{{ url_for('static', filename='uploads/journal-queenstown-lake.jpg') }}" alt="Lake Wakatipu in Queenstown"><span class="library-status">COMPLETED</span></a>
+          <div class="library-copy"><span>JOURNAL PAGE 04</span><h3>Queenstown, New Zealand</h3><p>Lake Wakatipu & mountain light</p><div class="library-actions"><a href="{{ url_for('journal', trip_id=udaipur_trip['id']) }}">Open journal →</a></div></div>
+        </article>
+      </div>
+    </section>
+  {% else %}
+    {% for key, label in [('ongoing','Ongoing'),('upcoming','Upcoming'),('completed','Completed')] %}
+    <section class="trip-shelf">
+      <div class="section-heading"><div><span class="shelf-index">0{{ loop.index }}</span><h2>{{ label }}</h2></div><span>{{ grouped[key]|length }} trip{{ '' if grouped[key]|length == 1 else 's' }}</span></div>
+      <div class="trip-library-grid">
+      {% for trip in grouped[key] %}
+        <article class="library-card accent-{{ trip['accent'] }}">
+          <a href="{{ url_for('trip_overview', trip_id=trip['id']) }}" class="library-image"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="library-status">{{ key|upper }}</span></a>
+          <div class="library-copy"><span>{{ trip['start_date'] }} — {{ trip['end_date'] }}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p><div class="library-actions"><a href="{{ url_for('trip_overview', trip_id=trip['id']) }}">Open trip →</a><a href="{{ url_for('edit_trip', trip_id=trip['id']) }}">Edit</a></div></div>
+        </article>
+      {% else %}<div class="small-empty shelf-empty">No {{ key }} trips.</div>{% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  {% endif %}
 </main>
 {% endblock %}
