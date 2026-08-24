@@ -421,31 +421,28 @@ body.auth-body {
     }
 }
 /* =========================================================
-   REGISTER CARD — MATCH LOGIN CARD ALIGNMENT
-   Card itself does NOT move
+   REGISTER CARD — MATCH LOGIN ALIGNMENT
+   Do not move the white card
    ========================================================= */
 
-/* Position only the content inside the card */
+/* Use one consistent left edge for all card content */
 .register-shell .auth-copy {
-    position: relative !important;
-    top: -52px !important;
-
     display: block !important;
-    padding: 46px 52px 32px !important;
+    padding: 58px 52px 34px !important;
     box-sizing: border-box !important;
 }
 
-/* Match login: strong LEFT alignment */
+/* Heading aligns exactly with the form */
 .register-shell .auth-copy h1 {
     width: 100% !important;
-    max-width: 420px !important;
+    max-width: none !important;
 
     margin: 0 0 12px 0 !important;
 
     text-align: left !important;
 }
 
-/* Supporting copy also follows login alignment */
+/* Supporting copy starts from the SAME left edge */
 .register-shell .auth-copy > p:not(.auth-switch) {
     width: 100% !important;
     max-width: none !important;
@@ -459,25 +456,25 @@ body.auth-body {
     line-height: 1.45 !important;
 }
 
-/* Remove the oversized gap before Full name */
+/* Pull the entire form block upward to remove the dead space */
 .register-shell .form-stack.two-col-form {
     width: 100% !important;
 
-    margin-top: 24px !important;
-    padding-top: 0 !important;
+    margin-top: 0 !important;
+    transform: translateY(-48px) !important;
 
-    row-gap: 17px !important;
+    row-gap: 18px !important;
     column-gap: 18px !important;
 
     text-align: left !important;
 }
 
-/* Controlled space before Create account */
-.register-shell .form-stack .button {
+/* Keep some breathing space before the CTA */
+.register-shell .form-stack.two-col-form .button {
     margin-top: 12px !important;
 }
 
-/* Login link stays close to the primary CTA */
+/* Keep login link close to the CTA */
 .register-shell .auth-switch {
     margin-top: 14px !important;
     text-align: left !important;
@@ -486,11 +483,15 @@ body.auth-body {
 /* Mobile */
 @media (max-width: 900px) {
     .register-shell .auth-copy {
-        top: 0 !important;
-        padding: 36px 28px 30px !important;
+        padding: 38px 28px 30px !important;
     }
 
     .register-shell .auth-copy > p:not(.auth-switch) {
         white-space: normal !important;
+    }
+
+    .register-shell .form-stack.two-col-form {
+        transform: none !important;
+        margin-top: 24px !important;
     }
 }
