@@ -154,6 +154,29 @@ def _init_postgres_schema(db, schema_path: Path):
            FOR EACH ROW EXECUTE FUNCTION normalize_roamory_starter_archive()'''
     )
 
+    db.execute(
+        '''CREATE OR REPLACE FUNCTION suppress_old_udaipur_journal_memory()
+           RETURNS TRIGGER AS $$
+           BEGIN
+               IF NEW.title = 'Udaipur Blue Hour'
+                  AND NEW.location = 'Udaipur'
+                  AND EXISTS (
+                      SELECT 1 FROM trips
+                      WHERE id = NEW.trip_id AND destination = 'Summer Atlas'
+                  ) THEN
+                   RETURN NULL;
+               END IF;
+               RETURN NEW;
+           END;
+           $$ LANGUAGE plpgsql'''
+    )
+    db.execute('DROP TRIGGER IF EXISTS suppress_old_udaipur_journal_memory_trigger ON memories')
+    db.execute(
+        '''CREATE TRIGGER suppress_old_udaipur_journal_memory_trigger
+           BEFORE INSERT ON memories
+           FOR EACH ROW EXECUTE FUNCTION suppress_old_udaipur_journal_memory()'''
+    )
+
 
 def _init_sqlite_schema(db, schema_path: Path):
     db.executescript(schema_path.read_text(encoding='utf-8'))
@@ -180,6 +203,19 @@ def _init_sqlite_schema(db, schema_path: Path):
                 UPDATE trips
                 SET title = '{title}', description = '{description}'
                 WHERE id = NEW.id;
+            END;
+
+            DROP TRIGGER IF EXISTS suppress_old_udaipur_journal_memory_insert;
+            CREATE TRIGGER suppress_old_udaipur_journal_memory_insert
+            AFTER INSERT ON memories
+            WHEN NEW.title = 'Udaipur Blue Hour'
+                 AND NEW.location = 'Udaipur'
+                 AND EXISTS (
+                     SELECT 1 FROM trips
+                     WHERE id = NEW.trip_id AND destination = 'Summer Atlas'
+                 )
+            BEGIN
+                DELETE FROM memories WHERE id = NEW.id;
             END;'''
     )
 
