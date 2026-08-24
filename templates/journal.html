@@ -1,37 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Journal — {{ trip['destination'] }}{% endblock %}
-{% block extra_head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/journal-curated.css') }}">
-<script defer src="{{ url_for('static', filename='js/journal-curated.js') }}"></script>
-{% endblock %}
+{% block title %}Journal — Udaipur{% endblock %}
 {% block content %}
 {% include '_trip_nav.html' %}
-{% set has_udaipur_opening = journal_opening_trip and journal_opening_trip['destination']|lower == 'udaipur' %}
-{% set opening_count = 1 if has_udaipur_opening else 0 %}
-{% set total_pages = opening_count + completed_journal_memories|length %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/journal-curated.css') }}">
+
 <main class="journal-shell trip-page curated-journal">
   <section class="journal-heading">
     <div>
       <span class="eyebrow">DIGITAL TRAVEL JOURNAL</span>
-      <h1>{{ journal_opening_trip['destination'] if has_udaipur_opening else trip['destination'] }}</h1>
-      <p>The current journey opens the book. Finished journeys follow, one place at a time.</p>
+      <h1>Udaipur</h1>
+      <p>The first page belongs to the journey happening now. Finished places will follow as you build the book.</p>
     </div>
-    {% if trip_status(trip) != 'upcoming' %}<button class="button button-primary" type="button" data-open-memory-form>+ Add memory</button>{% endif %}
   </section>
 
   <section class="journal-stage" data-journal>
     <div class="book-spine" aria-hidden="true"></div>
     <div class="journal-book">
-
-      {% if has_udaipur_opening %}
       <!--
-        UDAIPUR PHOTO SLOTS — upload these exact filenames later and the layout
-        will populate automatically without another template change:
+        UDAIPUR PAGE 01
+        Add your final images later using these exact filenames:
         static/uploads/journal-udaipur-arch.jpg
         static/uploads/journal-udaipur-lake.jpg
         static/uploads/journal-udaipur-stamp.png
+
+        The old generic Udaipur memory is intentionally NOT rendered here.
+        Upcoming trips are intentionally NOT part of this curated journal.
       -->
-      <article class="journal-sheet curated-udaipur-sheet active" data-page="0" style="--page-z:{{ total_pages }}">
+      <article class="journal-sheet curated-udaipur-sheet active" data-page="0" style="--page-z:1">
         <div class="page-front curated-udaipur-front">
           <span class="page-number udaipur-page-no">01</span>
           <span class="udaipur-kicker">CURRENT JOURNEY · RAJASTHAN, INDIA</span>
@@ -39,7 +34,7 @@
           <div class="udaipur-title-cluster">
             <h2>Udaipur</h2>
             <span class="handwritten">pink walls, blue water</span>
-            <span class="udaipur-date">{{ journal_opening_trip['start_date'] }} → {{ journal_opening_trip['end_date'] }}</span>
+            <span class="udaipur-date">{{ trip['start_date'] }} → {{ trip['end_date'] }}</span>
           </div>
 
           <figure class="udaipur-photo-slot udaipur-arch-photo" aria-label="Placeholder for the pink palace arch photograph">
@@ -49,81 +44,39 @@
 
           <figure class="udaipur-photo-slot udaipur-lake-photo" aria-label="Placeholder for the lakeside palace photograph">
             <span class="slot-code">PHOTO 02 · LAKESIDE PALACE</span>
-            <figcaption>where the architecture meets the water</figcaption>
+            <figcaption>domes floating beside the water</figcaption>
           </figure>
 
-          <div class="udaipur-stamp-slot" aria-label="Mandatory Rajasthan stamp placeholder"><span>RAJASTHAN STAMP</span></div>
+          <div class="udaipur-stamp-slot" aria-label="Mandatory Rajasthan stamp placeholder">
+            <span>RAJASTHAN STAMP</span>
+          </div>
 
           <aside class="udaipur-note-card">
-            <p>Rose-toned arches, crystal light and carved facades — then domes, gardens and water.</p>
+            <p>Rose-toned arches, carved facades and chandeliers first. Then the city opens into domes, gardens and long strips of blue water.</p>
             <small>PALACE DETAILS / LAKE LIGHT / WARM STONE</small>
           </aside>
 
-          <span class="udaipur-margin-note">the city changes colour with every frame.</span>
+          <span class="udaipur-margin-note">the city keeps changing colour.</span>
           <span class="udaipur-color-note">keep the warm pinks</span>
-          <svg class="udaipur-route-doodle" viewBox="0 0 180 85" aria-hidden="true"><path d="M7 68 C 44 8, 101 10, 166 52"/><path d="M158 44 L171 53 L157 59"/></svg>
+
+          <svg class="udaipur-route-doodle" viewBox="0 0 180 85" aria-hidden="true">
+            <path d="M7 68 C 44 8, 101 10, 166 52"/>
+            <path d="M158 44 L171 53 L157 59"/>
+          </svg>
         </div>
-        <div class="page-back"><span>ROAMORY · UDAIPUR</span><p class="handwritten">the first page stays here.</p></div>
-      </article>
-      {% endif %}
 
-      {% for memory in completed_journal_memories %}
-      {% set page_index = loop.index0 + opening_count %}
-      <article class="journal-sheet mood-{{ memory['mood'] }} archive-layout-{{ (loop.index0 % 4) + 1 }} {{ 'active' if not has_udaipur_opening and loop.first else '' }}" data-page="{{ page_index }}" style="--page-z:{{ total_pages - page_index }}">
-        <div class="page-front archive-journal-front">
-          <span class="page-number">{{ '%02d'|format(page_index + 1) }}</span>
-          <span class="tape tape-left"></span>
-
-          <figure class="archive-main-photo instant-develop">
-            <div class="photo-wash"></div>
-            {% if memory['image_filename'] %}<img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="{{ memory['title'] }}">
-            {% elif memory['image_url'] %}<img src="{{ memory['image_url'] }}" alt="{{ memory['title'] }}">
-            {% else %}<div class="journal-blank-photo"></div>{% endif %}
-            <figcaption>{{ memory['location'] or memory['trip_destination'] }}</figcaption>
-          </figure>
-
-          <div class="archive-copy-card">
-            <span class="eyebrow">{{ memory['memory_date'] or memory['trip_end_date'] }}</span>
-            <h2>{{ memory['title'] }}</h2>
-            <p class="journal-location">{{ memory['location'] or memory['trip_destination'] }}</p>
-            <p>{{ memory['note'] or 'A memory without a caption yet.' }}</p>
-            <span class="handwritten">kept from the road.</span>
-          </div>
-
-          <div class="archive-ticket-scrap">{{ memory['trip_destination']|upper }}<br>FINISHED JOURNEY</div>
-          <div class="journal-page-actions">
-            <a href="{{ url_for('edit_memory', trip_id=memory['source_trip_id'], memory_id=memory['id']) }}">Edit page</a>
-            <form method="post" action="{{ url_for('delete_memory', trip_id=memory['source_trip_id'], memory_id=memory['id']) }}" data-confirm="Remove this memory from the journal?">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="link-button danger-text">Delete page</button>
-            </form>
-          </div>
+        <div class="page-back">
+          <span>ROAMORY · UDAIPUR</span>
+          <p class="handwritten">the first page stays here.</p>
         </div>
-        <div class="page-back"><span>ROAMORY · {{ memory['trip_destination']|upper }}</span><p class="handwritten">another place worth keeping</p></div>
       </article>
-      {% endfor %}
-
-      {% if total_pages == 0 %}
-      <article class="journal-sheet active empty-journal-sheet" data-page="0">
-        <div class="page-front"><span class="tape tape-left"></span><div class="empty-state"><span class="pressed-flower">✾</span><span class="eyebrow">FIRST BLANK PAGE</span><h2>Your journal starts after something happens.</h2><p>Complete a journey and its memories will join the book.</p></div></div>
-        <div class="page-back"></div>
-      </article>
-      {% endif %}
     </div>
 
     <div class="journal-controls">
-      <button class="journal-arrow" type="button" data-prev-page aria-label="Previous journal page">←</button>
-      <span data-page-indicator>PAGE 01</span>
-      <button class="journal-arrow" type="button" data-next-page aria-label="Next journal page">→</button>
+      <button class="journal-arrow" type="button" disabled aria-label="Previous journal page">←</button>
+      <span>PAGE 01</span>
+      <button class="journal-arrow" type="button" disabled aria-label="Next journal page">→</button>
     </div>
   </section>
-
-  {% if trip_status(trip) != 'upcoming' %}
-  <dialog class="memory-dialog" data-memory-dialog>
-    <form id="add-memory" method="post" enctype="multipart/form-data" class="paper-form memory-form" data-memory-form data-loading-form><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="dialog-close" type="button" data-close-memory-form aria-label="Close">×</button><span class="eyebrow">NEW JOURNAL PAGE</span><h2>Develop a memory.</h2><label>Title<input name="title" placeholder="A detail worth keeping" required></label><label>Date<input type="date" name="memory_date"></label><label>Location<input name="location" placeholder="Place"></label><label>Photograph<input type="file" name="image" accept="image/png,image/jpeg,image/webp"></label><label>Memory<textarea name="note" rows="4" placeholder="What do you want to remember about this moment?"></textarea></label><label>Mood<select name="mood"><option value="postcard">Postcard blue</option><option value="sunset">Sunset coral</option><option value="lemon">Lemon yellow</option><option value="lake">Lake turquoise</option></select></label><button class="button button-primary" type="submit">Add to journal</button>
-    </form>
-  </dialog>
-  {% endif %}
 </main>
 {% endblock %}
