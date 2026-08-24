@@ -73,6 +73,14 @@
 .nyc-yellow-cab .cab-window{position:absolute;left:68px;bottom:64px;width:52px;height:18px;background:#9bd4ec;border:2px solid #292929;transform:skew(-9deg);z-index:2}
 .nyc-yellow-cab .wheel{position:absolute;bottom:8px;width:29px;height:29px;border-radius:50%;background:#292929;border:5px solid #555;z-index:3}.nyc-yellow-cab .wheel.one{left:39px}.nyc-yellow-cab .wheel.two{right:29px}.nyc-yellow-cab .checker{position:absolute;left:27px;bottom:45px;width:138px;height:9px;background:repeating-linear-gradient(90deg,#292929 0 9px,#fff 9px 18px)}
 .nyc-yellow-cab .cab-label{position:absolute;left:76px;bottom:31px;font-size:.54rem;font-weight:900;letter-spacing:.1em;z-index:4}
+
+/* Real photo stickers from Unsplash: keep these secondary to the user's NYC photos. */
+.nyc-flag-sticker{width:98px;height:66px;background-image:url('https://images.unsplash.com/photo-1479685299024-787b75aea174?auto=format&fit=crop&w=500&q=82')!important;background-size:cover!important;background-position:center 42%!important;background-repeat:no-repeat!important;border:6px solid #fff!important;box-sizing:border-box;overflow:hidden;box-shadow:0 10px 18px rgba(39,48,64,.18)!important}
+.nyc-flag-sticker:before{display:none!important;content:none!important}
+.nyc-yellow-cab{left:520px;bottom:46px;width:196px;height:126px;background:#fff url('https://images.unsplash.com/photo-1570466153480-ad80ec511246?auto=format&fit=crop&w=800&q=82') center/cover no-repeat!important;border:8px solid #fff;box-sizing:border-box;overflow:hidden;filter:none!important;box-shadow:0 13px 23px rgba(48,43,30,.18)}
+.nyc-yellow-cab>*{display:none!important}
+.nyc-yellow-cab:after{content:"NYC CAB";position:absolute;right:8px;bottom:7px;padding:4px 7px;background:rgba(255,255,255,.9);font-size:.52rem;font-weight:900;letter-spacing:.11em;color:#202633}
+
 .nyc-hand-note{position:absolute;left:754px;bottom:53px;z-index:16;font-family:var(--hand);font-size:1.3rem;color:#d83c48;transform:rotate(-6deg)}
 .nyc-red-arrow{position:absolute;left:790px;bottom:96px;width:90px;height:60px;fill:none;stroke:#d83c48;stroke-width:2.5;stroke-linecap:round;opacity:.85}
 
@@ -81,7 +89,7 @@
 @media(max-width:760px){
   .curated-journal .journal-book,.curated-journal .curated-udaipur-sheet,.curated-journal .curated-udaipur-sheet .page-front,.curated-journal .curated-nyc-sheet,.curated-journal .curated-nyc-sheet .page-front{height:860px!important;min-height:860px!important}
   .udaipur-title-cluster{left:24px;top:58px}.udaipur-title-cluster h2{font-size:4.25rem}.udaipur-kicker{left:24px;top:24px}.udaipur-arch-photo{left:38px;top:235px;width:55%;height:360px}.udaipur-lake-photo{right:23px;bottom:118px;width:57%;height:270px}.udaipur-stamp-slot{right:18px;top:45px;width:122px;height:145px}.udaipur-note-card{left:24px;bottom:70px;width:48%}.udaipur-margin-note{left:auto;right:24px;bottom:45px}.udaipur-color-note,.udaipur-route-doodle{display:none}
-  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:4.2rem}.nyc-title .nyc-city{margin-left:80px}.nyc-times-photo{left:28px;top:230px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:215px}.nyc-flag-sticker{left:auto;right:44px;top:348px;width:68px;height:43px}.nyc-liberty-photo{right:24px;top:440px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-yellow-cab{left:auto;right:20px;bottom:20px;transform:scale(.78) rotate(4deg);transform-origin:right bottom}.nyc-hand-note,.nyc-red-arrow{display:none}
+  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:4.2rem}.nyc-title .nyc-city{margin-left:80px}.nyc-times-photo{left:28px;top:230px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:215px}.nyc-flag-sticker{left:auto;right:44px;top:348px;width:72px;height:48px}.nyc-liberty-photo{right:24px;top:440px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-yellow-cab{left:auto;right:20px;bottom:20px;width:154px;height:98px;transform:rotate(4deg);transform-origin:right bottom}.nyc-hand-note,.nyc-red-arrow{display:none}
 }
 </style>
 
@@ -159,7 +167,7 @@
           </figure>
 
           <div class="nyc-subway-strip"><b>42</b><span>Times Sq · Manhattan</span></div>
-          <div class="nyc-flag-sticker" aria-label="Small American flag sticker"></div>
+          <div class="nyc-flag-sticker" aria-label="Small American flag photo sticker"></div>
 
           <figure class="nyc-liberty-photo nyc-photo-slot">
             <span class="nyc-photo-placeholder">STATUE OF LIBERTY<br>journal-nyc-liberty.jpg</span>
@@ -177,7 +185,7 @@
             <small>NEON / YELLOW CABS / BLUE SKY / MANHATTAN</small>
           </aside>
 
-          <div class="nyc-yellow-cab" aria-label="New York yellow taxi sticker">
+          <div class="nyc-yellow-cab" aria-label="New York yellow taxi photo sticker">
             <span class="cab-roof"></span><span class="cab-window"></span><span class="cab-body"></span><span class="checker"></span><span class="cab-label">NYC CAB</span><span class="wheel one"></span><span class="wheel two"></span>
           </div>
           <span class="nyc-hand-note">the city does not do quiet.</span>
