@@ -27,6 +27,32 @@ def init_db():
     settings_columns = {row['name'] for row in db.execute('PRAGMA table_info(settings)').fetchall()}
     if 'starter_seeded' not in settings_columns:
         db.execute("ALTER TABLE settings ADD COLUMN starter_seeded INTEGER NOT NULL DEFAULT 0")
+
+    # Retire the old numbered archive copy for existing starter trips.
+    db.execute(
+        '''UPDATE trips
+           SET title = ?, description = ?
+           WHERE destination = ? AND title = ?''',
+        (
+            'Places that stayed with me',
+            'A finished journey gathered into journal pages of coast, lake, spring streets, mountains and palace light.',
+            'Summer Atlas',
+            'Five Places I Keep Thinking About',
+        ),
+    )
+
+    # Keep future starter trips from ever surfacing the old numbered archive copy.
+    db.executescript(
+        '''CREATE TRIGGER IF NOT EXISTS normalize_starter_archive_copy
+           AFTER INSERT ON trips
+           WHEN NEW.destination = 'Summer Atlas' AND NEW.title = 'Five Places I Keep Thinking About'
+           BEGIN
+             UPDATE trips
+             SET title = 'Places that stayed with me',
+                 description = 'A finished journey gathered into journal pages of coast, lake, spring streets, mountains and palace light.'
+             WHERE id = NEW.id;
+           END;'''
+    )
     db.commit()
 
 
