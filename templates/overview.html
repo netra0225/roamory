@@ -2,10 +2,12 @@
 {% block title %}{{ trip['title'] }} — Roamory{% endblock %}
 {% block content %}
 {% include '_trip_nav.html' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trip-refresh.css') }}">
+{% set is_udaipur = trip['destination']|lower == 'udaipur' %}
 <main class="page-shell trip-page overview-page">
   <section class="trip-hero accent-{{ trip['accent'] }}">
-    <div class="trip-hero-image"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="trip-status-badge">{{ trip_status(trip)|upper }}</span></div>
-    <div class="trip-hero-copy"><span class="eyebrow">{{ trip['start_date'] }} — {{ trip['end_date'] }}</span><h1>{{ trip['destination'] }}</h1><p class="trip-title">{{ trip['title'] }}</p><p>{{ trip['description'] or 'A new trip waiting for its details.' }}</p><div class="hero-actions"><a class="button button-ink" href="{{ url_for('today', trip_id=trip['id']) }}">Open Today</a><a class="text-link" href="{{ url_for('edit_trip', trip_id=trip['id']) }}">Edit trip</a></div></div>
+    <div class="trip-hero-image">{% if is_udaipur %}<img src="{{ url_for('static', filename='uploads/udaipur-palace-hq.jpg') }}" alt="Udaipur palace">{% else %}<img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}">{% endif %}<span class="trip-status-badge">{{ trip_status(trip)|upper }}</span></div>
+    <div class="trip-hero-copy"><span class="eyebrow">{{ trip['start_date'] }} — {{ trip['end_date'] }}</span><h1>{{ trip['destination'] }}</h1><p class="trip-title">{{ trip['title'] }}</p><p>{% if is_udaipur %}Lake mornings, rose-coloured arches, palace courtyards and slow evenings around the old city.{% else %}{{ trip['description'] or 'A new trip waiting for its details.' }}{% endif %}</p><div class="hero-actions"><a class="button button-ink" href="{{ url_for('today', trip_id=trip['id']) }}">Open Today</a><a class="text-link" href="{{ url_for('edit_trip', trip_id=trip['id']) }}">Edit trip</a></div></div>
     <span class="baggage-tag overview-tag">{{ days|length }} DAYS · ROAMORY</span>
   </section>
 
@@ -27,9 +29,15 @@
     <aside class="readiness-card accent-{{ trip['accent'] }}"><span class="eyebrow">TRIP READINESS</span><h2>{{ pack_pct }}%</h2><div class="meter"><span style="width:{{ pack_pct }}%"></span></div><p>{{ packing['packed'] }} of {{ packing['total'] }} packing items ready.</p><a class="text-link" href="{{ url_for('packing', trip_id=trip['id']) }}">Finish packing →</a></aside>
   </section>
 
-  <section class="memory-preview-section"><div class="section-heading"><div><span class="eyebrow">MEMORY DESK</span><h2>What is already worth keeping?</h2></div><a href="{{ url_for('journal', trip_id=trip['id']) }}">Open journal →</a></div>
+  <section class="memory-preview-section"><div class="section-heading"><div><span class="eyebrow">MEMORY DESK</span><h2>{% if is_udaipur %}Udaipur moments worth keeping.{% else %}What is already worth keeping?{% endif %}</h2></div><a href="{{ url_for('journal', trip_id=trip['id']) }}">Open journal →</a></div>
     <div class="memory-strip">
-      {% for memory in memories %}<figure class="instant-mini"><div>{% if memory['image_filename'] %}<img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="{{ memory['title'] }}">{% elif memory['image_url'] %}<img src="{{ memory['image_url'] }}" alt="{{ memory['title'] }}">{% else %}<img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}">{% endif %}</div><figcaption>{{ memory['title'] }}</figcaption></figure>{% else %}<div class="small-empty">The journal is blank. Add a memory when something deserves a page.</div>{% endfor %}
+      {% if is_udaipur %}
+        <figure class="instant-mini"><div><img src="{{ url_for('static', filename='uploads/journal-udaipur-arch.jpg') }}" alt="Pink palace arch in Udaipur"></div><figcaption>through the pink arch</figcaption></figure>
+        <figure class="instant-mini"><div><img src="{{ url_for('static', filename='uploads/journal-udaipur-lake.jpg') }}" alt="Udaipur palace beside the lake"></div><figcaption>gold against the lake</figcaption></figure>
+        <figure class="instant-mini"><div><img src="{{ url_for('static', filename='uploads/udaipur-palace-hq.jpg') }}" alt="Udaipur palace architecture"></div><figcaption>palace light before evening</figcaption></figure>
+      {% else %}
+        {% for memory in memories %}<figure class="instant-mini"><div>{% if memory['image_filename'] %}<img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="{{ memory['title'] }}">{% elif memory['image_url'] %}<img src="{{ memory['image_url'] }}" alt="{{ memory['title'] }}">{% else %}<img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}">{% endif %}</div><figcaption>{{ memory['title'] }}</figcaption></figure>{% else %}<div class="small-empty">The journal is blank. Add a memory when something deserves a page.</div>{% endfor %}
+      {% endif %}
     </div>
   </section>
 
