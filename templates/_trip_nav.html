@@ -1,5 +1,6 @@
 {% if request.endpoint == 'journal' %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-venice-pop.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/journal-queenstown-pop.css') }}">
 {% endif %}
 <nav class="trip-nav" aria-label="Trip sections">
   <a href="{{ url_for('trip_overview', trip_id=trip['id']) }}" class="{{ 'active' if request.endpoint == 'trip_overview' else '' }}">Overview</a>
