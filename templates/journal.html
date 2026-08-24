@@ -74,36 +74,38 @@
 .nyc-hand-note{position:absolute;left:760px;bottom:52px;z-index:16;font-family:var(--hand);font-size:1.3rem;color:#d83c48;transform:rotate(-6deg)}
 .nyc-red-arrow{position:absolute;left:796px;bottom:96px;width:90px;height:60px;fill:none;stroke:#d83c48;stroke-width:2.5;stroke-linecap:round;opacity:.85}
 
-/* PAGE 03 — QUEENSTOWN */
-.curated-journal .curated-queenstown-sheet .page-front{display:block!important;border:1px solid rgba(42,62,66,.14);box-shadow:0 20px 50px rgba(39,55,57,.16);background:radial-gradient(circle at 12% 88%,rgba(57,105,92,.12),transparent 26%),radial-gradient(circle at 84% 15%,rgba(196,145,74,.14),transparent 22%),linear-gradient(122deg,#edf4f3 0%,#e4eeec 54%,#d8e5e5 54%,#edf2ee 100%)!important}
-.curated-queenstown-front:before{content:"";position:absolute;left:-80px;bottom:-95px;width:420px;height:260px;border:1px solid rgba(47,111,133,.2);border-radius:50%;box-shadow:0 0 0 28px rgba(47,111,133,.04),0 0 0 58px rgba(47,111,133,.035);transform:rotate(-11deg)}
-.curated-queenstown-front:after{content:"";position:absolute;right:-55px;top:235px;width:300px;height:420px;background:linear-gradient(155deg,transparent 0 48%,rgba(255,255,255,.34) 48% 51%,transparent 51% 100%);opacity:.8}
-.qt-page-no{position:absolute;right:24px;top:18px;z-index:30;font-weight:900;color:#263d45}
-.qt-kicker{position:absolute;left:58px;top:40px;z-index:14;font-size:.7rem;font-weight:900;letter-spacing:.2em;color:#35565e;text-transform:uppercase}
-.qt-title{position:absolute;left:456px;top:54px;width:420px;z-index:16}
-.qt-title h2{margin:0;font-family:var(--sans);font-size:4.55rem;line-height:.88;font-weight:900;letter-spacing:.045em;color:#203e4a;text-transform:uppercase}
-.qt-title .handwritten{display:block;margin:14px 0 0 55px;font-family:var(--hand);font-size:1.25rem;color:#b4763e;transform:rotate(-3deg)}
-.qt-title:after{content:"";display:block;width:285px;height:3px;margin:15px 0 0 4px;background:linear-gradient(90deg,#2f6f85 0 48%,#c4914a 48% 67%,#456d59 67%)}
-.qt-photo{position:absolute;margin:0;background:#fdfcf7;box-shadow:0 17px 34px rgba(35,53,56,.16);box-sizing:border-box;overflow:visible;padding:9px 9px 34px}
+/* PAGE 03 — QUEENSTOWN: warm contrast against the blue-green photography */
+.curated-journal .curated-queenstown-sheet .page-front{display:block!important;border:1px solid rgba(91,42,54,.14);box-shadow:0 20px 50px rgba(72,43,38,.16);background:radial-gradient(circle at 83% 16%,rgba(213,153,62,.23),transparent 24%),radial-gradient(circle at 13% 86%,rgba(119,47,69,.09),transparent 27%),linear-gradient(122deg,#f7eadb 0%,#f2dac8 53%,#edcdbb 53%,#f8ead8 100%)!important}
+.curated-queenstown-front:before{content:"";position:absolute;left:-82px;bottom:-108px;width:430px;height:270px;border:2px solid rgba(119,47,69,.2);border-radius:50%;box-shadow:0 0 0 28px rgba(119,47,69,.045),0 0 0 58px rgba(213,153,62,.04);transform:rotate(-11deg)}
+.curated-queenstown-front:after{content:"";position:absolute;right:-68px;top:242px;width:315px;height:395px;background:linear-gradient(154deg,transparent 0 47%,rgba(151,62,59,.1) 47% 50%,transparent 50% 100%);opacity:.9}
+.qt-page-no{position:absolute;right:24px;top:18px;z-index:30;font-weight:900;color:#332a28}
+.qt-kicker{position:absolute;left:58px;top:40px;z-index:14;font-size:.7rem;font-weight:900;letter-spacing:.2em;color:#6f263f;text-transform:uppercase}
+.qt-title{position:absolute;left:456px;top:52px;width:470px;z-index:16}
+.qt-title:before{content:"";position:absolute;left:-17px;top:36px;width:415px;height:31px;background:#e2aa51;opacity:.42;transform:rotate(-1.5deg);z-index:-1}
+.qt-title h2{margin:0;font-family:var(--serif);font-size:4.45rem;line-height:.88;font-weight:700;letter-spacing:-.035em;color:#742e49;text-transform:uppercase;text-shadow:3px 3px 0 rgba(255,244,222,.86)}
+.qt-title .handwritten{display:block;margin:15px 0 0 56px;font-family:var(--hand);font-size:1.3rem;color:#c45836;transform:rotate(-3deg)}
+.qt-title:after{content:"✦  ✦  ✦";display:block;margin:11px 0 0 8px;color:#9c4937;font-size:.9rem;letter-spacing:.48em}
+.qt-photo{position:absolute;margin:0;background:#fffaf1;box-shadow:0 17px 34px rgba(72,43,38,.17);box-sizing:border-box;overflow:visible;padding:9px 9px 34px}
 .qt-photo img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:2}
-.qt-photo figcaption{position:absolute;left:14px;bottom:6px;font-family:var(--hand);font-size:1.02rem;color:#29434b}
-.qt-placeholder{position:absolute;inset:9px 9px 34px;display:grid;place-items:center;border:2px dashed rgba(50,78,84,.24);background:repeating-linear-gradient(-45deg,#eef4f2 0 13px,#f8faf8 13px 26px);font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#667b80;text-align:center;padding:18px}
+.qt-photo figcaption{position:absolute;left:14px;bottom:6px;font-family:var(--hand);font-size:1.02rem;color:#6f263f}
+.qt-placeholder{position:absolute;inset:9px 9px 34px;display:grid;place-items:center;border:2px dashed rgba(111,38,63,.24);background:repeating-linear-gradient(-45deg,#faebdc 0 13px,#fff8ee 13px 26px);font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#76564f;text-align:center;padding:18px}
 .qt-photo-slot.has-image .qt-placeholder{display:none}
 .qt-lake-photo{left:62px;top:164px;width:382px;height:500px;transform:rotate(-2.2deg);z-index:9}
 .qt-gondola-photo{right:62px;top:156px;width:330px;height:270px;transform:rotate(3.2deg);z-index:11}
 .qt-central-photo{right:91px;bottom:48px;width:300px;height:238px;transform:rotate(-4deg);z-index:13}
-.qt-stamp{position:absolute;left:58px;top:72px;width:245px;height:132px;z-index:18;transform:rotate(-5deg);background:#f7f5ee;box-shadow:0 10px 20px rgba(39,56,59,.12);overflow:hidden}
+.qt-stamp{position:absolute;left:58px;top:72px;width:245px;height:132px;z-index:18;transform:rotate(-5deg);background:#fff8eb;box-shadow:0 10px 20px rgba(75,46,41,.12);overflow:hidden}
 .qt-stamp img{width:100%;height:100%;object-fit:contain;display:block;position:relative;z-index:2}
-.qt-stamp .qt-placeholder{inset:0;background:#eef2ef;border-color:#6f8390}
-.qt-flag-sticker{position:absolute;left:320px;top:92px;width:92px;height:58px;z-index:19;border:5px solid #fff;box-sizing:border-box;box-shadow:0 8px 15px rgba(39,48,64,.14);transform:rotate(6deg);background:#12356c url('https://flagcdn.com/w160/nz.png') center/cover no-repeat}
-.qt-note{position:absolute;left:470px;top:306px;width:255px;padding:19px 20px 21px;background:#f4edda;box-shadow:0 10px 20px rgba(43,57,56,.08);transform:rotate(2deg);z-index:12;border-left:5px solid #456d59}
-.qt-note:before{content:"";position:absolute;left:94px;top:-11px;width:72px;height:22px;background:rgba(196,145,74,.42);transform:rotate(-5deg)}
-.qt-note p{margin:0;font-family:var(--serif);font-size:1.04rem;line-height:1.3;color:#263a3f}.qt-note small{display:block;margin-top:12px;font-size:.56rem;font-weight:900;letter-spacing:.12em;color:#456d59;text-transform:uppercase}
-.qt-travel-tag{position:absolute;left:485px;top:252px;z-index:15;padding:9px 14px;background:#2f6f85;color:#fff;font-size:.62rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;transform:rotate(-1.5deg);box-shadow:0 7px 14px rgba(47,111,133,.17)}
-.qt-hand-note{position:absolute;left:493px;bottom:64px;z-index:17;font-family:var(--hand);font-size:1.28rem;color:#b4763e;transform:rotate(-5deg)}
-.qt-cable-line{position:absolute;right:360px;top:116px;width:280px;height:100px;z-index:4;fill:none;stroke:#38535d;stroke-width:2;opacity:.42}
-.qt-cable-dot{position:absolute;right:514px;top:154px;width:38px;height:25px;border:2px solid #38535d;border-radius:7px;background:#e7f0ee;z-index:5;transform:rotate(-8deg);opacity:.72}
-.qt-cable-dot:before{content:"";position:absolute;left:17px;top:-14px;width:2px;height:14px;background:#38535d}
+.qt-stamp .qt-placeholder{inset:0;background:#f8eadb;border-color:#9a6a5c}
+.qt-flag-sticker{position:absolute;left:320px;top:92px;width:92px;height:58px;z-index:19;border:5px solid #fff;box-sizing:border-box;box-shadow:0 8px 15px rgba(63,41,38,.14);transform:rotate(6deg);background:#12356c url('https://flagcdn.com/w160/nz.png') center/cover no-repeat}
+.qt-note{position:absolute;left:470px;top:306px;width:255px;padding:19px 20px 21px;background:#f6dca8;box-shadow:0 10px 20px rgba(72,43,38,.1);transform:rotate(2deg);z-index:12;border-left:6px solid #7a3048}
+.qt-note:before{content:"";position:absolute;left:94px;top:-11px;width:72px;height:22px;background:rgba(185,95,60,.34);transform:rotate(-5deg)}
+.qt-note p{margin:0;font-family:var(--serif);font-size:1.04rem;line-height:1.3;color:#352a27}.qt-note small{display:block;margin-top:12px;font-size:.56rem;font-weight:900;letter-spacing:.12em;color:#7a3048;text-transform:uppercase}
+.qt-travel-tag{position:absolute;left:485px;top:252px;z-index:15;padding:9px 14px;background:#7a3048;color:#fff8eb;font-size:.62rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;transform:rotate(-1.5deg);box-shadow:0 7px 14px rgba(91,42,54,.17)}
+.qt-hand-note{position:absolute;left:493px;bottom:64px;z-index:17;font-family:var(--hand);font-size:1.3rem;color:#c45836;transform:rotate(-5deg)}
+.qt-postmark{position:absolute;left:374px;top:135px;width:72px;height:72px;z-index:17;border:2px solid rgba(122,48,72,.62);border-radius:50%;box-shadow:inset 0 0 0 6px rgba(122,48,72,.08);transform:rotate(-12deg);display:grid;place-items:center;color:#7a3048;font-size:.48rem;font-weight:900;letter-spacing:.12em;text-align:center;line-height:1.15;background:rgba(255,247,233,.38)}
+.qt-postmark:before,.qt-postmark:after{content:"";position:absolute;left:55px;width:62px;height:2px;background:rgba(122,48,72,.48)}
+.qt-postmark:before{top:27px;transform:rotate(7deg)}.qt-postmark:after{top:38px;transform:rotate(7deg)}
+.qt-south-tag{position:absolute;right:398px;bottom:28px;z-index:15;padding:7px 11px;background:#d8a246;color:#4d2a25;font-size:.55rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase;transform:rotate(3deg);box-shadow:0 5px 10px rgba(72,43,38,.1)}
 
 .journal-controls button:disabled{opacity:.34;cursor:not-allowed}
 
@@ -111,7 +113,7 @@
   .curated-journal .journal-book,.curated-journal .journal-book>.journal-sheet,.curated-journal .journal-sheet>.page-front,.curated-journal .journal-sheet>.page-back{height:860px!important;min-height:860px!important}
   .udaipur-title-cluster{left:24px;top:58px}.udaipur-title-cluster h2{font-size:4.25rem}.udaipur-kicker{left:24px;top:24px}.udaipur-arch-photo{left:38px;top:235px;width:55%;height:360px}.udaipur-lake-photo{right:23px;bottom:118px;width:57%;height:270px}.udaipur-stamp-slot{right:18px;top:45px;width:122px;height:145px}.udaipur-note-card{left:24px;bottom:70px;width:48%}.udaipur-margin-note{left:auto;right:24px;bottom:45px}.udaipur-color-note,.udaipur-route-doodle{display:none}
   .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:3.55rem}.nyc-look-note{left:34px;top:205px;font-size:1.05rem}.nyc-times-photo{left:28px;top:250px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:220px}.nyc-flag-sticker{left:auto;right:44px;top:348px;width:68px;height:43px}.nyc-liberty-photo{right:24px;top:450px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-cab-sticker{left:auto;right:20px;bottom:20px;width:154px;height:98px}.nyc-hand-note,.nyc-red-arrow{display:none}
-  .qt-kicker{left:24px;top:25px}.qt-title{left:24px;top:76px;width:300px}.qt-title h2{font-size:3.1rem}.qt-title .handwritten{margin-left:20px;font-size:1rem}.qt-stamp{right:18px;left:auto;top:48px;width:145px;height:78px}.qt-flag-sticker{left:auto;right:40px;top:138px;width:68px;height:43px}.qt-lake-photo{left:24px;top:215px;width:58%;height:380px}.qt-gondola-photo{right:22px;top:300px;width:46%;height:235px}.qt-central-photo{right:26px;bottom:86px;width:48%;height:225px}.qt-note{left:24px;top:auto;bottom:56px;width:45%;padding:14px}.qt-travel-tag{left:26px;top:610px}.qt-hand-note,.qt-cable-line,.qt-cable-dot{display:none}
+  .qt-kicker{left:24px;top:25px}.qt-title{left:24px;top:76px;width:330px}.qt-title h2{font-size:3.05rem}.qt-title .handwritten{margin-left:20px;font-size:1rem}.qt-title:before{width:280px;top:26px;height:24px}.qt-stamp{right:18px;left:auto;top:48px;width:145px;height:78px}.qt-flag-sticker{left:auto;right:40px;top:138px;width:68px;height:43px}.qt-lake-photo{left:24px;top:215px;width:58%;height:380px}.qt-gondola-photo{right:22px;top:300px;width:46%;height:235px}.qt-central-photo{right:26px;bottom:86px;width:48%;height:225px}.qt-note{left:24px;top:auto;bottom:56px;width:45%;padding:14px}.qt-travel-tag{left:26px;top:610px}.qt-hand-note,.qt-postmark,.qt-south-tag{display:none}
 }
 </style>
 
@@ -236,6 +238,7 @@
             <img src="{{ url_for('static', filename='uploads/journal-queenstown-stamp.png') }}" alt="Vintage New Zealand Lake Wakatipu stamp" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'">
           </div>
           <div class="qt-flag-sticker" aria-label="Small New Zealand flag sticker"></div>
+          <div class="qt-postmark" aria-hidden="true">SOUTH<br>ISLAND</div>
 
           <figure class="qt-photo qt-lake-photo qt-photo-slot">
             <span class="qt-placeholder">LAKE WAKATIPU<br>journal-queenstown-lake.jpg</span>
@@ -262,8 +265,7 @@
           </aside>
 
           <span class="qt-hand-note">the view keeps interrupting everything.</span>
-          <svg class="qt-cable-line" viewBox="0 0 280 100" aria-hidden="true"><path d="M4 16 C90 25,178 42,276 83"/></svg>
-          <span class="qt-cable-dot" aria-hidden="true"></span>
+          <span class="qt-south-tag">SOUTH ISLAND · NZ</span>
         </div>
         <div class="page-back" aria-hidden="true"></div>
       </article>
