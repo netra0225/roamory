@@ -62,6 +62,8 @@
 .nyc-stamp .nyc-photo-placeholder{inset:0;background:#fff7f7;border-color:#d83c48}
 .nyc-subway-strip{position:absolute;left:560px;top:212px;z-index:10;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 9px;background:#1769b0;color:#fff;box-shadow:0 7px 14px rgba(23,105,176,.18);transform:rotate(1.5deg)}
 .nyc-subway-strip b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;color:#1769b0;font-size:.78rem}.nyc-subway-strip span{font-size:.67rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.nyc-flag-sticker{position:absolute;left:818px;top:225px;width:88px;height:56px;z-index:19;border:5px solid #fff;box-shadow:0 8px 15px rgba(39,48,64,.14);transform:rotate(7deg);background:repeating-linear-gradient(to bottom,#d9484f 0 7.7%,#fff 7.7% 15.4%)}
+.nyc-flag-sticker:before{content:"";position:absolute;left:0;top:0;width:43%;height:54%;background-color:#254f91;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.2px);background-size:8px 7px;background-position:2px 2px}
 .nyc-note{position:absolute;left:548px;top:326px;width:255px;padding:19px 20px 21px;background:#ffdede;box-shadow:0 10px 20px rgba(54,49,53,.09);transform:rotate(-3deg);z-index:10}
 .nyc-note:before{content:"";position:absolute;left:91px;top:-10px;width:72px;height:22px;background:rgba(255,213,86,.76);transform:rotate(7deg)}
 .nyc-note p{margin:0;font-family:var(--serif);font-size:1.07rem;line-height:1.28}.nyc-note small{display:block;margin-top:12px;font-size:.57rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
@@ -79,7 +81,7 @@
 @media(max-width:760px){
   .curated-journal .journal-book,.curated-journal .curated-udaipur-sheet,.curated-journal .curated-udaipur-sheet .page-front,.curated-journal .curated-nyc-sheet,.curated-journal .curated-nyc-sheet .page-front{height:860px!important;min-height:860px!important}
   .udaipur-title-cluster{left:24px;top:58px}.udaipur-title-cluster h2{font-size:4.25rem}.udaipur-kicker{left:24px;top:24px}.udaipur-arch-photo{left:38px;top:235px;width:55%;height:360px}.udaipur-lake-photo{right:23px;bottom:118px;width:57%;height:270px}.udaipur-stamp-slot{right:18px;top:45px;width:122px;height:145px}.udaipur-note-card{left:24px;bottom:70px;width:48%}.udaipur-margin-note{left:auto;right:24px;bottom:45px}.udaipur-color-note,.udaipur-route-doodle{display:none}
-  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:4.2rem}.nyc-title .nyc-city{margin-left:80px}.nyc-times-photo{left:28px;top:230px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:215px}.nyc-liberty-photo{right:24px;top:440px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-yellow-cab{left:auto;right:20px;bottom:20px;transform:scale(.78) rotate(4deg);transform-origin:right bottom}.nyc-hand-note,.nyc-red-arrow{display:none}
+  .nyc-kicker{left:25px;top:30px}.nyc-title{left:28px;top:86px;width:300px}.nyc-title h2{font-size:4.2rem}.nyc-title .nyc-city{margin-left:80px}.nyc-times-photo{left:28px;top:230px;width:64%;height:390px}.nyc-stamp{right:18px;top:70px;width:122px;height:122px}.nyc-subway-strip{left:auto;right:18px;top:215px}.nyc-flag-sticker{left:auto;right:44px;top:348px;width:68px;height:43px}.nyc-liberty-photo{right:24px;top:440px;width:45%;height:290px}.nyc-note{left:22px;top:auto;bottom:78px;width:45%;padding:14px}.nyc-yellow-cab{left:auto;right:20px;bottom:20px;transform:scale(.78) rotate(4deg);transform-origin:right bottom}.nyc-hand-note,.nyc-red-arrow{display:none}
 }
 </style>
 
@@ -157,6 +159,7 @@
           </figure>
 
           <div class="nyc-subway-strip"><b>42</b><span>Times Sq · Manhattan</span></div>
+          <div class="nyc-flag-sticker" aria-label="Small American flag sticker"></div>
 
           <figure class="nyc-liberty-photo nyc-photo-slot">
             <span class="nyc-photo-placeholder">STATUE OF LIBERTY<br>journal-nyc-liberty.jpg</span>
