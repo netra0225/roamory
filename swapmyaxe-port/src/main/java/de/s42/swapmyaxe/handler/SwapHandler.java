@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -135,9 +135,9 @@ public class SwapHandler {
             return Math.max(0, Math.min(8, cfg.targetSlot));
         }
 
-        ResourceLocation targetId;
+        Identifier targetId;
         try {
-            targetId = ResourceLocation.parse(cfg.targetItem);
+            targetId = Identifier.parse(cfg.targetItem);
         } catch (RuntimeException e) {
             SwapMyAxe.LOGGER.warn("Invalid target item id: {}", cfg.targetItem);
             return -1;
@@ -147,7 +147,7 @@ public class SwapHandler {
             if (i == currentSlot) continue;
             ItemStack stack = inv.getItem(i);
             if (stack.isEmpty()) continue;
-            ResourceLocation stackId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            Identifier stackId = BuiltInRegistries.ITEM.getKey(stack.getItem());
             if (targetId.equals(stackId)) return i;
         }
         return -1;
