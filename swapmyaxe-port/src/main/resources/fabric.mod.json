@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "swapmyaxe",
+  "version": "${version}",
+  "name": "SwapMyAxe",
+  "description": "Automatically swaps from an axe to a configured hotbar slot or item after an axe hit.",
+  "authors": ["S42yt"],
+  "contact": {
+    "sources": "https://github.com/S42yt/SwapMyAxe"
+  },
+  "license": "GPL-3.0-only",
+  "icon": "assets/swapmyaxe/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": ["de.s42.swapmyaxe.SwapMyAxe"],
+    "modmenu": ["de.s42.swapmyaxe.config.ModMenuIntegration"]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": ">=${fabric_version}",
+    "minecraft": "${minecraft_version}",
+    "java": ">=21"
+  },
+  "suggests": {
+    "modmenu": ">=${modmenu_version}",
+    "cloth-config": ">=${cloth_config_version}"
+  }
+}
