@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class SwapMyAxe implements ModInitializer {
                 "key.sma.toggle",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_V,
-                KeyMapping.Category.register(ResourceLocation.parse("category.sma"))
+                KeyMapping.Category.register(Identifier.parse("category.sma"))
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(this::handleKey);
