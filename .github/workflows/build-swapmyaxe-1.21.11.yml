@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - build/swapmyaxe-1.21.11
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
