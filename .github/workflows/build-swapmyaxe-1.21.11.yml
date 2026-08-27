@@ -1,0 +1,45 @@
+name: Build SwapMyAxe 1.21.11
+
+on:
+  push:
+    branches:
+      - build/swapmyaxe-1.21.11
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle 9.2.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.1'
+
+      - name: Restore upstream license and icon
+        shell: bash
+        run: |
+          curl -fL https://raw.githubusercontent.com/S42yt/SwapMyAxe/master/LICENSE.txt -o swapmyaxe-port/LICENSE.txt
+          mkdir -p swapmyaxe-port/src/main/resources/assets/swapmyaxe
+          curl -fL https://raw.githubusercontent.com/S42yt/SwapMyAxe/master/src/main/resources/assets/swapmyaxe/icon.png -o swapmyaxe-port/src/main/resources/assets/swapmyaxe/icon.png
+
+      - name: Build Fabric mod
+        run: gradle -p swapmyaxe-port clean build --stacktrace
+
+      - name: Upload installable JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: SwapMyAxe-1.21.11-Fabric
+          path: |
+            swapmyaxe-port/build/libs/*.jar
+            !swapmyaxe-port/build/libs/*-sources.jar
+          if-no-files-found: error
