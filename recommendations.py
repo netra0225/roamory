@@ -10,39 +10,31 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
-GOOGLE_TEXT_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
-GOOGLE_NEARBY_SEARCH_URL = "https://places.googleapis.com/v1/places:searchNearby"
+GEOAPIFY_GEOCODE_URL = "https://api.geoapify.com/v1/geocode/search"
+GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places"
+FOURSQUARE_SEARCH_URL = "https://places-api.foursquare.com/places/search"
 OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 
 DEFAULT_RADIUS_METERS = 15000
 MAX_RADIUS_METERS = 50000
 
-ATTRACTION_TYPES = (
-    "tourist_attraction",
-    "museum",
-    "historical_landmark",
-    "park",
-    "national_park",
-    "art_gallery",
-    "zoo",
-    "aquarium",
-    "amusement_park",
-    "hiking_area",
-    "observation_deck",
+GEOAPIFY_ATTRACTION_CATEGORIES = (
+    "tourism.attraction",
+    "tourism.sights",
+    "entertainment.museum",
+    "leisure.park",
+)
+GEOAPIFY_FOOD_CATEGORIES = (
+    "catering.restaurant",
+    "catering.cafe",
+    "catering.fast_food",
 )
 
-FOOD_TYPES = (
-    "restaurant",
-    "cafe",
-    "bakery",
-)
-
-PRICE_LEVELS = {
-    "free": "PRICE_LEVEL_FREE",
-    "budget": "PRICE_LEVEL_INEXPENSIVE",
-    "moderate": "PRICE_LEVEL_MODERATE",
-    "premium": "PRICE_LEVEL_EXPENSIVE",
-    "luxury": "PRICE_LEVEL_VERY_EXPENSIVE",
+FOURSQUARE_PRICE_LEVELS = {
+    "budget": 1,
+    "moderate": 2,
+    "premium": 3,
+    "luxury": 4,
 }
 
 RAINY_WEATHER_CODES = {
@@ -58,14 +50,23 @@ class RecommendationError(RuntimeError):
     """Raised when an external recommendation source cannot return usable data."""
 
 
-def google_places_configured() -> bool:
-    return bool(_google_api_key())
+def provider_status() -> dict[str, bool]:
+    """Expose configuration state without leaking any API keys."""
+    return {
+        "geoapify": bool(_geoapify_api_key()),
+        "foursquare": bool(_foursquare_api_key()),
+        "weather": True,
+    }
 
 
-def _google_api_key() -> str:
+def _geoapify_api_key() -> str:
+    return os.getenv("GEOAPIFY_API_KEY", "").strip()
+
+
+def _foursquare_api_key() -> str:
     return (
-        os.getenv("GOOGLE_PLACES_API_KEY", "").strip()
-        or os.getenv("GOOGLE_MAPS_API_KEY", "").strip()
+        os.getenv("FOURSQUARE_API_KEY", "").strip()
+        or os.getenv("FSQ_API_KEY", "").strip()
     )
 
 
@@ -77,7 +78,10 @@ def _json_request(
     headers: dict[str, str] | None = None,
     timeout: int = 8,
 ) -> dict[str, Any]:
-    request_headers = {"Accept": "application/json"}
+    request_headers = {
+        "Accept": "application/json",
+        "User-Agent": "Roamory/1.0 travel-planner",
+    }
     if headers:
         request_headers.update(headers)
 
@@ -97,50 +101,67 @@ def _json_request(
         except Exception:
             pass
         raise RecommendationError(
-            f"External place/weather service returned HTTP {exc.code}."
+            f"External recommendation service returned HTTP {exc.code}."
             + (f" {detail[:240]}" if detail else "")
         ) from exc
     except (URLError, TimeoutError, json.JSONDecodeError) as exc:
-        raise RecommendationError("External place/weather service is temporarily unavailable.") from exc
+        raise RecommendationError(
+            "External recommendation service is temporarily unavailable."
+        ) from exc
 
 
 def resolve_destination(destination: str) -> dict[str, Any]:
-    """Resolve a user-entered destination to a concrete Google place and coordinates."""
+    """Resolve a destination into exact coordinates using Geoapify's free geocoder."""
     query = (destination or "").strip()
     if not query:
         raise RecommendationError("Destination is required.")
 
-    api_key = _google_api_key()
+    api_key = _geoapify_api_key()
     if not api_key:
-        raise RecommendationError("Google Places is not configured.")
-
-    payload = {
-        "textQuery": query,
-        "maxResultCount": 5,
-    }
-    headers = {
-        "X-Goog-Api-Key": api_key,
-        "X-Goog-FieldMask": (
-            "places.id,places.displayName,places.formattedAddress,"
-            "places.location,places.types,places.primaryType"
-        ),
-    }
-    response = _json_request(
-        GOOGLE_TEXT_SEARCH_URL,
-        method="POST",
-        payload=payload,
-        headers=headers,
-    )
-    places = response.get("places") or []
-    if not places:
         raise RecommendationError(
-            "We could not identify that destination. Check the location name and try again."
+            "Destination lookup is not configured yet. Add GEOAPIFY_API_KEY."
         )
 
-    candidates = [_normalise_place(place) for place in places if place.get("location")]
+    params = urlencode(
+        {
+            "text": query,
+            "format": "json",
+            "limit": 5,
+            "apiKey": api_key,
+        }
+    )
+    response = _json_request(f"{GEOAPIFY_GEOCODE_URL}?{params}")
+    raw_results = response.get("results") or []
+
+    candidates: list[dict[str, Any]] = []
+    for raw in raw_results:
+        lat = raw.get("lat")
+        lon = raw.get("lon")
+        if lat is None or lon is None:
+            continue
+        candidates.append(
+            {
+                "place_id": raw.get("place_id"),
+                "name": (
+                    raw.get("city")
+                    or raw.get("town")
+                    or raw.get("village")
+                    or raw.get("name")
+                    or query
+                ),
+                "address": raw.get("formatted") or raw.get("address_line2") or query,
+                "latitude": float(lat),
+                "longitude": float(lon),
+                "country": raw.get("country"),
+                "state": raw.get("state"),
+                "result_type": raw.get("result_type"),
+                "provider": "geoapify",
+            }
+        )
+
     if not candidates:
         raise RecommendationError(
-            "We found the destination name but could not verify its location."
+            "We could not identify that destination. Check the location name and try again."
         )
 
     return {
@@ -160,81 +181,205 @@ def search_nearby_places(
     price_levels: list[str] | tuple[str, ...] | None = None,
     max_results: int = 20,
 ) -> list[dict[str, Any]]:
-    """Fetch real nearby places and apply strict local rating/price/distance filtering."""
-    api_key = _google_api_key()
-    if not api_key:
-        raise RecommendationError("Google Places is not configured.")
+    """
+    Search real nearby places.
 
+    Foursquare is preferred because its free Pro tier includes rating and price
+    metadata. Geoapify is the zero-cost fallback when Foursquare is unavailable;
+    fallback results intentionally leave rating/price blank rather than inventing
+    values.
+    """
     radius = max(500, min(int(radius_meters), MAX_RADIUS_METERS))
-    result_count = max(1, min(int(max_results), 20))
-    included_types = FOOD_TYPES if categories == "food" else ATTRACTION_TYPES
+    result_count = max(1, min(int(max_results), 30))
 
-    payload = {
-        "includedTypes": list(included_types),
-        "maxResultCount": result_count,
-        "rankPreference": "POPULARITY",
-        "locationRestriction": {
-            "circle": {
-                "center": {
-                    "latitude": float(latitude),
-                    "longitude": float(longitude),
-                },
-                "radius": float(radius),
-            }
-        },
+    if _foursquare_api_key():
+        try:
+            return _search_foursquare(
+                float(latitude),
+                float(longitude),
+                categories=categories,
+                radius_meters=radius,
+                min_rating=min_rating,
+                price_levels=price_levels,
+                max_results=result_count,
+            )
+        except RecommendationError:
+            if not _geoapify_api_key():
+                raise
+
+    if _geoapify_api_key():
+        return _search_geoapify_places(
+            float(latitude),
+            float(longitude),
+            categories=categories,
+            radius_meters=radius,
+            max_results=result_count,
+        )
+
+    raise RecommendationError(
+        "Place recommendations are not configured yet. "
+        "Add FOURSQUARE_API_KEY and GEOAPIFY_API_KEY."
+    )
+
+
+def _search_foursquare(
+    latitude: float,
+    longitude: float,
+    *,
+    categories: str,
+    radius_meters: int,
+    min_rating: float,
+    price_levels: list[str] | tuple[str, ...] | None,
+    max_results: int,
+) -> list[dict[str, Any]]:
+    api_key = _foursquare_api_key()
+    query_text = "restaurant" if categories == "food" else "tourist attraction"
+
+    params: dict[str, Any] = {
+        "query": query_text,
+        "ll": f"{latitude:.7f},{longitude:.7f}",
+        "radius": radius_meters,
+        "limit": min(max_results, 30),
+        "sort": "RATING",
     }
+
+    price_numbers = _normalise_foursquare_prices(price_levels)
+    if categories == "food" and price_numbers:
+        params["min_price"] = min(price_numbers)
+        params["max_price"] = max(price_numbers)
+
     headers = {
-        "X-Goog-Api-Key": api_key,
-        "X-Goog-FieldMask": (
-            "places.id,places.displayName,places.formattedAddress,places.location,"
-            "places.primaryType,places.types,places.rating,places.userRatingCount,"
-            "places.priceLevel,places.googleMapsUri,places.businessStatus"
-        ),
+        "Authorization": f"Bearer {api_key}",
+        "X-Places-Api-Version": "2025-06-17",
     }
     response = _json_request(
-        GOOGLE_NEARBY_SEARCH_URL,
-        method="POST",
-        payload=payload,
+        f"{FOURSQUARE_SEARCH_URL}?{urlencode(params)}",
         headers=headers,
     )
 
-    allowed_prices = _normalise_price_levels(price_levels)
     results: list[dict[str, Any]] = []
-    for raw in response.get("places") or []:
-        if raw.get("businessStatus") not in (None, "OPERATIONAL"):
+    for raw in response.get("results") or []:
+        lat = raw.get("latitude")
+        lon = raw.get("longitude")
+        if lat is None or lon is None:
             continue
 
-        place = _normalise_place(raw)
-        place["distance_km"] = round(
-            haversine_km(
-                float(latitude),
-                float(longitude),
-                place["latitude"],
-                place["longitude"],
-            ),
-            2,
+        distance_km = round(
+            haversine_km(latitude, longitude, float(lat), float(lon)), 2
         )
-
-        if place["distance_km"] * 1000 > radius:
+        if distance_km * 1000 > radius_meters:
             continue
 
-        rating = float(place.get("rating") or 0)
-        if rating < float(min_rating or 0):
+        rating_10 = raw.get("rating")
+        rating_5 = round(float(rating_10) / 2, 1) if rating_10 is not None else None
+        if min_rating and (rating_5 is None or rating_5 < float(min_rating)):
             continue
 
-        if allowed_prices and categories == "food":
-            if place.get("price_level") not in allowed_prices:
-                continue
+        price = raw.get("price")
+        if (
+            categories == "food"
+            and price_numbers
+            and price is not None
+            and int(price) not in price_numbers
+        ):
+            continue
 
-        results.append(place)
+        location = raw.get("location") or {}
+        category_rows = raw.get("categories") or []
+        category_names = [
+            item.get("name")
+            for item in category_rows
+            if isinstance(item, dict) and item.get("name")
+        ]
+
+        results.append(
+            {
+                "place_id": raw.get("fsq_place_id"),
+                "name": raw.get("name") or "Unnamed place",
+                "address": location.get("formatted_address") or "",
+                "latitude": float(lat),
+                "longitude": float(lon),
+                "categories": category_names,
+                "rating": rating_5,
+                "rating_source_scale": "5",
+                "price_level": int(price) if price is not None else None,
+                "price_label": _price_label(price),
+                "distance_km": distance_km,
+                "website": raw.get("website"),
+                "provider": "foursquare",
+            }
+        )
 
     results.sort(
         key=lambda item: (
-            -(float(item.get("rating") or 0)),
-            -(int(item.get("user_rating_count") or 0)),
+            -(float(item["rating"]) if item.get("rating") is not None else -1),
             float(item.get("distance_km") or 9999),
         )
     )
+    return results
+
+
+def _search_geoapify_places(
+    latitude: float,
+    longitude: float,
+    *,
+    categories: str,
+    radius_meters: int,
+    max_results: int,
+) -> list[dict[str, Any]]:
+    api_key = _geoapify_api_key()
+    category_values = (
+        GEOAPIFY_FOOD_CATEGORIES
+        if categories == "food"
+        else GEOAPIFY_ATTRACTION_CATEGORIES
+    )
+    params = urlencode(
+        {
+            "categories": ",".join(category_values),
+            "filter": f"circle:{longitude},{latitude},{radius_meters}",
+            "bias": f"proximity:{longitude},{latitude}",
+            "limit": min(max_results, 20),
+            "apiKey": api_key,
+        }
+    )
+    response = _json_request(f"{GEOAPIFY_PLACES_URL}?{params}")
+
+    results: list[dict[str, Any]] = []
+    for feature in response.get("features") or []:
+        properties = feature.get("properties") or {}
+        lat = properties.get("lat")
+        lon = properties.get("lon")
+        if lat is None or lon is None:
+            continue
+
+        distance_km = round(
+            haversine_km(latitude, longitude, float(lat), float(lon)), 2
+        )
+        if distance_km * 1000 > radius_meters:
+            continue
+
+        results.append(
+            {
+                "place_id": properties.get("place_id"),
+                "name": properties.get("name") or "Unnamed place",
+                "address": properties.get("formatted") or "",
+                "latitude": float(lat),
+                "longitude": float(lon),
+                "categories": properties.get("categories") or [],
+                "rating": None,
+                "rating_source_scale": None,
+                "price_level": None,
+                "price_label": None,
+                "distance_km": distance_km,
+                "website": (
+                    properties.get("website")
+                    or ((properties.get("datasource") or {}).get("raw") or {}).get("website")
+                ),
+                "provider": "geoapify",
+            }
+        )
+
+    results.sort(key=lambda item: float(item.get("distance_km") or 9999))
     return results
 
 
@@ -244,7 +389,7 @@ def weather_forecast(
     start_date: str,
     end_date: str,
 ) -> dict[str, Any]:
-    """Return real forecast data only when the trip overlaps Open-Meteo's forecast horizon."""
+    """Return live forecast only when the trip falls inside the useful forecast window."""
     try:
         start = datetime.strptime(start_date, "%Y-%m-%d").date()
         end = datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -252,14 +397,17 @@ def weather_forecast(
         raise RecommendationError("Trip dates are invalid.") from exc
 
     today = date.today()
-    last_forecast_day = today + timedelta(days=15)
+    last_forecast_day = today + timedelta(days=14)
 
     if end < today or start > last_forecast_day:
         return {
             "available": False,
             "partial": False,
             "days": [],
-            "reason": "Forecast is only used when the trip is close enough for reliable live weather data.",
+            "reason": (
+                "Live weather is only used when the trip is close enough "
+                "for a reliable forecast."
+            ),
         }
 
     forecast_start = max(start, today)
@@ -284,9 +432,6 @@ def weather_forecast(
     days = []
     for index, day_value in enumerate(dates):
         code = _list_value(daily.get("weather_code"), index)
-        precipitation_probability = _list_value(
-            daily.get("precipitation_probability_max"), index
-        )
         days.append(
             {
                 "date": day_value,
@@ -299,7 +444,9 @@ def weather_forecast(
                 "temperature_min_c": _list_value(
                     daily.get("temperature_2m_min"), index
                 ),
-                "precipitation_probability": precipitation_probability,
+                "precipitation_probability": _list_value(
+                    daily.get("precipitation_probability_max"), index
+                ),
                 "precipitation_mm": _list_value(
                     daily.get("precipitation_sum"), index
                 ),
@@ -348,38 +495,36 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * radius_km * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def _normalise_price_levels(
+def _normalise_foursquare_prices(
     values: list[str] | tuple[str, ...] | None,
-) -> set[str]:
+) -> set[int]:
     if not values:
         return set()
-
-    normalised = set()
+    result: set[int] = set()
     for value in values:
-        token = str(value).strip()
+        token = str(value).strip().lower()
         if not token:
             continue
-        mapped = PRICE_LEVELS.get(token.lower(), token.upper())
-        normalised.add(mapped)
-    return normalised
+        if token.isdigit() and 1 <= int(token) <= 4:
+            result.add(int(token))
+        elif token in FOURSQUARE_PRICE_LEVELS:
+            result.add(FOURSQUARE_PRICE_LEVELS[token])
+    return result
 
 
-def _normalise_place(place: dict[str, Any]) -> dict[str, Any]:
-    location = place.get("location") or {}
-    display_name = place.get("displayName") or {}
+def _price_label(value: Any) -> str | None:
+    if value is None:
+        return None
+    try:
+        price = int(value)
+    except (TypeError, ValueError):
+        return None
     return {
-        "place_id": place.get("id"),
-        "name": display_name.get("text") or place.get("name") or "Unnamed place",
-        "address": place.get("formattedAddress") or "",
-        "latitude": float(location.get("latitude")),
-        "longitude": float(location.get("longitude")),
-        "primary_type": place.get("primaryType"),
-        "types": place.get("types") or [],
-        "rating": place.get("rating"),
-        "user_rating_count": place.get("userRatingCount"),
-        "price_level": place.get("priceLevel"),
-        "maps_url": place.get("googleMapsUri"),
-    }
+        1: "₹",
+        2: "₹₹",
+        3: "₹₹₹",
+        4: "₹₹₹₹",
+    }.get(price)
 
 
 def _list_value(values: Any, index: int) -> Any:
