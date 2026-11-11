@@ -15,6 +15,8 @@ from werkzeug.utils import secure_filename
 
 from db import get_db, init_app as init_db_app
 from starter_data import seed_starter_content
+from recommendations import RecommendationError
+from trip_builder import build_trip_plan
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / 'static' / 'uploads'
@@ -498,6 +500,82 @@ def itinerary(trip_id):
            WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''', (trip_id,)
     ).fetchall()
     return render_template('itinerary.html', trip=trip, days=days, activities=activities, selected_day=selected_day)
+
+
+@app.post('/trips/<int:trip_id>/build')
+@login_required
+def build_trip(trip_id):
+    trip = get_trip_or_404(trip_id)
+    db = get_db()
+
+    existing = db.execute(
+        'SELECT COUNT(*) c FROM activities WHERE trip_id=?', (trip_id,)
+    ).fetchone()['c']
+    if existing:
+        flash('Build My Trip only fills an empty itinerary, so your existing plans stay untouched.', 'info')
+        return redirect(url_for('itinerary', trip_id=trip_id))
+
+    interest = request.form.get('interest', 'mixed').strip().lower()
+    if interest not in {'mixed', 'nature', 'culture', 'food'}:
+        interest = 'mixed'
+
+    food_budget = request.form.get('food_budget', 'any').strip().lower()
+    if food_budget not in {'any', 'budget', 'moderate', 'premium'}:
+        food_budget = 'any'
+
+    try:
+        min_rating = float(request.form.get('min_rating', '0') or 0)
+    except ValueError:
+        min_rating = 0
+    min_rating = min(max(min_rating, 0), 5)
+
+    try:
+        plan = build_trip_plan(
+            trip,
+            interest=interest,
+            food_budget=food_budget,
+            min_rating=min_rating,
+        )
+    except RecommendationError as exc:
+        flash(str(exc), 'error')
+        return redirect(url_for('itinerary', trip_id=trip_id))
+
+    day_rows = {row['day_number']: row for row in trip_days(trip_id)}
+    inserted = 0
+    for planned_day in plan['days']:
+        day = day_rows.get(planned_day['day_number'])
+        if day is None:
+            continue
+        for item in planned_day['items']:
+            db.execute(
+                '''INSERT INTO activities
+                (trip_id, day_id, name, type, activity_date, start_time, end_time, location,
+                 estimated_cost, actual_cost, notes, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (
+                    trip_id,
+                    day['id'],
+                    item['name'],
+                    item['type'],
+                    day['date'],
+                    item['start_time'],
+                    None,
+                    item['location'],
+                    item['estimated_cost'],
+                    0,
+                    item['notes'],
+                    'planned',
+                )
+            )
+            inserted += 1
+
+    if not inserted:
+        flash('We found the destination, but not enough verified places to build this trip.', 'error')
+        return redirect(url_for('itinerary', trip_id=trip_id))
+
+    db.commit()
+    flash(f'Roamory built a simple {len(plan["days"])}-day itinerary with {inserted} suggested stops.', 'success')
+    return redirect(url_for('itinerary', trip_id=trip_id))
 
 
 @app.route('/trips/<int:trip_id>/activities/new', methods=('GET', 'POST'))
