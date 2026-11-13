@@ -95,7 +95,6 @@ try:
                 f'/trips/{trip_id}/build',
                 data={
                     'csrf_token': build_token,
-                    'interest': 'mixed',
                 },
                 follow_redirects=True,
             )
