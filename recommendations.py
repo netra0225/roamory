@@ -242,53 +242,22 @@ def search_nearby_places(
     radius_meters: int = DEFAULT_RADIUS_METERS,
     max_results: int = 20,
 ) -> list[dict[str, Any]]:
-    """Search nearby places with a keyless source first and paid-key providers only as fallback."""
+    """Search verified nearby places without any API-key dependency."""
     radius = max(500, min(int(radius_meters), MAX_RADIUS_METERS))
     result_count = max(1, min(int(max_results), 30))
 
-    try:
-        results = _search_overpass_places(
-            float(latitude),
-            float(longitude),
-            categories=categories,
-            radius_meters=radius,
-            max_results=result_count,
-        )
-        if results:
-            return results
-    except RecommendationError:
-        pass
-
-    if _geoapify_api_key():
-        try:
-            results = _search_geoapify_places(
-                float(latitude),
-                float(longitude),
-                categories=categories,
-                radius_meters=radius,
-                max_results=result_count,
-            )
-            if results:
-                return results
-        except RecommendationError:
-            pass
-
-    if _foursquare_api_key():
-        try:
-            results = _search_foursquare(
-                float(latitude),
-                float(longitude),
-                categories=categories,
-                radius_meters=radius,
-                max_results=result_count,
-            )
-            if results:
-                return results
-        except RecommendationError:
-            pass
+    results = _search_overpass_places(
+        float(latitude),
+        float(longitude),
+        categories=categories,
+        radius_meters=radius,
+        max_results=result_count,
+    )
+    if results:
+        return results
 
     raise RecommendationError(
-        "Roamory could not load nearby places right now. Please try again."
+        "Roamory could not find enough mapped places around this destination."
     )
 
 
@@ -317,7 +286,7 @@ def _search_overpass_places(
         (
           {selectors}
         );
-        out center 120;
+        out center;
     """
 
     response = None
