@@ -14,7 +14,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 from db import get_db, init_app as init_db_app
-from starter_data import seed_starter_content
+from starter_data import seed_starter_content, sync_curated_history
 from recommendations import RecommendationError
 from trip_builder import build_trip_plan
 
@@ -247,6 +247,8 @@ def logout():
 @login_required
 def dashboard():
     db = get_db()
+    sync_curated_history(db, g.user['id'])
+    db.commit()
     trips = db.execute(
         'SELECT * FROM trips WHERE user_id = ? ORDER BY start_date', (g.user['id'],)
     ).fetchall()
@@ -312,7 +314,10 @@ def dashboard():
 @app.route('/trips')
 @login_required
 def trips():
-    rows = get_db().execute(
+    db = get_db()
+    sync_curated_history(db, g.user['id'])
+    db.commit()
+    rows = db.execute(
         'SELECT * FROM trips WHERE user_id = ? ORDER BY start_date DESC', (g.user['id'],)
     ).fetchall()
     grouped = {'ongoing': [], 'upcoming': [], 'completed': []}
