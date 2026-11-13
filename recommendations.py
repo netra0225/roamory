@@ -95,15 +95,13 @@ def _json_request(
         with urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except HTTPError as exc:
-        detail = ""
-        try:
-            detail = exc.read().decode("utf-8")
-        except Exception:
-            pass
-        raise RecommendationError(
-            f"External recommendation service returned HTTP {exc.code}."
-            + (f" {detail[:240]}" if detail else "")
-        ) from exc
+        if exc.code == 401:
+            message = "Recommendation service authorization failed."
+        elif exc.code == 429:
+            message = "Recommendation service is temporarily at its free request limit."
+        else:
+            message = "External recommendation service is temporarily unavailable."
+        raise RecommendationError(message) from exc
     except (URLError, TimeoutError, json.JSONDecodeError) as exc:
         raise RecommendationError(
             "External recommendation service is temporarily unavailable."
@@ -127,10 +125,12 @@ def resolve_destination(destination: str) -> dict[str, Any]:
             "text": query,
             "format": "json",
             "limit": 5,
-            "apiKey": api_key,
         }
     )
-    response = _json_request(f"{GEOAPIFY_GEOCODE_URL}?{params}")
+    response = _json_request(
+        f"{GEOAPIFY_GEOCODE_URL}?{params}",
+        headers={"x-api-key": api_key},
+    )
     raw_results = response.get("results") or []
 
     candidates: list[dict[str, Any]] = []
@@ -177,49 +177,53 @@ def search_nearby_places(
     *,
     categories: str = "attractions",
     radius_meters: int = DEFAULT_RADIUS_METERS,
-    min_rating: float = 0.0,
-    price_levels: list[str] | tuple[str, ...] | None = None,
     max_results: int = 20,
 ) -> list[dict[str, Any]]:
-    """
-    Search real nearby places.
-
-    Foursquare is preferred because its free Pro tier includes rating and price
-    metadata. Geoapify is the zero-cost fallback when Foursquare is unavailable;
-    fallback results intentionally leave rating/price blank rather than inventing
-    values.
-    """
+    """Search verified nearby places without making one provider a single point of failure."""
     radius = max(500, min(int(radius_meters), MAX_RADIUS_METERS))
     result_count = max(1, min(int(max_results), 30))
+    configured = bool(_geoapify_api_key() or _foursquare_api_key())
+    provider_failed = False
 
-    if _foursquare_api_key():
+    # Geoapify is the primary source for the free Roamory build.
+    if _geoapify_api_key():
         try:
-            return _search_foursquare(
+            results = _search_geoapify_places(
                 float(latitude),
                 float(longitude),
                 categories=categories,
                 radius_meters=radius,
-                min_rating=min_rating,
-                price_levels=price_levels,
                 max_results=result_count,
             )
+            if results:
+                return results
         except RecommendationError:
-            if not _geoapify_api_key():
-                raise
+            provider_failed = True
 
-    if _geoapify_api_key():
-        return _search_geoapify_places(
-            float(latitude),
-            float(longitude),
-            categories=categories,
-            radius_meters=radius,
-            max_results=result_count,
+    # Foursquare remains a fallback if Geoapify is unavailable or returns no usable places.
+    if _foursquare_api_key():
+        try:
+            results = _search_foursquare(
+                float(latitude),
+                float(longitude),
+                categories=categories,
+                radius_meters=radius,
+                max_results=result_count,
+            )
+            if results:
+                return results
+        except RecommendationError:
+            provider_failed = True
+
+    if not configured:
+        raise RecommendationError("Place recommendations are not configured yet.")
+
+    if provider_failed:
+        raise RecommendationError(
+            "Roamory could not load nearby places right now. Please try again."
         )
 
-    raise RecommendationError(
-        "Place recommendations are not configured yet. "
-        "Add FOURSQUARE_API_KEY and GEOAPIFY_API_KEY."
-    )
+    return []
 
 
 def _search_foursquare(
@@ -228,8 +232,6 @@ def _search_foursquare(
     *,
     categories: str,
     radius_meters: int,
-    min_rating: float,
-    price_levels: list[str] | tuple[str, ...] | None,
     max_results: int,
 ) -> list[dict[str, Any]]:
     api_key = _foursquare_api_key()
@@ -242,11 +244,6 @@ def _search_foursquare(
         "limit": min(max_results, 30),
         "sort": "DISTANCE",
     }
-
-    price_numbers = _normalise_foursquare_prices(price_levels)
-    if categories == "food" and price_numbers:
-        params["min_price"] = min(price_numbers)
-        params["max_price"] = max(price_numbers)
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -270,19 +267,8 @@ def _search_foursquare(
         if distance_km * 1000 > radius_meters:
             continue
 
-        rating_10 = raw.get("rating")
-        rating_5 = round(float(rating_10) / 2, 1) if rating_10 is not None else None
-        if min_rating and (rating_5 is None or rating_5 < float(min_rating)):
-            continue
-
-        price = raw.get("price")
-        if (
-            categories == "food"
-            and price_numbers
-            and price is not None
-            and int(price) not in price_numbers
-        ):
-            continue
+        rating_5 = None
+        price = None
 
         location = raw.get("location") or {}
         address = ", ".join(
@@ -321,12 +307,7 @@ def _search_foursquare(
             }
         )
 
-    results.sort(
-        key=lambda item: (
-            -(float(item["rating"]) if item.get("rating") is not None else -1),
-            float(item.get("distance_km") or 9999),
-        )
-    )
+    results.sort(key=lambda item: float(item.get("distance_km") or 9999))
     return results
 
 
@@ -350,10 +331,12 @@ def _search_geoapify_places(
             "filter": f"circle:{longitude},{latitude},{radius_meters}",
             "bias": f"proximity:{longitude},{latitude}",
             "limit": min(max_results, 20),
-            "apiKey": api_key,
         }
     )
-    response = _json_request(f"{GEOAPIFY_PLACES_URL}?{params}")
+    response = _json_request(
+        f"{GEOAPIFY_PLACES_URL}?{params}",
+        headers={"x-api-key": api_key},
+    )
 
     results: list[dict[str, Any]] = []
     for feature in response.get("features") or []:
