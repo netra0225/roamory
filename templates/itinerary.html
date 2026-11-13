@@ -3,27 +3,20 @@
 {% block content %}
 {% include '_trip_nav.html' %}
 <main class="page-shell trip-page itinerary-page">
-  <section class="page-intro itinerary-intro"><div><span class="eyebrow">THE JOURNEY ROUTE</span><h1>{{ trip['destination'] }}, day by day.</h1></div><a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">+ Add activity</a></section>
-  {% if not activities %}
-  <details class="trip-builder">
-    <summary class="button button-secondary">Build my trip</summary>
-    <form class="trip-builder-form" method="post" action="{{ url_for('build_trip', trip_id=trip['id']) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <p>Roamory will use {{ trip['destination'] }} and your trip dates to suggest a simple day-wise plan.</p>
-      <div class="trip-builder-fields">
-        <label>Trip style
-          <select name="interest">
-            <option value="mixed">Mixed</option>
-            <option value="nature">Nature</option>
-            <option value="culture">Culture</option>
-            <option value="food">Food</option>
-          </select>
-        </label>
-      </div>
-      <button class="button button-primary" type="submit">Build itinerary</button>
-    </form>
-  </details>
-  {% endif %}
+  <section class="page-intro itinerary-intro">
+    <div><span class="eyebrow">THE JOURNEY ROUTE</span><h1>{{ trip['destination'] }}, day by day.</h1></div>
+    <div class="itinerary-actions">
+      {% if not activities %}
+      <form class="build-trip-inline" method="post" action="{{ url_for('build_trip', trip_id=trip['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="button button-primary build-trip-button" type="submit">Build my trip</button>
+      </form>
+      <a class="button button-secondary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">+ Add activity</a>
+      {% else %}
+      <a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">+ Add activity</a>
+      {% endif %}
+    </div>
+  </section>
   <nav class="day-tabs" aria-label="Trip days">
     {% for day in days %}<a class="{{ 'active' if day['day_number']==selected_day else '' }}" href="{{ url_for('itinerary', trip_id=trip['id'], day=day['day_number']) }}"><span>Day {{ day['day_number'] }}</span><small>{{ day['date'][5:] }}</small></a>{% endfor %}
   </nav>
