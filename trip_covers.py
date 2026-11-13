@@ -8,6 +8,7 @@ from urllib.request import Request, urlopen
 
 
 WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php"
+COMMONS_API_URL = "https://commons.wikimedia.org/w/api.php"
 USER_AGENT = "Roamory/1.0 (student travel planner; https://roamory-1.onrender.com)"
 
 _BLOCKED_IMAGE_WORDS = {
@@ -49,6 +50,16 @@ def destination_cover_url(destination: str) -> str | None:
         image = _search_page_image(search_query)
         if image:
             return image
+
+    for search_query in candidates:
+        for commons_query in (
+            f"{search_query} panorama",
+            f"{search_query} city",
+            search_query,
+        ):
+            image = _commons_search_image(commons_query)
+            if image:
+                return image
 
     return None
 
@@ -108,19 +119,65 @@ def _image_from_page(page: dict[str, Any]) -> str | None:
 
     thumbnail = page.get("thumbnail") or {}
     source = thumbnail.get("source")
-    if source:
+    if source and "/wikipedia/commons/" in str(source):
         return str(source)
 
     original = page.get("original") or {}
     source = original.get("source")
-    if source:
+    if source and "/wikipedia/commons/" in str(source):
         return str(source)
 
     return None
 
 
-def _request(params: dict[str, Any]) -> dict[str, Any] | None:
-    url = f"{WIKIPEDIA_API_URL}?{urlencode(params)}"
+def _commons_search_image(query: str) -> str | None:
+    payload = _request(
+        {
+            "action": "query",
+            "format": "json",
+            "generator": "search",
+            "gsrsearch": query,
+            "gsrnamespace": 6,
+            "gsrlimit": 12,
+            "prop": "imageinfo",
+            "iiprop": "url|mime",
+            "iiurlwidth": 1600,
+        },
+        base_url=COMMONS_API_URL,
+    )
+    pages = ((payload or {}).get("query") or {}).get("pages") or {}
+    ordered = sorted(
+        pages.values(),
+        key=lambda page: int(page.get("index", 9999)),
+    )
+
+    for page in ordered:
+        title = str(page.get("title") or "").lower()
+        normalised = title.replace("-", " ").replace("_", " ")
+        if any(word in normalised for word in _BLOCKED_IMAGE_WORDS):
+            continue
+
+        info_rows = page.get("imageinfo") or []
+        if not info_rows:
+            continue
+        info = info_rows[0]
+        mime = str(info.get("mime") or "")
+        if mime not in {"image/jpeg", "image/png", "image/webp"}:
+            continue
+
+        source = info.get("thumburl") or info.get("url")
+        if source:
+            return str(source)
+
+    return None
+
+
+def _request(
+    params: dict[str, Any],
+    *,
+    base_url: str = WIKIPEDIA_API_URL,
+) -> dict[str, Any] | None:
+    url = f"{base_url}?{urlencode(params)}"
     request = Request(
         url,
         headers={
