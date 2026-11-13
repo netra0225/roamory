@@ -56,18 +56,20 @@ try:
         categories='attractions',
         max_results=3,
     )
+    _selftest_food = search_nearby_places(
+        _selftest_selected['latitude'],
+        _selftest_selected['longitude'],
+        categories='food',
+        max_results=3,
+    )
     print(
         'ROAMORY RECOMMENDATION SELFTEST:',
-        _selftest_selected.get('name'),
-        _selftest_selected.get('provider'),
-        [
-            {
-                'name': place.get('name'),
-                'provider': place.get('provider'),
-                'categories': place.get('categories'),
-            }
-            for place in _selftest_places[:5]
-        ],
+        {
+            'destination': _selftest_selected.get('name'),
+            'destination_provider': _selftest_selected.get('provider'),
+            'attractions': [place.get('name') for place in _selftest_places[:3]],
+            'food': [place.get('name') for place in _selftest_food[:3]],
+        },
         flush=True,
     )
 except Exception as _selftest_exc:
