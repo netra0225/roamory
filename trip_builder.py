@@ -32,8 +32,6 @@ def build_trip_plan(
     trip: Any,
     *,
     interest: str = "mixed",
-    food_budget: str = "any",
-    min_rating: float = 0.0,
 ) -> dict[str, Any]:
     destination = resolve_destination(trip["destination"])
     centre = destination["selected"]
@@ -48,17 +46,13 @@ def build_trip_plan(
         latitude,
         longitude,
         categories="attractions",
-        min_rating=min_rating,
         max_results=attraction_limit,
     )
 
-    price_filter = None if food_budget == "any" else [food_budget]
     food_places = search_nearby_places(
         latitude,
         longitude,
         categories="food",
-        min_rating=min_rating,
-        price_levels=price_filter,
         max_results=food_limit,
     )
 
@@ -166,7 +160,6 @@ def _rank_for_interest(
         interest_hit = any(keyword in haystack for keyword in keywords)
         return (
             0 if interest_hit else 1,
-            -(float(place.get("rating") or 0)),
             float(place.get("distance_km") or 9999),
         )
 
