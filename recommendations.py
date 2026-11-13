@@ -12,8 +12,9 @@ from urllib.request import Request, urlopen
 
 NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search"
 OVERPASS_ENDPOINTS = (
-    "https://overpass-api.de/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
+    "https://overpass-api.de/api/interpreter",
 )
 GEOAPIFY_GEOCODE_URL = "https://api.geoapify.com/v1/geocode/search"
 GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places"
