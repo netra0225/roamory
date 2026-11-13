@@ -240,7 +240,7 @@ def _search_foursquare(
         "ll": f"{latitude:.7f},{longitude:.7f}",
         "radius": radius_meters,
         "limit": min(max_results, 30),
-        "sort": "RATING",
+        "sort": "DISTANCE",
     }
 
     price_numbers = _normalise_foursquare_prices(price_levels)
