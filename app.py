@@ -46,6 +46,31 @@ app.config.update(
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 init_db_app(app)
 
+# TEMPORARY: production recommendation self-test. Removed after verification.
+try:
+    _selftest_destination = resolve_destination('Coonoor')
+    _selftest_selected = _selftest_destination['selected']
+    _selftest_places = search_nearby_places(
+        _selftest_selected['latitude'],
+        _selftest_selected['longitude'],
+        categories='attractions',
+        max_results=3,
+    )
+    print(
+        'ROAMORY RECOMMENDATION SELFTEST:',
+        _selftest_selected.get('name'),
+        _selftest_selected.get('provider'),
+        [place.get('name') for place in _selftest_places[:3]],
+        flush=True,
+    )
+except Exception as _selftest_exc:
+    print(
+        'ROAMORY RECOMMENDATION SELFTEST FAILED:',
+        type(_selftest_exc).__name__,
+        str(_selftest_exc),
+        flush=True,
+    )
+
 
 def login_required(view):
     @wraps(view)
