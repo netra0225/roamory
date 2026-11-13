@@ -519,22 +519,10 @@ def build_trip(trip_id):
     if interest not in {'mixed', 'nature', 'culture', 'food'}:
         interest = 'mixed'
 
-    food_budget = request.form.get('food_budget', 'any').strip().lower()
-    if food_budget not in {'any', 'budget', 'moderate', 'premium'}:
-        food_budget = 'any'
-
-    try:
-        min_rating = float(request.form.get('min_rating', '0') or 0)
-    except ValueError:
-        min_rating = 0
-    min_rating = min(max(min_rating, 0), 5)
-
     try:
         plan = build_trip_plan(
             trip,
             interest=interest,
-            food_budget=food_budget,
-            min_rating=min_rating,
         )
     except RecommendationError as exc:
         flash(str(exc), 'error')
