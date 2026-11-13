@@ -2,6 +2,7 @@
 import os
 import re
 import tempfile
+from unittest.mock import patch
 
 from app import app
 from db import init_db
@@ -56,6 +57,53 @@ try:
         trips_page = client.get('/trips')
         assert trips_page.status_code == 200
         assert b'Smoke Test Trip' in trips_page.data
+
+        # Build My Trip should populate an empty itinerary without making a network call.
+        with app.app_context():
+            db = __import__('db').get_db()
+            trip = db.execute(
+                'SELECT * FROM trips WHERE title=? ORDER BY id DESC LIMIT 1',
+                ('Smoke Test Trip',)
+            ).fetchone()
+            trip_id = trip['id']
+
+        itinerary_page = client.get(f'/trips/{trip_id}/itinerary')
+        assert itinerary_page.status_code == 200
+        itinerary_html = itinerary_page.get_data(as_text=True)
+        assert b'Build my trip' in itinerary_page.data
+        build_token = csrf_from(itinerary_html)
+
+        fake_plan = {
+            'days': [
+                {
+                    'day_number': 1,
+                    'items': [
+                        {
+                            'name': 'Verified Test Place',
+                            'type': 'activity',
+                            'start_time': '10:00',
+                            'location': 'Test Address',
+                            'estimated_cost': 0,
+                            'notes': 'Suggested by Roamory',
+                        }
+                    ],
+                }
+            ]
+        }
+        with patch('app.build_trip_plan', return_value=fake_plan):
+            response = client.post(
+                f'/trips/{trip_id}/build',
+                data={
+                    'csrf_token': build_token,
+                    'interest': 'mixed',
+                    'food_budget': 'any',
+                    'min_rating': '0',
+                },
+                follow_redirects=True,
+            )
+        assert response.status_code == 200
+        assert b'Verified Test Place' in response.data
+        assert b'Build My Trip' not in response.data
 
     print('Roamory smoke test passed.')
 finally:
