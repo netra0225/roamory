@@ -550,3 +550,14 @@ body.auth-body {
     justify-content:flex-start;
   }
 }
+
+.map-data-attribution{
+  margin:28px 0 0;
+  font-size:11px;
+  color:var(--muted);
+  opacity:.78;
+}
+.map-data-attribution a{
+  color:inherit;
+  text-decoration:underline;
+}
