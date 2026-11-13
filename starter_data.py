@@ -5,6 +5,9 @@ from pathlib import Path
 
 IMAGE_MAP = {
     'udaipur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1600&q=86',
+    'nyc_journal': '/static/uploads/journal-nyc-times-square.jpg',
+    'queenstown_journal': '/static/uploads/journal-queenstown-lake.jpg',
+    'venice_journal': '/static/uploads/journal-venice-flowers.jpg',
     'amalfi': 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1600&q=86',
     'banff': 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=86',
     'coast': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=86',
@@ -71,18 +74,6 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
         IMAGE_MAP['udaipur'],
         'sunflower',
         65000,
-    )
-    upcoming_id = _create_trip(
-        db,
-        user_id,
-        'Blue Water, Lemon Evenings',
-        'Amalfi Coast',
-        today + timedelta(days=21),
-        today + timedelta(days=27),
-        'Ferries, cliffside towns, sea swims and a notebook full of places worth stopping for.',
-        IMAGE_MAP['amalfi'],
-        'mediterranean',
-        125000,
     )
     # ---------- Ongoing Udaipur trip ----------
     days = db.execute('SELECT * FROM trip_days WHERE trip_id=? ORDER BY day_number', (ongoing_id,)).fetchall()
@@ -185,20 +176,119 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
     if ongoing_memory_ids and len(activity_ids) > 1:
         db.execute('UPDATE activities SET memory_id=? WHERE id=?', (ongoing_memory_ids[1], activity_ids[1]))
 
-    # ---------- Upcoming Amalfi trip ----------
-    upcoming_days = db.execute('SELECT * FROM trip_days WHERE trip_id=? ORDER BY day_number', (upcoming_id,)).fetchall()
-    for day_index, name, kind, time_, location, note in [
-        (0, 'Naples to Positano transfer', 'transport', '10:30', 'Naples Centrale', 'Train + driver transfer.'),
-        (0, 'Check in above the water', 'stay', '15:00', 'Positano', 'Ask for the terrace key.'),
-        (1, 'Ferry to Capri', 'transport', '09:15', 'Positano Ferry Pier', 'Keep the ticket in Wallet.'),
-        (2, 'Path of the Gods walk', 'activity', '08:00', 'Bomerano', 'Start before the heat.'),
-    ]:
-        day = upcoming_days[day_index]
-        db.execute(
-            '''INSERT INTO activities
-               (trip_id,day_id,name,type,activity_date,start_time,location,notes,status)
-               VALUES (?,?,?,?,?,?,?,?,?)''',
-            (upcoming_id, day['id'], name, kind, day['date'], time_, location, note, 'planned'),
-        )
+    history = sync_curated_history(db, user_id, today=today)
+    return {'ongoing': ongoing_id, **history}
 
-    return {'ongoing': ongoing_id, 'upcoming': upcoming_id}
+
+def sync_curated_history(db, user_id: int, *, today: date | None = None) -> dict[str, int]:
+    """Align My Trips with the curated journal pages."""
+    today = today or date.today()
+
+    db.execute(
+        '''DELETE FROM trips
+           WHERE user_id=? AND destination=? AND title=?''',
+        (user_id, 'Amalfi Coast', 'Blue Water, Lemon Evenings'),
+    )
+
+    specs = [
+        {
+            'key': 'completed_new_york',
+            'destination': 'New York City',
+            'title': 'Neon, Yellow Cabs & Skyline Hours',
+            'start': today - timedelta(days=210),
+            'end': today - timedelta(days=205),
+            'description': 'Times Square lights, Manhattan streets and a quiet look across the water at Liberty.',
+            'cover': IMAGE_MAP['nyc_journal'],
+            'accent': 'mediterranean',
+            'budget': 110000,
+            'activities': [
+                ('Times Square evening walk', 'destination', '18:30', 'Times Square'),
+                ('Statue of Liberty morning', 'activity', '10:00', 'New York Harbor'),
+            ],
+            'memories': [
+                ('Times Square after dark', 'Times Square', '/static/uploads/journal-nyc-times-square.jpg', 'The city turned every light on at once.'),
+                ('Liberty across the water', 'New York Harbor', '/static/uploads/journal-nyc-liberty.jpg', 'A still frame inside a city that rarely stays still.'),
+            ],
+        },
+        {
+            'key': 'completed_queenstown',
+            'destination': 'Queenstown, New Zealand',
+            'title': 'Lake Wakatipu & Mountain Light',
+            'start': today - timedelta(days=160),
+            'end': today - timedelta(days=155),
+            'description': 'Lake Wakatipu, Skyline Gondola and mountain views finding their way into every frame.',
+            'cover': IMAGE_MAP['queenstown_journal'],
+            'accent': 'coral',
+            'budget': 135000,
+            'activities': [
+                ('Lake Wakatipu waterfront', 'destination', '09:00', 'Lake Wakatipu'),
+                ('Skyline Gondola', 'activity', '15:30', 'Queenstown'),
+            ],
+            'memories': [
+                ('Gold light on Lake Wakatipu', 'Lake Wakatipu', '/static/uploads/journal-queenstown-lake.jpg', 'The lake held the last light longer than the streets did.'),
+                ('Above Queenstown', 'Skyline Gondola', '/static/uploads/journal-queenstown-gondola.jpg', 'The town looked small once the gondola cleared the rooftops.'),
+            ],
+        },
+        {
+            'key': 'completed_venice',
+            'destination': 'Venice, Italy',
+            'title': 'Canals, Flowers & Aperitivo',
+            'start': today - timedelta(days=110),
+            'end': today - timedelta(days=105),
+            'description': 'Canals, flower-lined facades, bridges and aperitivo beside the water.',
+            'cover': IMAGE_MAP['venice_journal'],
+            'accent': 'sunflower',
+            'budget': 120000,
+            'activities': [
+                ('Canal-side morning walk', 'destination', '09:30', 'Venice'),
+                ('Aperitivo beside the canal', 'restaurant', '17:30', 'Venice'),
+            ],
+            'memories': [
+                ('The prettiest way to get lost', 'Venice', '/static/uploads/journal-venice-flowers.jpg', 'Every turn found another canal and another flower-covered facade.'),
+                ('Aperitivo by the water', 'Venice', '/static/uploads/journal-venice-food.jpg', 'Lunch took its time while boats kept passing below.'),
+            ],
+        },
+    ]
+
+    result = {}
+    for spec in specs:
+        existing = db.execute(
+            'SELECT id FROM trips WHERE user_id=? AND destination=? AND title=? LIMIT 1',
+            (user_id, spec['destination'], spec['title']),
+        ).fetchone()
+
+        if existing:
+            trip_id = existing['id']
+        else:
+            trip_id = _create_trip(
+                db, user_id, spec['title'], spec['destination'],
+                spec['start'], spec['end'], spec['description'],
+                spec['cover'], spec['accent'], spec['budget'],
+            )
+            days = db.execute(
+                'SELECT * FROM trip_days WHERE trip_id=? ORDER BY day_number',
+                (trip_id,),
+            ).fetchall()
+
+            for index, (name, kind, time_, location) in enumerate(spec['activities']):
+                day = days[min(index, len(days) - 1)]
+                db.execute(
+                    '''INSERT INTO activities
+                       (trip_id,day_id,name,type,activity_date,start_time,location,notes,status)
+                       VALUES (?,?,?,?,?,?,?,?,?)''',
+                    (trip_id, day['id'], name, kind, day['date'], time_, location,
+                     'From the curated Roamory journal.', 'completed'),
+                )
+
+            for index, (title, location, image, note) in enumerate(spec['memories']):
+                db.execute(
+                    '''INSERT INTO memories
+                       (trip_id,title,memory_date,location,note,image_url,mood)
+                       VALUES (?,?,?,?,?,?,?)''',
+                    (trip_id, title, (spec['start'] + timedelta(days=index)).isoformat(),
+                     location, note, image, 'postcard'),
+                )
+
+        result[spec['key']] = trip_id
+
+    return result
