@@ -110,3 +110,14 @@
   }
   .overview-page .trip-hero-copy{padding:4px 2px 12px !important;}
 }
+
+.dashboard-lower-grid.dashboard-trips-only{
+  grid-template-columns:minmax(0,1fr)!important;
+}
+.dashboard-lower-grid.dashboard-trips-only .upcoming-section{
+  width:100%;
+  min-width:0;
+}
+.dashboard-upcoming-only{
+  margin-top:28px;
+}
