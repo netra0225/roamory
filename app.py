@@ -515,15 +515,8 @@ def build_trip(trip_id):
         flash('Build My Trip only fills an empty itinerary, so your existing plans stay untouched.', 'info')
         return redirect(url_for('itinerary', trip_id=trip_id))
 
-    interest = request.form.get('interest', 'mixed').strip().lower()
-    if interest not in {'mixed', 'nature', 'culture', 'food'}:
-        interest = 'mixed'
-
     try:
-        plan = build_trip_plan(
-            trip,
-            interest=interest,
-        )
+        plan = build_trip_plan(trip)
     except RecommendationError as exc:
         flash(str(exc), 'error')
         return redirect(url_for('itinerary', trip_id=trip_id))
