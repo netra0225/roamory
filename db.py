@@ -9,13 +9,6 @@ from flask import current_app, g
 from asset_bootstrap import materialize_dashboard_assets
 
 
-ARCHIVE_TITLE = 'Places that stayed with me'
-ARCHIVE_DESCRIPTION = (
-    'A finished journey gathered into journal pages of coast, lake, spring streets, '
-    'mountains and palace light.'
-)
-
-
 class _PostgresResult:
     def __init__(self, cursor, lastrowid=None):
         self._cursor = cursor
@@ -134,24 +127,6 @@ def _init_postgres_schema(db, schema_path: Path):
            )'''
     )
 
-    db.execute(
-        f'''CREATE OR REPLACE FUNCTION normalize_roamory_starter_archive()
-            RETURNS TRIGGER AS $$
-            BEGIN
-                IF NEW.destination = 'Summer Atlas' THEN
-                    NEW.title := '{ARCHIVE_TITLE}';
-                    NEW.description := '{ARCHIVE_DESCRIPTION}';
-                END IF;
-                RETURN NEW;
-            END;
-            $$ LANGUAGE plpgsql'''
-    )
-    db.execute('DROP TRIGGER IF EXISTS normalize_roamory_starter_archive_trigger ON trips')
-    db.execute(
-        '''CREATE TRIGGER normalize_roamory_starter_archive_trigger
-           BEFORE INSERT OR UPDATE ON trips
-           FOR EACH ROW EXECUTE FUNCTION normalize_roamory_starter_archive()'''
-    )
 
 
 def _init_sqlite_schema(db, schema_path: Path):
@@ -166,20 +141,6 @@ def _init_sqlite_schema(db, schema_path: Path):
                meta_key TEXT NOT NULL UNIQUE,
                meta_value TEXT NOT NULL
            )'''
-    )
-
-    title = ARCHIVE_TITLE.replace("'", "''")
-    description = ARCHIVE_DESCRIPTION.replace("'", "''")
-    db.executescript(
-        f'''DROP TRIGGER IF EXISTS normalize_roamory_starter_archive_insert;
-            CREATE TRIGGER normalize_roamory_starter_archive_insert
-            AFTER INSERT ON trips
-            WHEN NEW.destination = 'Summer Atlas'
-            BEGIN
-                UPDATE trips
-                SET title = '{title}', description = '{description}'
-                WHERE id = NEW.id;
-            END;'''
     )
 
 
@@ -214,11 +175,16 @@ def init_db():
     else:
         _init_sqlite_schema(db, schema_path)
 
+    # Remove only the old built-in Summer Atlas showcase from existing accounts.
     db.execute(
-        '''UPDATE trips
-           SET title = ?, description = ?
-           WHERE destination = ?''',
-        (ARCHIVE_TITLE, ARCHIVE_DESCRIPTION, 'Summer Atlas'),
+        '''DELETE FROM trips
+           WHERE destination = ?
+             AND title IN (?, ?)''',
+        (
+            'Summer Atlas',
+            'Five Places I Keep Thinking About',
+            'Places that stayed with me',
+        ),
     )
     _configure_persistent_secret(db)
     db.commit()
