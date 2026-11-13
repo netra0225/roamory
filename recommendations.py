@@ -125,12 +125,10 @@ def resolve_destination(destination: str) -> dict[str, Any]:
             "text": query,
             "format": "json",
             "limit": 5,
+            "apiKey": api_key,
         }
     )
-    response = _json_request(
-        f"{GEOAPIFY_GEOCODE_URL}?{params}",
-        headers={"x-api-key": api_key},
-    )
+    response = _json_request(f"{GEOAPIFY_GEOCODE_URL}?{params}")
     raw_results = response.get("results") or []
 
     candidates: list[dict[str, Any]] = []
@@ -331,12 +329,10 @@ def _search_geoapify_places(
             "filter": f"circle:{longitude},{latitude},{radius_meters}",
             "bias": f"proximity:{longitude},{latitude}",
             "limit": min(max_results, 20),
+            "apiKey": api_key,
         }
     )
-    response = _json_request(
-        f"{GEOAPIFY_PLACES_URL}?{params}",
-        headers={"x-api-key": api_key},
-    )
+    response = _json_request(f"{GEOAPIFY_PLACES_URL}?{params}")
 
     results: list[dict[str, Any]] = []
     for feature in response.get("features") or []:
