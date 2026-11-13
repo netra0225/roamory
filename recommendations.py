@@ -285,6 +285,17 @@ def _search_foursquare(
             continue
 
         location = raw.get("location") or {}
+        address = ", ".join(
+            str(value).strip()
+            for value in (
+                location.get("address"),
+                location.get("locality"),
+                location.get("region"),
+                location.get("postcode"),
+                location.get("country"),
+            )
+            if value and str(value).strip()
+        )
         category_rows = raw.get("categories") or []
         category_names = [
             item.get("name")
@@ -296,7 +307,7 @@ def _search_foursquare(
             {
                 "place_id": raw.get("fsq_place_id"),
                 "name": raw.get("name") or "Unnamed place",
-                "address": location.get("formatted_address") or "",
+                "address": address,
                 "latitude": float(lat),
                 "longitude": float(lon),
                 "categories": category_names,
