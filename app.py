@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 from db import get_db, init_app as init_db_app
 from starter_data import seed_starter_content
-from recommendations import RecommendationError, resolve_destination, search_nearby_places
+from recommendations import RecommendationError
 from trip_builder import build_trip_plan
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -45,41 +45,6 @@ app.config.update(
 )
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 init_db_app(app)
-
-# TEMPORARY: production recommendation self-test. Removed after verification.
-try:
-    _selftest_destination = resolve_destination('Coonoor')
-    _selftest_selected = _selftest_destination['selected']
-    _selftest_places = search_nearby_places(
-        _selftest_selected['latitude'],
-        _selftest_selected['longitude'],
-        categories='attractions',
-        max_results=3,
-    )
-    _selftest_food = search_nearby_places(
-        _selftest_selected['latitude'],
-        _selftest_selected['longitude'],
-        categories='food',
-        max_results=3,
-    )
-    print(
-        'ROAMORY RECOMMENDATION SELFTEST:',
-        {
-            'destination': _selftest_selected.get('name'),
-            'destination_provider': _selftest_selected.get('provider'),
-            'attractions': [place.get('name') for place in _selftest_places[:3]],
-            'food': [place.get('name') for place in _selftest_food[:3]],
-        },
-        flush=True,
-    )
-except Exception as _selftest_exc:
-    print(
-        'ROAMORY RECOMMENDATION SELFTEST FAILED:',
-        type(_selftest_exc).__name__,
-        str(_selftest_exc),
-        flush=True,
-    )
-
 
 def login_required(view):
     @wraps(view)
@@ -198,28 +163,6 @@ def inject_helpers():
         'csrf_token': csrf_token,
         'today_iso': date.today().isoformat(),
     }
-
-
-
-@app.route('/_health/recommendations')
-def recommendation_health():
-    try:
-        destination = resolve_destination('Coonoor')
-        selected = destination['selected']
-        places = search_nearby_places(
-            selected['latitude'],
-            selected['longitude'],
-            categories='attractions',
-            max_results=5,
-        )
-        return {
-            'ok': True,
-            'destination': selected['name'],
-            'provider': selected.get('provider'),
-            'places': [place['name'] for place in places[:5]],
-        }
-    except RecommendationError as exc:
-        return {'ok': False, 'error': str(exc)}, 503
 
 
 
