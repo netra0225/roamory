@@ -17,6 +17,7 @@ from db import get_db, init_app as init_db_app
 from starter_data import seed_starter_content, sync_curated_history
 from recommendations import RecommendationError
 from trip_builder import build_trip_plan
+from trip_covers import destination_cover_url
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / 'static' / 'uploads'
@@ -108,13 +109,43 @@ def safe_delete_upload(filename: str | None):
         path.unlink(missing_ok=True)
 
 
+def _ensure_auto_cover(db, trip) -> bool:
+    if trip['cover_filename'] or trip['cover_url']:
+        return False
+    cover_url = destination_cover_url(trip['destination'])
+    if not cover_url:
+        return False
+    db.execute(
+        'UPDATE trips SET cover_url=? WHERE id=? AND user_id=?',
+        (cover_url, trip['id'], trip['user_id'])
+    )
+    return True
+
+
+def _ensure_auto_covers(db, trips) -> bool:
+    changed = False
+    for trip in trips:
+        if _ensure_auto_cover(db, trip):
+            changed = True
+    if changed:
+        db.commit()
+    return changed
+
+
 def get_trip_or_404(trip_id: int):
-    trip = get_db().execute(
+    db = get_db()
+    trip = db.execute(
         'SELECT * FROM trips WHERE id = ? AND user_id = ?',
         (trip_id, g.user['id'])
     ).fetchone()
     if trip is None:
         abort(404)
+    if _ensure_auto_cover(db, trip):
+        db.commit()
+        trip = db.execute(
+            'SELECT * FROM trips WHERE id = ? AND user_id = ?',
+            (trip_id, g.user['id'])
+        ).fetchone()
     return trip
 
 
@@ -142,15 +173,6 @@ def cover_for_trip(trip):
         return url_for('static', filename=f"uploads/{trip['cover_filename']}")
     if trip['cover_url']:
         return trip['cover_url']
-    destination = trip['destination'].lower()
-    if any(k in destination for k in ('amalfi', 'como', 'italy', 'positano')):
-        return DEFAULT_IMAGES['italy']
-    if any(k in destination for k in ('banff', 'switzerland', 'mountain', 'alps')):
-        return DEFAULT_IMAGES['mountain']
-    if any(k in destination for k in ('udaipur', 'kyoto', 'paris', 'city')):
-        return DEFAULT_IMAGES['city']
-    if any(k in destination for k in ('bali', 'coast', 'beach', 'island')):
-        return DEFAULT_IMAGES['coast']
     return DEFAULT_IMAGES['travel']
 
 
@@ -252,6 +274,10 @@ def dashboard():
     trips = db.execute(
         'SELECT * FROM trips WHERE user_id = ? ORDER BY start_date', (g.user['id'],)
     ).fetchall()
+    if _ensure_auto_covers(db, trips):
+        trips = db.execute(
+            'SELECT * FROM trips WHERE user_id = ? ORDER BY start_date', (g.user['id'],)
+        ).fetchall()
     # Existing accounts from the first build may have opened onto a blank dashboard.
     # Seed the showcase only once; after that, users can delete everything and keep a true empty state.
     starter_seeded = g.settings['starter_seeded'] if g.settings and 'starter_seeded' in g.settings.keys() else 0
@@ -320,6 +346,10 @@ def trips():
     rows = db.execute(
         'SELECT * FROM trips WHERE user_id = ? ORDER BY start_date DESC', (g.user['id'],)
     ).fetchall()
+    if _ensure_auto_covers(db, rows):
+        rows = db.execute(
+            'SELECT * FROM trips WHERE user_id = ? ORDER BY start_date DESC', (g.user['id'],)
+        ).fetchall()
     grouped = {'ongoing': [], 'upcoming': [], 'completed': []}
     for row in rows:
         grouped[trip_status(row)].append(row)
@@ -383,11 +413,12 @@ def create_trip():
             flash(error, 'error')
         else:
             db = get_db()
+            cover_url = None if cover_filename else destination_cover_url(destination)
             cur = db.execute(
                 '''INSERT INTO trips
-                (user_id, title, destination, start_date, end_date, description, cover_filename, accent, planned_budget)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                (g.user['id'], title, destination, start_date, end_date, description, cover_filename, accent, budget_value)
+                (user_id, title, destination, start_date, end_date, description, cover_filename, cover_url, accent, planned_budget)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (g.user['id'], title, destination, start_date, end_date, description, cover_filename, cover_url, accent, budget_value)
             )
             trip_id = cur.lastrowid
             ensure_trip_days(db, trip_id, start_date, end_date)
@@ -429,11 +460,20 @@ def edit_trip(trip_id):
             flash(error, 'error')
         else:
             cover_filename = new_cover or trip['cover_filename']
+            if new_cover:
+                cover_url = None
+            elif trip['cover_filename']:
+                cover_url = trip['cover_url']
+            elif destination != trip['destination'] or not trip['cover_url']:
+                cover_url = destination_cover_url(destination)
+            else:
+                cover_url = trip['cover_url']
+
             db = get_db()
             db.execute(
-                '''UPDATE trips SET title=?, destination=?, start_date=?, end_date=?, description=?, cover_filename=?, accent=?, planned_budget=?
+                '''UPDATE trips SET title=?, destination=?, start_date=?, end_date=?, description=?, cover_filename=?, cover_url=?, accent=?, planned_budget=?
                    WHERE id=? AND user_id=?''',
-                (title, destination, start_date, end_date, description, cover_filename, accent, budget_value, trip_id, g.user['id'])
+                (title, destination, start_date, end_date, description, cover_filename, cover_url, accent, budget_value, trip_id, g.user['id'])
             )
             if start_date != trip['start_date'] or end_date != trip['end_date']:
                 activity_count = db.execute('SELECT COUNT(*) c FROM activities WHERE trip_id=?', (trip_id,)).fetchone()['c']
