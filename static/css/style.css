@@ -526,56 +526,27 @@ body.auth-body {
 }
 
 
-/* Build My Trip — deliberately compact so itinerary stays the main screen. */
-.trip-builder{
-  margin:0 0 22px;
-}
-.trip-builder > summary{
-  list-style:none;
-  cursor:pointer;
-  width:max-content;
-}
-.trip-builder > summary::-webkit-details-marker{
-  display:none;
-}
-.trip-builder-form{
-  margin-top:14px;
-  padding:18px;
-  border:1px solid rgba(40,37,34,.14);
-  border-radius:18px;
-  background:rgba(255,253,248,.92);
-  box-shadow:0 12px 28px rgba(40,37,34,.06);
-}
-.trip-builder-form > p{
-  margin:0 0 14px;
-  color:var(--muted);
-  font-size:14px;
-}
-.trip-builder-fields{
-  display:grid;
-  grid-template-columns:minmax(220px,340px);
+/* Build My Trip — primary empty-itinerary action. */
+.itinerary-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
   gap:12px;
-  margin-bottom:14px;
+  flex-wrap:wrap;
 }
-.trip-builder-fields label{
-  display:grid;
-  gap:6px;
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:.02em;
+.build-trip-inline{
+  margin:0;
 }
-.trip-builder-fields select{
-  width:100%;
-  min-height:42px;
-  padding:0 12px;
-  border:1px solid rgba(40,37,34,.18);
-  border-radius:10px;
-  background:#fffdf8;
-  color:var(--ink);
-  font:inherit;
+.build-trip-button{
+  min-width:156px;
+  box-shadow:0 8px 0 rgba(13,86,143,.14);
 }
 @media (max-width:760px){
-  .trip-builder-fields{
-    grid-template-columns:1fr;
+  .itinerary-intro{
+    align-items:flex-start;
+  }
+  .itinerary-actions{
+    width:100%;
+    justify-content:flex-start;
   }
 }
