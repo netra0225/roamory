@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 from db import get_db, init_app as init_db_app
 from starter_data import seed_starter_content
-from recommendations import RecommendationError
+from recommendations import RecommendationError, resolve_destination, search_nearby_places
 from trip_builder import build_trip_plan
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -164,6 +164,29 @@ def inject_helpers():
         'csrf_token': csrf_token,
         'today_iso': date.today().isoformat(),
     }
+
+
+
+@app.route('/_health/recommendations')
+def recommendation_health():
+    try:
+        destination = resolve_destination('Coonoor')
+        selected = destination['selected']
+        places = search_nearby_places(
+            selected['latitude'],
+            selected['longitude'],
+            categories='attractions',
+            max_results=5,
+        )
+        return {
+            'ok': True,
+            'destination': selected['name'],
+            'provider': selected.get('provider'),
+            'places': [place['name'] for place in places[:5]],
+        }
+    except RecommendationError as exc:
+        return {'ok': False, 'error': str(exc)}, 503
+
 
 
 @app.route('/')
