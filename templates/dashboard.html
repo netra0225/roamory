@@ -150,42 +150,41 @@
     </article>
   </section>
 
-  <section class="dashboard-lower-grid">
+  <section class="dashboard-lower-grid dashboard-trips-only">
     <div class="upcoming-section">
       <div class="section-heading"><div><span class="eyebrow">COMING UP</span><h2>Next departures.</h2></div><a href="{{ url_for('trips') }}">All trips →</a></div>
       <div class="postcard-row rich-postcards">
-        {% if ongoing['destination'] == 'Udaipur' %}
-        <a class="trip-postcard rich-trip-postcard kyoto-dashboard-card" href="{{ url_for('trips') }}">
-          <div class="postcard-photo-wrap"><img src="{{ url_for('static', filename='uploads/kyoto-sakura-pagoda.jpg') }}" alt="Cherry blossoms around a pagoda in Kyoto"><span class="postcard-date">05 APR 2027</span></div>
-          <div><span class="eyebrow">05 — 11 APRIL 2027</span><h3>Kyoto, Japan</h3><p>Sakura Paths & Temple Mornings</p></div>
+        {% for trip in upcoming[:3] %}
+        <a class="trip-postcard rich-trip-postcard" href="{{ url_for('trip_overview', trip_id=trip['id']) }}">
+          <div class="postcard-photo-wrap"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="postcard-date">{{ trip['start_date'] }}</span></div>
+          <div><span class="eyebrow">{% if loop.first and countdown is not none %}IN {{ countdown }} DAYS{% else %}UPCOMING{% endif %}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p></div>
         </a>
-        {% else %}
-          {% for trip in upcoming[:2] %}
+        {% else %}<div class="small-empty">No future trip yet.</div>{% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {% else %}
+    {% if upcoming %}
+    <section class="dashboard-lower-grid dashboard-trips-only dashboard-upcoming-only">
+      <div class="upcoming-section">
+        <div class="section-heading"><div><span class="eyebrow">COMING UP</span><h2>Your next trips.</h2></div><a href="{{ url_for('trips') }}">All trips →</a></div>
+        <div class="postcard-row rich-postcards">
+          {% for trip in upcoming[:3] %}
           <a class="trip-postcard rich-trip-postcard" href="{{ url_for('trip_overview', trip_id=trip['id']) }}">
             <div class="postcard-photo-wrap"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="postcard-date">{{ trip['start_date'] }}</span></div>
             <div><span class="eyebrow">{% if loop.first and countdown is not none %}IN {{ countdown }} DAYS{% else %}UPCOMING{% endif %}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p></div>
           </a>
-          {% else %}<div class="small-empty">No future trip yet.</div>{% endfor %}
-        {% endif %}
+          {% endfor %}
+        </div>
       </div>
-    </div>
-
-    <aside class="archive-scrapbook">
-      <div class="archive-copy"><span class="eyebrow">FROM THE ARCHIVE</span><h2>{{ 'Places that stayed with me' if archive_trip else 'Your finished trips live here.' }}</h2><p>{{ archive_trip['destination'] if archive_trip else 'Complete a trip to make the first archive edition.' }}</p>{% if archive_trip %}<div class="archive-links"><a class="text-link" href="{{ url_for('journal', trip_id=archive_trip['id']) }}">Flip through the journal →</a><a class="text-link" href="{{ url_for('summary', trip_id=archive_trip['id']) }}">Open trip summary →</a></div>{% endif %}</div>
-      <div class="archive-photo-fan">
-        {% for memory in archive_memories[:4] %}<figure class="archive-photo archive-photo-{{ loop.index }}">{% if memory['image_url'] %}<img src="{{ memory['image_url'] }}" alt="{{ memory['location'] }}">{% elif memory['image_filename'] %}<img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="">{% endif %}<figcaption>{{ memory['location'] }}</figcaption></figure>{% endfor %}
-      </div>
-      <div class="passport-stamp archive-stamp">REMEMBERED<br>ROAMORY</div>
-    </aside>
-  </section>
-
-  <div class="starter-note"><strong>Starter showcase</strong><span>This editable sample journey is included so every Roamory feature is visible immediately. Change it, add to it, or delete it when you are ready to use your own trip.</span></div>
-
-  {% else %}
-  <section class="dashboard-empty-editorial">
-    <div class="empty-copy"><span class="eyebrow">BLANK PASSPORT</span><h2>Your first trip gets the whole desk.</h2><p>Create a trip and Roamory will open the itinerary, Today, Wallet, Packing, Budget, Journal and Summary around it.</p><a class="button button-primary" href="{{ url_for('create_trip') }}">Create first trip</a></div>
-    <div class="empty-collage"><div class="empty-postcard">WHERE TO NEXT?</div><div class="empty-ticket">ROAMORY · OPEN DATE</div><div class="passport-stamp">READY<br>TO GO</div></div>
-  </section>
+    </section>
+    {% else %}
+    <section class="dashboard-empty-editorial">
+      <div class="empty-copy"><span class="eyebrow">BLANK PASSPORT</span><h2>Your first trip gets the whole desk.</h2><p>Create a trip and Roamory will open the itinerary, Today, Wallet, Packing, Budget, Journal and Summary around it.</p><a class="button button-primary" href="{{ url_for('create_trip') }}">Create first trip</a></div>
+      <div class="empty-collage"><div class="empty-postcard">WHERE TO NEXT?</div><div class="empty-ticket">ROAMORY · OPEN DATE</div><div class="passport-stamp">READY<br>TO GO</div></div>
+    </section>
+    {% endif %}
   {% endif %}
 </main>
 {% endblock %}
