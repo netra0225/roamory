@@ -60,7 +60,14 @@ try:
         'ROAMORY RECOMMENDATION SELFTEST:',
         _selftest_selected.get('name'),
         _selftest_selected.get('provider'),
-        [place.get('name') for place in _selftest_places[:3]],
+        [
+            {
+                'name': place.get('name'),
+                'provider': place.get('provider'),
+                'categories': place.get('categories'),
+            }
+            for place in _selftest_places[:5]
+        ],
         flush=True,
     )
 except Exception as _selftest_exc:
