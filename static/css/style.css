@@ -553,7 +553,7 @@ body.auth-body {
 }
 .trip-builder-fields{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:minmax(220px,340px);
   gap:12px;
   margin-bottom:14px;
 }
