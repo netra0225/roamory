@@ -39,5 +39,6 @@
       <div class="empty-state route-empty"><span class="doodle-arrow">↝</span><span class="eyebrow">DAY {{ selected_day }}</span><h2>No stops on this route yet.</h2><p>Add a stay, meal, activity, transport or anything else that matters.</p><a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">Add first activity</a></div>
     {% endfor %}
   </section>
+  <p class="map-data-attribution">Place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a></p>
 </main>
 {% endblock %}
