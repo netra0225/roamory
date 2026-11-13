@@ -11,11 +11,7 @@ from urllib.request import Request, urlopen
 
 
 NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search"
-OVERPASS_ENDPOINTS = (
-    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
-    "https://overpass-api.de/api/interpreter",
-)
+PHOTON_REVERSE_URL = "https://photon.komoot.io/reverse"
 GEOAPIFY_GEOCODE_URL = "https://api.geoapify.com/v1/geocode/search"
 GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places"
 FOURSQUARE_SEARCH_URL = "https://places-api.foursquare.com/places/search"
@@ -247,7 +243,7 @@ def search_nearby_places(
     radius = max(500, min(int(radius_meters), MAX_RADIUS_METERS))
     result_count = max(1, min(int(max_results), 30))
 
-    results = _search_overpass_places(
+    results = _search_photon_places(
         float(latitude),
         float(longitude),
         categories=categories,
@@ -262,7 +258,7 @@ def search_nearby_places(
     )
 
 
-def _search_overpass_places(
+def _search_photon_places(
     latitude: float,
     longitude: float,
     *,
@@ -271,114 +267,128 @@ def _search_overpass_places(
     max_results: int,
 ) -> list[dict[str, Any]]:
     if categories == "food":
-        selectors = f"""
-          nwr(around:{radius_meters},{latitude:.7f},{longitude:.7f})["amenity"~"^(restaurant|cafe|fast_food)$"];
-        """
-    else:
-        selectors = f"""
-          nwr(around:{radius_meters},{latitude:.7f},{longitude:.7f})["tourism"~"^(attraction|viewpoint|museum|gallery|zoo|theme_park)$"];
-          nwr(around:{radius_meters},{latitude:.7f},{longitude:.7f})["historic"];
-          nwr(around:{radius_meters},{latitude:.7f},{longitude:.7f})["leisure"~"^(park|garden)$"];
-          nwr(around:{radius_meters},{latitude:.7f},{longitude:.7f})["natural"~"^(peak|waterfall|beach|spring)$"];
-        """
-
-    query = f"""
-        [out:json][timeout:18];
-        (
-          {selectors}
-        );
-        out center;
-    """
-
-    response = None
-    for endpoint in OVERPASS_ENDPOINTS:
-        try:
-            response = _json_request(
-                endpoint,
-                method="POST",
-                form_payload={"data": query},
-                timeout=22,
-            )
-            if isinstance(response, dict):
-                break
-        except RecommendationError:
-            response = None
-
-    if not isinstance(response, dict):
-        raise RecommendationError("OpenStreetMap place lookup is temporarily unavailable.")
-
-    results: list[dict[str, Any]] = []
-    seen: set[str] = set()
-
-    for element in response.get("elements") or []:
-        tags = element.get("tags") or {}
-        name = tags.get("name:en") or tags.get("name")
-        if not name:
-            continue
-
-        lat = element.get("lat")
-        lon = element.get("lon")
-        if lat is None or lon is None:
-            center = element.get("center") or {}
-            lat = center.get("lat")
-            lon = center.get("lon")
-        if lat is None or lon is None:
-            continue
-
-        distance_km = round(
-            haversine_km(latitude, longitude, float(lat), float(lon)), 2
+        osm_tags = (
+            "amenity:restaurant",
+            "amenity:cafe",
+            "amenity:fast_food",
         )
-        if distance_km * 1000 > radius_meters:
-            continue
+    else:
+        osm_tags = (
+            "tourism:viewpoint",
+            "tourism:attraction",
+            "tourism:museum",
+            "leisure:park",
+            "leisure:garden",
+            "natural:waterfall",
+            "natural:peak",
+            "historic",
+        )
 
-        dedupe_key = str(name).strip().lower()
-        if not dedupe_key or dedupe_key in seen:
-            continue
-        if not _osm_place_is_relevant(tags, str(name), categories):
-            continue
-        seen.add(dedupe_key)
+    gathered: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    per_tag_limit = min(max(8, max_results), 20)
+    radius_km = max(1, min(int(round(radius_meters / 1000)), 50))
+    request_failed = False
 
-        address = _osm_address(tags)
-        category_names = _osm_categories(tags)
-        results.append(
+    for osm_tag in osm_tags:
+        params = urlencode(
             {
-                "place_id": f"osm-{element.get('type')}-{element.get('id')}",
-                "name": str(name).strip(),
-                "address": address,
-                "latitude": float(lat),
-                "longitude": float(lon),
-                "categories": category_names,
-                "rating": None,
-                "rating_source_scale": None,
-                "price_level": None,
-                "price_label": None,
-                "distance_km": distance_km,
-                "website": tags.get("website") or tags.get("contact:website"),
-                "provider": "openstreetmap",
+                "lon": f"{longitude:.7f}",
+                "lat": f"{latitude:.7f}",
+                "radius": radius_km,
+                "limit": per_tag_limit,
+                "osm_tag": osm_tag,
             }
         )
+        try:
+            response = _json_request(
+                f"{PHOTON_REVERSE_URL}?{params}",
+                timeout=10,
+            )
+        except RecommendationError:
+            request_failed = True
+            continue
+
+        if not isinstance(response, dict):
+            continue
+
+        for feature in response.get("features") or []:
+            properties = feature.get("properties") or {}
+            geometry = feature.get("geometry") or {}
+            coordinates = geometry.get("coordinates") or []
+            if len(coordinates) < 2:
+                continue
+
+            lon = coordinates[0]
+            lat = coordinates[1]
+            if lat is None or lon is None:
+                continue
+
+            name = properties.get("name")
+            if not name:
+                continue
+
+            osm_key = str(properties.get("osm_key") or "").strip()
+            osm_value = str(properties.get("osm_value") or "").strip()
+            if not _photon_place_is_relevant(osm_key, osm_value, str(name), categories):
+                continue
+
+            distance_km = round(
+                haversine_km(latitude, longitude, float(lat), float(lon)), 2
+            )
+            if distance_km * 1000 > radius_meters:
+                continue
+
+            dedupe_key = str(name).strip().lower()
+            if not dedupe_key or dedupe_key in seen:
+                continue
+            seen.add(dedupe_key)
+
+            category = f"{osm_key}:{osm_value}" if osm_key and osm_value else osm_key
+            gathered.append(
+                {
+                    "place_id": f"photon-{properties.get('osm_type')}-{properties.get('osm_id')}",
+                    "name": str(name).strip(),
+                    "address": _photon_address(properties),
+                    "latitude": float(lat),
+                    "longitude": float(lon),
+                    "categories": [category] if category else [],
+                    "rating": None,
+                    "rating_source_scale": None,
+                    "price_level": None,
+                    "price_label": None,
+                    "distance_km": distance_km,
+                    "website": (properties.get("extra") or {}).get("website"),
+                    "provider": "photon-openstreetmap",
+                }
+            )
+
+    if not gathered and request_failed:
+        raise RecommendationError("OpenStreetMap place lookup is temporarily unavailable.")
 
     if categories == "food":
-        results.sort(key=lambda item: float(item.get("distance_km") or 9999))
+        gathered.sort(key=lambda item: float(item.get("distance_km") or 9999))
     else:
-        results.sort(
+        gathered.sort(
             key=lambda item: (
-                _osm_attraction_priority(item.get("categories") or []),
+                _photon_attraction_priority(item.get("categories") or []),
                 float(item.get("distance_km") or 9999),
             )
         )
-    return results[:max_results]
+
+    return gathered[:max_results]
 
 
-def _osm_place_is_relevant(
-    tags: dict[str, Any],
+def _photon_place_is_relevant(
+    osm_key: str,
+    osm_value: str,
     name: str,
     categories: str,
 ) -> bool:
     lowered = name.lower()
 
     if categories == "food":
-        return tags.get("amenity") in {"restaurant", "cafe", "fast_food"}
+        return osm_key == "amenity" and osm_value in {"restaurant", "cafe", "fast_food"}
 
     blocked_name_tokens = (
         "tourist home",
@@ -401,33 +411,21 @@ def _osm_place_is_relevant(
     if any(token in lowered for token in blocked_name_tokens):
         return False
 
-    if tags.get("shop") or tags.get("public_transport"):
-        return False
-    if tags.get("amenity") in {"taxi", "bus_station", "parking"}:
-        return False
-    if tags.get("tourism") in {
-        "hotel", "guest_house", "hostel", "motel", "apartment",
-        "chalet", "camp_site", "caravan_site",
-    }:
-        return False
-
-    return bool(
-        tags.get("tourism") in {
-            "attraction", "viewpoint", "museum", "gallery", "zoo", "theme_park"
-        }
-        or tags.get("historic")
-        or tags.get("leisure") in {"park", "garden"}
-        or tags.get("natural") in {"peak", "waterfall", "beach", "spring"}
+    return (
+        (osm_key == "tourism" and osm_value in {"viewpoint", "attraction", "museum"})
+        or (osm_key == "leisure" and osm_value in {"park", "garden"})
+        or (osm_key == "natural" and osm_value in {"waterfall", "peak"})
+        or osm_key == "historic"
     )
 
 
-def _osm_attraction_priority(categories: list[str]) -> int:
+def _photon_attraction_priority(categories: list[str]) -> int:
     values = set(categories)
     priority_groups = (
         {"tourism:viewpoint", "natural:waterfall", "natural:peak"},
-        {"leisure:garden", "leisure:park", "tourism:museum", "tourism:gallery"},
+        {"leisure:garden", "leisure:park", "tourism:museum"},
         {"historic:monument", "historic:memorial", "historic:castle", "historic:ruins"},
-        {"tourism:attraction", "tourism:zoo", "tourism:theme_park"},
+        {"tourism:attraction"},
     )
     for index, group in enumerate(priority_groups):
         if values & group:
@@ -435,37 +433,28 @@ def _osm_attraction_priority(categories: list[str]) -> int:
     return 9
 
 
-def _osm_address(tags: dict[str, Any]) -> str:
-    if tags.get("addr:full"):
-        return str(tags["addr:full"]).strip()
-
+def _photon_address(properties: dict[str, Any]) -> str:
     street = " ".join(
         part
         for part in (
-            str(tags.get("addr:housenumber") or "").strip(),
-            str(tags.get("addr:street") or "").strip(),
+            str(properties.get("housenumber") or "").strip(),
+            str(properties.get("street") or "").strip(),
         )
         if part
     )
-    pieces = [
+    pieces = (
         street,
-        tags.get("addr:place"),
-        tags.get("addr:suburb"),
-        tags.get("addr:city"),
-        tags.get("addr:state"),
-        tags.get("addr:postcode"),
-    ]
-    address = ", ".join(str(value).strip() for value in pieces if value and str(value).strip())
-    return address or str(tags.get("is_in") or "").strip()
-
-
-def _osm_categories(tags: dict[str, Any]) -> list[str]:
-    categories = []
-    for key in ("tourism", "historic", "leisure", "natural", "amenity"):
-        value = tags.get(key)
-        if value:
-            categories.append(f"{key}:{value}")
-    return categories
+        properties.get("district"),
+        properties.get("city"),
+        properties.get("state"),
+        properties.get("postcode"),
+        properties.get("country"),
+    )
+    return ", ".join(
+        str(value).strip()
+        for value in pieces
+        if value and str(value).strip()
+    )
 
 
 def _search_foursquare(
