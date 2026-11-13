@@ -96,14 +96,12 @@ try:
                 data={
                     'csrf_token': build_token,
                     'interest': 'mixed',
-                    'food_budget': 'any',
-                    'min_rating': '0',
                 },
                 follow_redirects=True,
             )
         assert response.status_code == 200
         assert b'Verified Test Place' in response.data
-        assert b'Build My Trip' not in response.data
+        assert b'Build my trip' not in response.data
 
     print('Roamory smoke test passed.')
 finally:
