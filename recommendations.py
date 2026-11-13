@@ -364,6 +364,8 @@ def _search_overpass_places(
         dedupe_key = str(name).strip().lower()
         if not dedupe_key or dedupe_key in seen:
             continue
+        if not _osm_place_is_relevant(tags, str(name), categories):
+            continue
         seen.add(dedupe_key)
 
         address = _osm_address(tags)
@@ -386,8 +388,81 @@ def _search_overpass_places(
             }
         )
 
-    results.sort(key=lambda item: float(item.get("distance_km") or 9999))
+    if categories == "food":
+        results.sort(key=lambda item: float(item.get("distance_km") or 9999))
+    else:
+        results.sort(
+            key=lambda item: (
+                _osm_attraction_priority(item.get("categories") or []),
+                float(item.get("distance_km") or 9999),
+            )
+        )
     return results[:max_results]
+
+
+def _osm_place_is_relevant(
+    tags: dict[str, Any],
+    name: str,
+    categories: str,
+) -> bool:
+    lowered = name.lower()
+
+    if categories == "food":
+        return tags.get("amenity") in {"restaurant", "cafe", "fast_food"}
+
+    blocked_name_tokens = (
+        "tourist home",
+        "guest house",
+        "guesthouse",
+        "hotel",
+        "resort",
+        "lodge",
+        "homestay",
+        "hostel",
+        "taxi",
+        "bus stand",
+        "bus station",
+        "super market",
+        "supermarket",
+        "travel agency",
+        "restaurant",
+        "cafe",
+    )
+    if any(token in lowered for token in blocked_name_tokens):
+        return False
+
+    if tags.get("shop") or tags.get("public_transport"):
+        return False
+    if tags.get("amenity") in {"taxi", "bus_station", "parking"}:
+        return False
+    if tags.get("tourism") in {
+        "hotel", "guest_house", "hostel", "motel", "apartment",
+        "chalet", "camp_site", "caravan_site",
+    }:
+        return False
+
+    return bool(
+        tags.get("tourism") in {
+            "attraction", "viewpoint", "museum", "gallery", "zoo", "theme_park"
+        }
+        or tags.get("historic")
+        or tags.get("leisure") in {"park", "garden"}
+        or tags.get("natural") in {"peak", "waterfall", "beach", "spring"}
+    )
+
+
+def _osm_attraction_priority(categories: list[str]) -> int:
+    values = set(categories)
+    priority_groups = (
+        {"tourism:viewpoint", "natural:waterfall", "natural:peak"},
+        {"leisure:garden", "leisure:park", "tourism:museum", "tourism:gallery"},
+        {"historic:monument", "historic:memorial", "historic:castle", "historic:ruins"},
+        {"tourism:attraction", "tourism:zoo", "tourism:theme_park"},
+    )
+    for index, group in enumerate(priority_groups):
+        if values & group:
+            return index
+    return 9
 
 
 def _osm_address(tags: dict[str, Any]) -> str:
