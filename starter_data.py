@@ -84,19 +84,6 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
         'mediterranean',
         125000,
     )
-    completed_id = _create_trip(
-        db,
-        user_id,
-        'Five Places I Keep Thinking About',
-        'Summer Atlas',
-        today - timedelta(days=90),
-        today - timedelta(days=84),
-        'A finished journey gathered as five distinct journal pages: coast, lake, spring streets, mountains and palace light.',
-        IMAGE_MAP['coast'],
-        'coral',
-        98000,
-    )
-
     # ---------- Ongoing Udaipur trip ----------
     days = db.execute('SELECT * FROM trip_days WHERE trip_id=? ORDER BY day_number', (ongoing_id,)).fetchall()
     ongoing_activities = [
@@ -214,49 +201,4 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
             (upcoming_id, day['id'], name, kind, day['date'], time_, location, note, 'planned'),
         )
 
-    # ---------- Completed Summer Atlas trip ----------
-    completed_days = db.execute('SELECT * FROM trip_days WHERE trip_id=? ORDER BY day_number', (completed_id,)).fetchall()
-    completed_stops = [
-        (0, 'Cliffside lunch in Positano', 'restaurant', '12:30', 'Positano'),
-        (0, 'Swim below the town', 'activity', '16:00', 'Spiaggia Grande'),
-        (1, 'Lake ferry morning', 'transport', '09:20', 'Lake Como'),
-        (2, 'Spring side-street walk', 'destination', '08:10', 'Kyoto'),
-        (3, 'First light at the lake', 'activity', '06:00', 'Banff National Park'),
-        (4, 'Palace windows at blue hour', 'destination', '18:20', 'Udaipur'),
-        (5, 'Long lunch without a plan', 'restaurant', '13:00', 'Old Town'),
-        (6, 'Last postcard before home', 'general', '17:30', 'Station café'),
-    ]
-    for day_index, name, kind, time_, location in completed_stops:
-        day = completed_days[day_index]
-        db.execute(
-            '''INSERT INTO activities
-               (trip_id,day_id,name,type,activity_date,start_time,location,notes,status,actual_cost)
-               VALUES (?,?,?,?,?,?,?,?,?,?)''',
-            (completed_id, day['id'], name, kind, day['date'], time_, location, 'One of the stops that made the final journal.', 'completed', 1800 + day_index * 350),
-        )
-
-    for name, category, offset, amount in [
-        ('Stays', 'Stay', -90, 42000), ('Ferries & trains', 'Transport', -89, 12800),
-        ('Meals worth remembering', 'Food', -88, 17600), ('Museums & activities', 'Activities', -87, 10200),
-        ('Postcards and small things', 'Shopping', -86, 4900),
-    ]:
-        db.execute(
-            'INSERT INTO expenses (trip_id,name,category,expense_date,amount,note) VALUES (?,?,?,?,?,?)',
-            (completed_id, name, category, (today + timedelta(days=offset)).isoformat(), amount, 'Final trip total'),
-        )
-
-    journal_pages = [
-        ('Amalfi at Noon', 'Amalfi Coast', IMAGE_MAP['amalfi'], 'The walls were warm from the sun and every turn opened straight into blue water.', 'postcard'),
-        ('Lake Como, After Rain', 'Lake Como', IMAGE_MAP['coast'], 'The boats started moving again before the clouds had fully left.', 'lake'),
-        ('Kyoto in Spring', 'Kyoto', IMAGE_MAP['kyoto'], 'Pink petals collected at the edge of side streets like confetti after a party.', 'sunset'),
-        ('Banff, First Light', 'Banff National Park', IMAGE_MAP['banff'], 'Cold hands, quiet water and a mountain reflection that looked almost too precise.', 'lake'),
-        ('Udaipur Blue Hour', 'Udaipur', IMAGE_MAP['udaipur'], 'The lake turned silver just before the palace lights appeared.', 'lemon'),
-    ]
-    for idx, (title, location, image, note, mood) in enumerate(journal_pages):
-        db.execute(
-            '''INSERT INTO memories (trip_id,title,memory_date,location,note,image_url,mood)
-               VALUES (?,?,?,?,?,?,?)''',
-            (completed_id, title, (today - timedelta(days=90 - idx)).isoformat(), location, note, image, mood),
-        )
-
-    return {'ongoing': ongoing_id, 'upcoming': upcoming_id, 'completed': completed_id}
+    return {'ongoing': ongoing_id, 'upcoming': upcoming_id}
