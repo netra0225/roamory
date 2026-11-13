@@ -294,11 +294,6 @@ def dashboard():
         dashboard_memories = db.execute('SELECT * FROM memories WHERE trip_id=? ORDER BY memory_date DESC,id DESC LIMIT 3', (ongoing['id'],)).fetchall()
         dashboard_documents = db.execute('SELECT * FROM documents WHERE trip_id=? ORDER BY created_at DESC LIMIT 3', (ongoing['id'],)).fetchall()
 
-    archive_memories = []
-    archive_trip = completed[-1] if completed else None
-    if archive_trip:
-        archive_memories = db.execute('SELECT * FROM memories WHERE trip_id=? ORDER BY memory_date LIMIT 5', (archive_trip['id'],)).fetchall()
-
     countdown = None
     if upcoming:
         try:
@@ -310,7 +305,7 @@ def dashboard():
         'dashboard.html', trips=trips, ongoing=ongoing, upcoming=upcoming, completed=completed, readiness=readiness,
         current_activity=current_activity, next_activity=next_activity, current_day=current_day, spent=spent,
         dashboard_memories=dashboard_memories, dashboard_documents=dashboard_documents,
-        archive_trip=archive_trip, archive_memories=archive_memories, countdown=countdown
+        countdown=countdown
     )
 
 
