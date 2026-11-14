@@ -222,6 +222,8 @@ def _activity_from_place(
         "type": activity_type,
         "start_time": start_time,
         "location": place.get("address") or "",
+        "latitude": place.get("latitude"),
+        "longitude": place.get("longitude"),
         "estimated_cost": 0,
         "notes": " · ".join(details),
     }
