@@ -119,6 +119,15 @@ def _init_postgres_schema(db, schema_path: Path):
     if 'starter_seeded' not in settings_columns:
         db.execute('ALTER TABLE settings ADD COLUMN starter_seeded INTEGER NOT NULL DEFAULT 0')
 
+    activity_columns = db.execute(
+        "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='activities'"
+    ).fetchall()
+    activity_column_names = {row['column_name'] for row in activity_columns}
+    if 'latitude' not in activity_column_names:
+        db.execute('ALTER TABLE activities ADD COLUMN latitude REAL')
+    if 'longitude' not in activity_column_names:
+        db.execute('ALTER TABLE activities ADD COLUMN longitude REAL')
+
     db.execute(
         '''CREATE TABLE IF NOT EXISTS app_meta (
                id SERIAL PRIMARY KEY,
@@ -134,6 +143,12 @@ def _init_sqlite_schema(db, schema_path: Path):
     settings_columns = {row['name'] for row in db.execute('PRAGMA table_info(settings)').fetchall()}
     if 'starter_seeded' not in settings_columns:
         db.execute('ALTER TABLE settings ADD COLUMN starter_seeded INTEGER NOT NULL DEFAULT 0')
+
+    activity_columns = {row['name'] for row in db.execute('PRAGMA table_info(activities)').fetchall()}
+    if 'latitude' not in activity_columns:
+        db.execute('ALTER TABLE activities ADD COLUMN latitude REAL')
+    if 'longitude' not in activity_columns:
+        db.execute('ALTER TABLE activities ADD COLUMN longitude REAL')
 
     db.execute(
         '''CREATE TABLE IF NOT EXISTS app_meta (
