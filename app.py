@@ -1064,16 +1064,22 @@ def today(trip_id):
         )
 
     _seed_smart_packing(db, trip)
-    carry_items = db.execute(
+    unpacked_items = db.execute(
         '''SELECT name FROM packing_items
            WHERE trip_id=? AND packed=0
-           ORDER BY CASE
-               WHEN name LIKE '%umbrella%' OR name LIKE '%jacket%' OR name LIKE '%water%' THEN 0
-               ELSE 1
-           END, id
-           LIMIT 2''',
+           ORDER BY id
+           LIMIT 20''',
         (trip_id,)
     ).fetchall()
+
+    priority_words = ('umbrella', 'jacket', 'water', 'rain', 'charger', 'medicine')
+    carry_items = sorted(
+        unpacked_items,
+        key=lambda row: (
+            0 if any(word in (row['name'] or '').lower() for word in priority_words) else 1,
+            (row['name'] or '').lower(),
+        )
+    )[:2]
 
     return render_template(
         'today.html', trip=trip, day=day, activities=activities, current=current,
