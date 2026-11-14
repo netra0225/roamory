@@ -387,3 +387,110 @@
   .today-hero{min-height:240px;padding:22px;}
   .now-card.now-card-experience{padding:22px;}
 }
+
+
+/* Quiet readiness + automatic brief */
+.readiness-line{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:18px 0 20px;
+}
+.readiness-line span{
+  padding:7px 10px;
+  border-radius:999px;
+  background:#f1ede4;
+  color:#66717b;
+  font-size:.72rem;
+  font-weight:800;
+}
+.readiness-line span.ready{
+  background:#e8f3ea;
+  color:#2f6a42;
+}
+.next-action-copy{
+  padding:16px 0 4px;
+  border-top:1px solid rgba(31,43,55,.1);
+}
+.next-action-copy small{
+  display:block;
+  margin-bottom:5px;
+  color:#1769b0;
+  font-size:.68rem;
+  font-weight:900;
+  letter-spacing:.13em;
+}
+.next-action-copy strong{
+  display:block;
+  font-family:var(--serif);
+  font-size:1.55rem;
+  font-weight:400;
+}
+.next-action-copy p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+}
+
+.today-brief{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1px;
+  margin:-2px 0 24px;
+  border:1px solid rgba(31,43,55,.1);
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(31,43,55,.08);
+}
+.today-brief>div{
+  min-height:108px;
+  padding:18px 20px;
+  background:#fffdf8;
+}
+.today-brief small{
+  display:block;
+  margin-bottom:7px;
+  color:#1769b0;
+  font-size:.66rem;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.today-brief strong{
+  display:block;
+  font-size:1rem;
+  line-height:1.25;
+}
+.today-brief span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:.82rem;
+  line-height:1.35;
+}
+
+.packing-manual-tools{
+  margin:0 0 26px;
+  border:1px solid rgba(31,43,55,.1);
+  border-radius:16px;
+  background:#fffaf0;
+}
+.packing-manual-tools>summary{
+  cursor:pointer;
+  list-style:none;
+  padding:14px 18px;
+  font-size:.82rem;
+  font-weight:800;
+  color:#1769b0;
+}
+.packing-manual-tools>summary::-webkit-details-marker{display:none;}
+.packing-manual-tools[open]>summary{
+  border-bottom:1px solid rgba(31,43,55,.09);
+}
+.packing-manual-tools .packing-tools{
+  margin:0;
+  padding:16px 18px 18px;
+}
+
+@media(max-width:720px){
+  .today-brief{grid-template-columns:1fr;}
+  .today-brief>div{min-height:auto;}
+}
