@@ -702,3 +702,26 @@
   }
   .expense-details .expense-note{grid-column:auto;}
 }
+
+
+/* Dashboard hierarchy: current trip first, next trip second. */
+.dashboard-up-next{
+  margin-top:64px;
+}
+.up-next-heading{
+  margin-bottom:18px;
+}
+.up-next-heading .handwritten{
+  max-width:260px;
+  text-align:right;
+}
+.next-trip-prep-card{
+  margin-bottom:54px;
+}
+.upcoming-journey-cover{
+  margin-top:12px;
+}
+@media(max-width:720px){
+  .dashboard-up-next{margin-top:44px;}
+  .up-next-heading .handwritten{text-align:left;}
+}
