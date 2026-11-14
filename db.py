@@ -245,6 +245,133 @@ def _backfill_udaipur_showcase_itinerary(db):
     )
 
 
+
+def _backfill_udaipur_food_stops(db):
+    """Ensure the current Udaipur showcase has at least two named food stops every day."""
+    migration_key = 'udaipur_food_stops_v1'
+    applied = db.execute(
+        'SELECT id FROM app_meta WHERE meta_key = ?',
+        (migration_key,),
+    ).fetchone()
+    if applied:
+        return
+
+    food_specs = {
+        1: [
+            ('Breakfast at Ambrai Restaurant', '08:30', '09:45', 'Ambrai Restaurant', 1200, 'Lake-facing breakfast before City Palace.'),
+            ('Lunch at Millets of Mewar', '13:30', '14:45', 'Millets of Mewar Restaurant', 700, 'A lighter millet-based lunch near the old city.'),
+        ],
+        2: [
+            ("Breakfast at Jheel's Ginger Coffee Bar & Bakery", '08:30', '09:15', "Jheel's Ginger Coffee Bar & Bakery", 600, 'Coffee, bakery food and a lake-side start.'),
+            ('Dinner at Upre by 1559 AD', '19:30', '21:00', 'Upre by 1559 AD', 1800, 'Book a rooftop table for the lake view.'),
+        ],
+        3: [
+            ('Coffee at Cafe Edelweiss', '10:00', '11:15', 'Cafe Edelweiss', 600, 'Coffee, bakery food and an easy start to the day.'),
+            ('Dinner at Tribute Restaurant', '20:15', '21:45', 'Tribute Restaurant', 1800, 'Lakeside dinner after the Monsoon Palace sunset.'),
+        ],
+        4: [
+            ('Lunch at Savage Garden Restaurant', '12:30', '14:00', 'Savage Garden Restaurant', 900, 'Relaxed old-city lunch before the afternoon break.'),
+            ('Dinner at Sun N Moon Cafe & Restaurant', '19:00', '20:30', 'Sun N Moon Cafe & Restaurant', 1200, 'Rooftop dinner near Jagdish Temple.'),
+        ],
+        5: [
+            ('Lunch at 1559 AD', '13:15', '14:45', '1559 AD', 1500, 'Heritage-style lunch near Fateh Sagar.'),
+            ('Dinner at Khamma Ghani Restaurant', '19:30', '21:00', 'Khamma Ghani Restaurant', 1600, 'Lakeside Rajasthani dinner after the sunset walk.'),
+        ],
+        6: [
+            ('Lunch at Natraj Dining Hall & Restaurant', '13:15', '14:30', 'Natraj Dining Hall & Restaurant', 700, 'Traditional Rajasthani-Gujarati thali for lunch.'),
+            ('Dinner at Jagat Niwas Palace Restaurant', '19:30', '21:00', 'Jagat Niwas Palace Restaurant', 1600, 'Final lake-view dinner in the old city.'),
+        ],
+    }
+
+    trips = db.execute(
+        '''SELECT id FROM trips
+           WHERE LOWER(destination)=?
+             AND (id=1 OR title=?)''',
+        ('udaipur', 'Palaces, Lakes & Late Sunsets'),
+    ).fetchall()
+
+    for trip in trips:
+        days = db.execute(
+            '''SELECT id, day_number, date FROM trip_days
+               WHERE trip_id=?
+               ORDER BY day_number''',
+            (trip['id'],),
+        ).fetchall()
+
+        for day in days:
+            day_number = day['day_number']
+            specs = food_specs.get(day_number, [])
+            if not specs:
+                continue
+
+            # Rename the old generic demo food entries so every stop is a real named venue.
+            if day_number == 1:
+                db.execute(
+                    '''UPDATE activities
+                       SET name=?, location=?, notes=?
+                       WHERE trip_id=? AND day_id=? AND type='restaurant'
+                         AND name=?''',
+                    (
+                        'Breakfast at Ambrai Restaurant', 'Ambrai Restaurant',
+                        'Lake-facing breakfast before City Palace.',
+                        trip['id'], day['id'], 'Breakfast by Lake Pichola',
+                    ),
+                )
+            elif day_number == 3:
+                db.execute(
+                    '''UPDATE activities
+                       SET name=?, location=?, notes=?
+                       WHERE trip_id=? AND day_id=? AND type='restaurant'
+                         AND name=?''',
+                    (
+                        'Coffee at Cafe Edelweiss', 'Cafe Edelweiss',
+                        'Coffee, bakery food and an easy start to the day.',
+                        trip['id'], day['id'], 'Coffee and sketchbook hour',
+                    ),
+                )
+                db.execute(
+                    '''UPDATE activities
+                       SET name=?, location=?, notes=?
+                       WHERE trip_id=? AND day_id=? AND type='restaurant'
+                         AND name=?''',
+                    (
+                        'Dinner at Tribute Restaurant', 'Tribute Restaurant',
+                        'Lakeside dinner after the Monsoon Palace sunset.',
+                        trip['id'], day['id'], 'Dinner overlooking the lake',
+                    ),
+                )
+
+            existing_rows = db.execute(
+                '''SELECT name FROM activities
+                   WHERE trip_id=? AND day_id=? AND type='restaurant' ''',
+                (trip['id'], day['id']),
+            ).fetchall()
+            existing_names = {row['name'] for row in existing_rows}
+            restaurant_count = len(existing_rows)
+
+            for name, start, end, location, estimated, note in specs:
+                if restaurant_count >= 2:
+                    break
+                if name in existing_names:
+                    continue
+                db.execute(
+                    '''INSERT INTO activities
+                       (trip_id,day_id,name,type,activity_date,start_time,end_time,location,
+                        estimated_cost,actual_cost,notes,status)
+                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''',
+                    (
+                        trip['id'], day['id'], name, 'restaurant', day['date'],
+                        start, end, location, estimated, 0, note, 'planned',
+                    ),
+                )
+                existing_names.add(name)
+                restaurant_count += 1
+
+    db.execute(
+        'INSERT INTO app_meta (meta_key, meta_value) VALUES (?, ?)',
+        (migration_key, '1'),
+    )
+
 def init_db():
     db = get_db()
     schema_path = Path(current_app.root_path) / 'schema.sql'
@@ -267,6 +394,7 @@ def init_db():
     )
     _configure_persistent_secret(db)
     _backfill_udaipur_showcase_itinerary(db)
+    _backfill_udaipur_food_stops(db)
     db.commit()
 
 
