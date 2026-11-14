@@ -70,27 +70,23 @@
 
     <div class="journey-cover-collage">
       <figure class="journey-main-photo">
-        {% if ongoing['destination'] == 'Udaipur' %}
-        <img src="{{ url_for('static', filename='uploads/udaipur-palace-hq.jpg') }}" alt="Udaipur palace beside the water">
-        {% else %}
         <img src="{{ cover_for_trip(ongoing) }}" alt="{{ ongoing['destination'] }}">
-        {% endif %}
         <figcaption>{{ ongoing['destination'] }} · Day {{ current_day['day_number'] if current_day else '—' }}</figcaption>
       </figure>
       {% if dashboard_memories %}
         {% set memory = dashboard_memories[0] %}
         <figure class="journey-polaroid">
-          {% if ongoing['destination'] == 'Udaipur' %}
-          <img src="{{ url_for('static', filename='uploads/dashboard-pink-car.svg') }}" alt="Pink vintage car in a palace garden">
-          <figcaption>Pink wheels at the palace</figcaption>
+          {% if memory['image_filename'] %}
+          <img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="{{ memory['title'] }}">
+          {% elif memory['image_url'] %}
+          <img src="{{ memory['image_url'] }}" alt="{{ memory['title'] }}">
           {% else %}
-          {% if memory['image_filename'] %}<img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="{{ memory['title'] }}">
-          {% elif memory['image_url'] %}<img src="{{ memory['image_url'] }}" alt="{{ memory['title'] }}">{% endif %}
-          <figcaption>{{ memory['title'] }}</figcaption>
+          <img src="{{ cover_for_trip(ongoing) }}" alt="{{ ongoing['destination'] }}">
           {% endif %}
+          <figcaption>{{ memory['title'] }}</figcaption>
         </figure>
       {% endif %}
-      <div class="journey-ticket"><span>ROAMORY / CURRENT</span><strong>{{ current_activity['start_time'] if current_activity else 'OPEN' }}</strong><small>{% if ongoing['destination'] == 'Udaipur' %}Palace poolside hour{% else %}{{ current_activity['name'] if current_activity else 'MAKE A NEW STOP' }}{% endif %}</small></div>
+      <div class="journey-ticket"><span>ROAMORY / CURRENT</span><strong>{{ current_activity['start_time'] if current_activity else 'OPEN' }}</strong><small>{{ current_activity['name'] if current_activity else 'MAKE A NEW STOP' }}</small></div>
       <div class="passport-stamp journey-stamp">IN MOTION<br>{{ ongoing['destination'][:8]|upper }}</div>
       <span class="tape journey-tape"></span>
       <svg class="journey-doodle" viewBox="0 0 240 130" aria-hidden="true"><path d="M8 104 C 46 17, 127 8, 222 66"/><path d="M218 58 L229 68 L215 72"/></svg>
