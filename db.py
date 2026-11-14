@@ -183,7 +183,7 @@ def _configure_persistent_secret(db):
 
 def _backfill_udaipur_showcase_itinerary(db):
     """Fill the previously empty final days of the built-in Udaipur showcase once."""
-    migration_key = 'udaipur_showcase_days_4_6_v1'
+    migration_key = 'udaipur_showcase_days_4_6_v2'
     applied = db.execute(
         'SELECT id FROM app_meta WHERE meta_key = ?',
         (migration_key,),
@@ -208,7 +208,8 @@ def _backfill_udaipur_showcase_itinerary(db):
 
     trips = db.execute(
         '''SELECT id FROM trips
-           WHERE LOWER(destination)=? AND title=?''',
+           WHERE LOWER(destination)=?
+             AND (id=1 OR title=?)''',
         ('udaipur', 'Palaces, Lakes & Late Sunsets'),
     ).fetchall()
 
