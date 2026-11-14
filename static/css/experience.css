@@ -494,3 +494,22 @@
   .today-brief{grid-template-columns:1fr;}
   .today-brief>div{min-height:auto;}
 }
+
+
+/* Instant packing feedback: short UI transitions, no full-page animation. */
+.packing-page .packing-item{
+  transition:opacity .14s ease,background-color .14s ease;
+}
+.packing-page .pack-check{
+  transition:background-color .12s ease,color .12s ease,border-color .12s ease,transform .12s ease;
+  cursor:pointer;
+}
+.packing-page .pack-check.pack-check-pop{
+  transform:scale(1.12);
+}
+.packing-page .packing-meter span{
+  transition:width .18s ease;
+}
+.packing-page .suitcase-fill{
+  transition:height .22s ease;
+}
