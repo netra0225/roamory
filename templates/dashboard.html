@@ -11,7 +11,7 @@
       <h1>Your trip, <em>right now.</em></h1>
             {% else %}
       <h1>Where are we <em>going</em> next?</h1>
-      <p style="padding-top:.9rem">One desk for the route, the practical bits, and the pages you keep afterwards.</p>
+      <p style="padding-top:.9rem">Plan the route, keep the details close, and remember the trip.</p>
       {% endif %}
     </div>
     <a class="button button-primary masthead-create" href="{{ url_for('create_trip') }}">+ Create a trip</a>
@@ -87,30 +87,29 @@
     <a href="{{ url_for('wallet', trip_id=ongoing['id']) }}"><span>04</span><strong>Wallet</strong><small>{{ readiness['docs'] }} documents</small></a>
     <a href="{{ url_for('packing', trip_id=ongoing['id']) }}"><span>05</span><strong>Packing</strong><small>{{ packing_pct }}% ready</small></a>
     <a href="{{ url_for('budget', trip_id=ongoing['id']) }}"><span>06</span><strong>Budget</strong><small>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(spent) }} spent</small></a>
-    <a href="{{ url_for('common_journal') }}"><span>07</span><strong>Journal</strong><small>{{ dashboard_memories|length }} memories</small></a>
+    <a href="{{ url_for('common_journal') }}"><span>07</span><strong>Travel Journal</strong><small>{{ dashboard_memories|length }} memories</small></a>
     <a href="{{ url_for('summary', trip_id=ongoing['id']) }}"><span>08</span><strong>Summary</strong><small>trip edition</small></a>
   </section>
 
   <section class="desk-heading">
-    <div><span class="eyebrow">TRIP DESK · RIGHT NOW</span><h2>Everything that matters, without becoming a dashboard.</h2></div>
-    <span class="handwritten desk-note">the practical stuff can still be beautiful →</span>
+    <div><span class="eyebrow">TRIP DESK · RIGHT NOW</span><h2>Trip at a glance.</h2></div>
   </section>
 
   <section class="dashboard-editorial-grid">
     <article class="desk-card today-preview-card">
-      <div class="desk-card-top"><span class="eyebrow">TODAY · DAY {{ current_day['day_number'] if current_day else '—' }}</span><a href="{{ url_for('today', trip_id=ongoing['id']) }}">Open →</a></div>
+      <div class="desk-card-top"><span class="eyebrow">TODAY · DAY {{ current_day['day_number'] if current_day else '—' }}</span></div>
       {% if current_activity %}
       <div class="today-clock">{{ current_activity['start_time'] or 'Anytime' }}</div>
       <span class="activity-type">{{ current_activity['type']|upper }}</span>
       <h3>{{ current_activity['name'] }}</h3>
       <p class="today-preview-location">⌖ {{ current_activity['location'] or 'Location pending' }}</p>
       <div class="today-next-strip"><small>UP NEXT</small><strong>{{ next_activity['name'] if next_activity else 'Nothing after this — enjoy the gap.' }}</strong></div>
-      {% else %}<h3>The route is clear.</h3><p>Add something to the itinerary when you know what comes next.</p>{% endif %}
+      {% else %}<h3>No stops left for today.</h3>{% endif %}
       <div class="today-route-sketch"><i class="done"></i><i class="done"></i><i class="current"></i><i></i><i></i></div>
     </article>
 
     <article class="desk-card packing-preview-card">
-      <div class="desk-card-top"><span class="eyebrow">PACKING</span><a href="{{ url_for('packing', trip_id=ongoing['id']) }}">Open →</a></div>
+      <div class="desk-card-top"><span class="eyebrow">PACKING</span></div>
       <div class="mini-suitcase" style="--fill:{{ packing_pct }}%"><span class="mini-handle"></span><div><i></i><b>R</b><small>{{ ongoing['destination'][:10]|upper }}</small></div></div>
       <h3>{{ packing_done }} / {{ packing_total }} packed</h3>
       <p>{{ packing_pct }}% of the suitcase is ready.</p>
@@ -118,7 +117,7 @@
     </article>
 
     <article class="desk-card budget-preview-card {{ 'is-over' if ongoing['planned_budget'] and spent > ongoing['planned_budget'] else '' }}">
-      <div class="desk-card-top"><span class="eyebrow">BUDGET</span><a href="{{ url_for('budget', trip_id=ongoing['id']) }}">Open →</a></div>
+      <div class="desk-card-top"><span class="eyebrow">BUDGET</span></div>
       <div class="mini-receipt">
         <span>ROAMORY · TRIP SPEND</span>
         <hr>
@@ -130,7 +129,7 @@
     </article>
 
     <article class="desk-card wallet-preview-card">
-      <div class="desk-card-top"><span class="eyebrow">TRAVEL WALLET</span><a href="{{ url_for('wallet', trip_id=ongoing['id']) }}">Open →</a></div>
+      <div class="desk-card-top"><span class="eyebrow">TRAVEL WALLET</span></div>
       <div class="mini-wallet">
         {% for doc in dashboard_documents %}<div class="mini-ticket ticket-{{ loop.index }}"><span>{{ doc['type']|upper }}</span><strong>{{ doc['title'] }}</strong><small>{{ doc['document_date'] or 'KEEP CLOSE' }}</small></div>{% endfor %}
         <div class="wallet-pocket-front"><span>ROAMORY</span><b>{{ readiness['docs'] }}</b><small>DOCUMENTS FILED</small></div>
@@ -138,7 +137,7 @@
     </article>
 
     <article class="desk-card journal-preview-card">
-      <div class="desk-card-top"><span class="eyebrow">JOURNAL · DEVELOPING</span><a href="{{ url_for('common_journal') }}">Open book →</a></div>
+      <div class="desk-card-top"><span class="eyebrow">TRAVEL JOURNAL</span></div>
       <div class="dashboard-journal-book">
         <div class="dash-journal-left">
           <span class="tape"></span>
@@ -268,7 +267,7 @@
     {% endif %}
     {% else %}
     <section class="dashboard-empty-editorial">
-      <div class="empty-copy"><span class="eyebrow">BLANK PASSPORT</span><h2>Your first trip gets the whole desk.</h2><p>Create a trip and Roamory will open the itinerary, Today, Wallet, Packing, Budget, Journal and Summary around it.</p><a class="button button-primary" href="{{ url_for('create_trip') }}">Create first trip</a></div>
+      <div class="empty-copy"><span class="eyebrow">BLANK PASSPORT</span><h2>Your first trip starts here.</h2><p>Plan the route, keep the practical details together, and save the memories.</p><a class="button button-primary" href="{{ url_for('create_trip') }}">Create first trip</a></div>
       <div class="empty-collage"><div class="empty-postcard">WHERE TO NEXT?</div><div class="empty-ticket">ROAMORY · OPEN DATE</div><div class="passport-stamp">READY<br>TO GO</div></div>
     </section>
     {% endif %}
