@@ -7,7 +7,7 @@ from functools import wraps
 from pathlib import Path
 
 from flask import (
-    Flask, abort, flash, g, redirect, render_template, request,
+    Flask, abort, flash, g, jsonify, redirect, render_template, request,
     send_from_directory, session, url_for
 )
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -1244,8 +1244,30 @@ def toggle_packing_item(trip_id, item_id):
     item = db.execute('SELECT * FROM packing_items WHERE id=? AND trip_id=?', (item_id,trip_id)).fetchone()
     if item is None:
         abort(404)
-    db.execute('UPDATE packing_items SET packed=? WHERE id=?', (0 if item['packed'] else 1, item_id))
+
+    packed_value = 0 if item['packed'] else 1
+    db.execute(
+        'UPDATE packing_items SET packed=? WHERE id=? AND trip_id=?',
+        (packed_value, item_id, trip_id)
+    )
     db.commit()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        totals = db.execute(
+            'SELECT COUNT(*) total, COALESCE(SUM(packed),0) packed FROM packing_items WHERE trip_id=?',
+            (trip_id,)
+        ).fetchone()
+        total = totals['total']
+        packed_count = totals['packed']
+        percent = round((packed_count / total * 100) if total else 0)
+        return jsonify({
+            'ok': True,
+            'packed': bool(packed_value),
+            'packed_count': packed_count,
+            'total': total,
+            'percent': percent,
+        })
+
     flash('Suitcase updated.', 'pack')
     return redirect(url_for('packing', trip_id=trip_id))
 
