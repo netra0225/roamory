@@ -161,11 +161,48 @@
     </article>
   </section>
 
+  {% if planning_trip %}
+  <section class="dashboard-up-next">
+    <div class="section-heading up-next-heading">
+      <div>
+        <span class="eyebrow">UP NEXT</span>
+        <h2>{{ planning_trip['destination'] }}</h2>
+      </div>
+      <span class="handwritten">prepare it when you’re ready →</span>
+    </div>
+
+    <section class="planning-focus-card planning-focus-quiet next-trip-prep-card">
+      <div class="planning-focus-image">
+        <img src="{{ cover_for_trip(planning_trip) }}" alt="{{ planning_trip['destination'] }}">
+      </div>
+      <div class="planning-focus-copy">
+        <span class="eyebrow">NEXT TRIP{% if countdown is not none %} · IN {{ countdown }} DAYS{% endif %}</span>
+        <h2>{{ planning_trip['destination'] }}</h2>
+        <div class="readiness-line" aria-label="Trip readiness">
+          <span class="{{ 'ready' if planning_activity_total else '' }}">Route {{ '✓' if planning_activity_total else '—' }}</span>
+          <span class="{{ 'ready' if planning_packing_total and planning_packing_done == planning_packing_total else '' }}">Packing {{ planning_packing_done }}/{{ planning_packing_total }}</span>
+          <span class="{{ 'ready' if planning_docs else '' }}">Docs {{ '✓' if planning_docs else '—' }}</span>
+        </div>
+        <div class="next-action-copy">
+          <small>BEST NEXT STEP</small>
+          <strong>{{ planning_next_label }}</strong>
+          <p>{{ planning_next_note }}</p>
+        </div>
+        <div class="planning-focus-actions">
+          <a class="button button-primary" href="{{ planning_next_href }}">{{ planning_next_label }}</a>
+          <a class="text-link" href="{{ url_for('trip_overview', trip_id=planning_trip['id']) }}">View trip →</a>
+        </div>
+      </div>
+    </section>
+  </section>
+  {% endif %}
+
+  {% if upcoming|length > 1 %}
   <section class="dashboard-lower-grid dashboard-trips-only">
     <div class="upcoming-section">
       <div class="section-heading"><div><span class="eyebrow">COMING UP</span><h2>Next departures.</h2></div><a href="{{ url_for('trips') }}">All trips →</a></div>
       <div class="postcard-row rich-postcards">
-        {% for trip in upcoming[:3] %}
+        {% for trip in upcoming[1:4] %}
         <a class="trip-postcard rich-trip-postcard" href="{{ url_for('trip_overview', trip_id=trip['id']) }}">
           <div class="postcard-photo-wrap"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="postcard-date">{{ trip['start_date'] }}</span></div>
           <div><span class="eyebrow">{% if loop.first and countdown is not none %}IN {{ countdown }} DAYS{% else %}UPCOMING{% endif %}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p></div>
@@ -174,6 +211,7 @@
       </div>
     </div>
   </section>
+  {% endif %}
 
   {% else %}
     {% if upcoming %}
