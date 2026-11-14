@@ -501,7 +501,15 @@ def dashboard():
     planning_days_total = 0
     planning_days_with_stops = 0
     planning_activity_total = 0
+    planning_packing_total = 0
+    planning_packing_done = 0
+    planning_docs = 0
+    planning_next_label = None
+    planning_next_href = None
+    planning_next_note = None
+
     if planning_trip:
+        _seed_smart_packing(db, planning_trip)
         try:
             countdown = max(0, (datetime.strptime(planning_trip['start_date'], '%Y-%m-%d').date() - date.today()).days)
         except ValueError:
@@ -518,13 +526,47 @@ def dashboard():
             'SELECT COUNT(*) c FROM activities WHERE trip_id=?',
             (planning_trip['id'],)
         ).fetchone()['c']
+        packing_row = db.execute(
+            'SELECT COUNT(*) total, COALESCE(SUM(packed),0) done FROM packing_items WHERE trip_id=?',
+            (planning_trip['id'],)
+        ).fetchone()
+        planning_packing_total = packing_row['total']
+        planning_packing_done = packing_row['done']
+        planning_docs = db.execute(
+            'SELECT COUNT(*) c FROM documents WHERE trip_id=?',
+            (planning_trip['id'],)
+        ).fetchone()['c']
+
+        if planning_activity_total == 0:
+            planning_next_label = 'Build the route'
+            planning_next_href = url_for('itinerary', trip_id=planning_trip['id'])
+            planning_next_note = 'Roamory can create the first version for you.'
+        elif planning_days_with_stops < planning_days_total:
+            planning_next_label = 'Continue planning'
+            planning_next_href = url_for('itinerary', trip_id=planning_trip['id'])
+            planning_next_note = f"{planning_days_total - planning_days_with_stops} day(s) still have no stops."
+        elif planning_packing_total and planning_packing_done < planning_packing_total:
+            planning_next_label = 'Start packing'
+            planning_next_href = url_for('packing', trip_id=planning_trip['id'])
+            planning_next_note = f"{planning_packing_total - planning_packing_done} packing item(s) are still open."
+        elif planning_docs == 0:
+            planning_next_label = 'Add travel documents'
+            planning_next_href = url_for('wallet', trip_id=planning_trip['id'])
+            planning_next_note = 'Keep tickets and confirmations in one place.'
+        else:
+            planning_next_label = 'Review the trip'
+            planning_next_href = url_for('trip_overview', trip_id=planning_trip['id'])
+            planning_next_note = 'The essentials are in place.'
 
     return render_template(
         'dashboard.html', trips=trips, ongoing=ongoing, upcoming=upcoming, completed=completed, readiness=readiness,
         current_activity=current_activity, next_activity=next_activity, current_day=current_day, spent=spent,
         dashboard_memories=dashboard_memories, dashboard_documents=dashboard_documents,
         countdown=countdown, planning_trip=planning_trip, planning_days_total=planning_days_total,
-        planning_days_with_stops=planning_days_with_stops, planning_activity_total=planning_activity_total
+        planning_days_with_stops=planning_days_with_stops, planning_activity_total=planning_activity_total,
+        planning_packing_total=planning_packing_total, planning_packing_done=planning_packing_done,
+        planning_docs=planning_docs, planning_next_label=planning_next_label,
+        planning_next_href=planning_next_href, planning_next_note=planning_next_note
     )
 
 
@@ -1013,10 +1055,30 @@ def today(trip_id):
         if activity['latitude'] is not None and activity['longitude'] is not None
     ]
 
+    forecast = _trip_forecast(trip)
+    today_weather = None
+    if day:
+        today_weather = next(
+            (item for item in (forecast.get('days') or []) if item.get('date') == day['date']),
+            None
+        )
+
+    _seed_smart_packing(db, trip)
+    carry_items = db.execute(
+        '''SELECT name FROM packing_items
+           WHERE trip_id=? AND packed=0
+           ORDER BY CASE
+               WHEN name LIKE '%umbrella%' OR name LIKE '%jacket%' OR name LIKE '%water%' THEN 0
+               ELSE 1
+           END, id
+           LIMIT 2''',
+        (trip_id,)
+    ).fetchall()
+
     return render_template(
         'today.html', trip=trip, day=day, activities=activities, current=current,
         next_activity=next_activity, current_document=current_document,
-        map_points=map_points
+        map_points=map_points, today_weather=today_weather, carry_items=carry_items
     )
 
 
@@ -1124,11 +1186,21 @@ def edit_document(trip_id, document_id):
 def packing(trip_id):
     trip = get_trip_or_404(trip_id)
     db = get_db()
+    _seed_smart_packing(db, trip)
     categories = db.execute('SELECT * FROM packing_categories WHERE trip_id=? ORDER BY sort_order,id', (trip_id,)).fetchall()
     items = db.execute('SELECT * FROM packing_items WHERE trip_id=? ORDER BY id', (trip_id,)).fetchall()
     total = len(items)
     packed = sum(row['packed'] for row in items)
-    return render_template('packing.html', trip=trip, categories=categories, items=items, total=total, packed=packed)
+    try:
+        start = datetime.strptime(trip['start_date'], '%Y-%m-%d').date()
+        end = datetime.strptime(trip['end_date'], '%Y-%m-%d').date()
+        trip_length = max(1, (end - start).days + 1)
+    except ValueError:
+        trip_length = 1
+    return render_template(
+        'packing.html', trip=trip, categories=categories, items=items,
+        total=total, packed=packed, trip_length=trip_length
+    )
 
 
 @app.post('/trips/<int:trip_id>/packing/categories')
