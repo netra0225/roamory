@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 from db import get_db, init_app as init_db_app
 from starter_data import seed_starter_content, sync_curated_history
-from recommendations import RecommendationError
+from recommendations import RecommendationError, resolve_destination
 from trip_builder import build_trip_plan
 from trip_covers import destination_cover_url
 
@@ -153,6 +153,43 @@ def trip_days(trip_id: int):
     return get_db().execute(
         'SELECT * FROM trip_days WHERE trip_id = ? ORDER BY day_number', (trip_id,)
     ).fetchall()
+
+
+def _location_coordinates(location: str | None, destination: str | None = None):
+    location = (location or '').strip()
+    if not location:
+        return None, None
+
+    query = location
+    destination = (destination or '').strip()
+    if destination and destination.lower() not in location.lower():
+        query = f"{location}, {destination}"
+
+    try:
+        resolved = resolve_destination(query)
+    except RecommendationError:
+        return None, None
+
+    selected = resolved.get('selected') or {}
+    return selected.get('latitude'), selected.get('longitude')
+
+
+def _backfill_activity_coordinates(db, trip, activities):
+    changed = False
+    for activity in activities:
+        if activity['latitude'] is not None and activity['longitude'] is not None:
+            continue
+        latitude, longitude = _location_coordinates(activity['location'], trip['destination'])
+        if latitude is None or longitude is None:
+            continue
+        db.execute(
+            'UPDATE activities SET latitude=?, longitude=? WHERE id=? AND trip_id=?',
+            (latitude, longitude, activity['id'], trip['id'])
+        )
+        changed = True
+    if changed:
+        db.commit()
+    return changed
 
 
 def trip_status(trip) -> str:
@@ -323,17 +360,34 @@ def dashboard():
         dashboard_documents = db.execute('SELECT * FROM documents WHERE trip_id=? ORDER BY created_at DESC LIMIT 3', (ongoing['id'],)).fetchall()
 
     countdown = None
-    if upcoming:
+    planning_trip = upcoming[0] if upcoming else None
+    planning_days_total = 0
+    planning_days_with_stops = 0
+    planning_activity_total = 0
+    if planning_trip:
         try:
-            countdown = max(0, (datetime.strptime(upcoming[0]['start_date'], '%Y-%m-%d').date() - date.today()).days)
+            countdown = max(0, (datetime.strptime(planning_trip['start_date'], '%Y-%m-%d').date() - date.today()).days)
         except ValueError:
             countdown = None
+        planning_days_total = db.execute(
+            'SELECT COUNT(*) c FROM trip_days WHERE trip_id=?',
+            (planning_trip['id'],)
+        ).fetchone()['c']
+        planning_days_with_stops = db.execute(
+            'SELECT COUNT(DISTINCT day_id) c FROM activities WHERE trip_id=?',
+            (planning_trip['id'],)
+        ).fetchone()['c']
+        planning_activity_total = db.execute(
+            'SELECT COUNT(*) c FROM activities WHERE trip_id=?',
+            (planning_trip['id'],)
+        ).fetchone()['c']
 
     return render_template(
         'dashboard.html', trips=trips, ongoing=ongoing, upcoming=upcoming, completed=completed, readiness=readiness,
         current_activity=current_activity, next_activity=next_activity, current_day=current_day, spent=spent,
         dashboard_memories=dashboard_memories, dashboard_documents=dashboard_documents,
-        countdown=countdown
+        countdown=countdown, planning_trip=planning_trip, planning_days_total=planning_days_total,
+        planning_days_with_stops=planning_days_with_stops, planning_activity_total=planning_activity_total
     )
 
 
@@ -531,15 +585,47 @@ def trip_overview(trip_id):
 @login_required
 def itinerary(trip_id):
     trip = get_trip_or_404(trip_id)
+    db = get_db()
     days = trip_days(trip_id)
     selected_day = request.args.get('day', type=int)
     if selected_day is None and days:
         selected_day = days[0]['day_number']
-    activities = get_db().execute(
+    activities = db.execute(
         '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
            WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''', (trip_id,)
     ).fetchall()
-    return render_template('itinerary.html', trip=trip, days=days, activities=activities, selected_day=selected_day)
+
+    selected_activities = [
+        activity for activity in activities
+        if activity['day_number'] == selected_day
+    ]
+    if _backfill_activity_coordinates(db, trip, selected_activities):
+        activities = db.execute(
+            '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
+               WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''', (trip_id,)
+        ).fetchall()
+        selected_activities = [
+            activity for activity in activities
+            if activity['day_number'] == selected_day
+        ]
+
+    map_points = [
+        {
+            'name': activity['name'],
+            'location': activity['location'] or '',
+            'time': activity['start_time'] or 'Anytime',
+            'type': activity['type'],
+            'latitude': float(activity['latitude']),
+            'longitude': float(activity['longitude']),
+        }
+        for activity in selected_activities
+        if activity['latitude'] is not None and activity['longitude'] is not None
+    ]
+
+    return render_template(
+        'itinerary.html', trip=trip, days=days, activities=activities,
+        selected_day=selected_day, map_points=map_points
+    )
 
 
 @app.post('/trips/<int:trip_id>/build')
@@ -571,8 +657,8 @@ def build_trip(trip_id):
             db.execute(
                 '''INSERT INTO activities
                 (trip_id, day_id, name, type, activity_date, start_time, end_time, location,
-                 estimated_cost, actual_cost, notes, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                 latitude, longitude, estimated_cost, actual_cost, notes, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (
                     trip_id,
                     day['id'],
@@ -582,6 +668,8 @@ def build_trip(trip_id):
                     item['start_time'],
                     None,
                     item['location'],
+                    item.get('latitude'),
+                    item.get('longitude'),
                     item['estimated_cost'],
                     0,
                     item['notes'],
@@ -629,12 +717,15 @@ def add_activity(trip_id):
             except ValueError:
                 flash('Costs must be valid numbers.', 'error')
                 return render_template('activity_form.html', trip=trip, days=days, activity=None, documents=documents, memories=memories)
+            location = request.form.get('location','').strip()
+            latitude, longitude = _location_coordinates(location, trip['destination'])
             db.execute(
                 '''INSERT INTO activities
-                (trip_id, day_id, name, type, activity_date, start_time, end_time, location, estimated_cost, actual_cost, notes, status, document_id, memory_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (trip_id, day_id, name, type, activity_date, start_time, end_time, location, latitude, longitude,
+                 estimated_cost, actual_cost, notes, status, document_id, memory_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (trip_id, day_id, name, activity_type, selected['date'], request.form.get('start_time') or None,
-                 request.form.get('end_time') or None, request.form.get('location','').strip(), estimated, actual,
+                 request.form.get('end_time') or None, location, latitude, longitude, estimated, actual,
                  request.form.get('notes','').strip(), request.form.get('status','planned'), document_id, memory_id)
             )
             db.commit()
@@ -692,11 +783,17 @@ def edit_activity(trip_id, activity_id):
             except ValueError:
                 flash('Costs must be valid numbers.', 'error')
                 return render_template('activity_form.html', trip=trip, days=days, activity=activity, documents=documents, memories=memories)
+            location = request.form.get('location','').strip()
+            if location == (activity['location'] or '') and activity['latitude'] is not None and activity['longitude'] is not None:
+                latitude, longitude = activity['latitude'], activity['longitude']
+            else:
+                latitude, longitude = _location_coordinates(location, trip['destination'])
             db.execute(
                 '''UPDATE activities SET day_id=?, name=?, type=?, activity_date=?, start_time=?, end_time=?, location=?,
-                   estimated_cost=?, actual_cost=?, notes=?, status=?, document_id=?, memory_id=? WHERE id=? AND trip_id=?''',
+                   latitude=?, longitude=?, estimated_cost=?, actual_cost=?, notes=?, status=?, document_id=?, memory_id=?
+                   WHERE id=? AND trip_id=?''',
                 (day_id, name, request.form.get('type','activity'), day['date'], request.form.get('start_time') or None,
-                 request.form.get('end_time') or None, request.form.get('location','').strip(), estimated, actual,
+                 request.form.get('end_time') or None, location, latitude, longitude, estimated, actual,
                  request.form.get('notes','').strip(), request.form.get('status','planned'), document_id, memory_id,
                  activity_id, trip_id)
             )
@@ -752,15 +849,37 @@ def today(trip_id):
             '''SELECT * FROM activities WHERE trip_id=? AND day_id=?
                ORDER BY COALESCE(start_time,'23:59'), id''', (trip_id, day['id'])
         ).fetchall()
+        if _backfill_activity_coordinates(db, trip, activities):
+            activities = db.execute(
+                '''SELECT * FROM activities WHERE trip_id=? AND day_id=?
+                   ORDER BY COALESCE(start_time,'23:59'), id''', (trip_id, day['id'])
+            ).fetchall()
+
     current = next((a for a in activities if a['status'] in ('planned','changed')), None)
     current_idx = activities.index(current) if current in activities else -1
     next_activity = activities[current_idx + 1] if current_idx >= 0 and current_idx + 1 < len(activities) else None
     current_document = None
     if current and current['document_id']:
         current_document = db.execute('SELECT * FROM documents WHERE id=? AND trip_id=?', (current['document_id'], trip_id)).fetchone()
+
+    map_points = [
+        {
+            'name': activity['name'],
+            'location': activity['location'] or '',
+            'time': activity['start_time'] or 'Anytime',
+            'type': activity['type'],
+            'status': activity['status'],
+            'latitude': float(activity['latitude']),
+            'longitude': float(activity['longitude']),
+        }
+        for activity in activities
+        if activity['latitude'] is not None and activity['longitude'] is not None
+    ]
+
     return render_template(
         'today.html', trip=trip, day=day, activities=activities, current=current,
-        next_activity=next_activity, current_document=current_document
+        next_activity=next_activity, current_document=current_document,
+        map_points=map_points
     )
 
 
