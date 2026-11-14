@@ -214,20 +214,59 @@
   {% endif %}
 
   {% else %}
-    {% if upcoming %}
+    {% if planning_trip %}
+    {% set planning_pct = ((planning_days_with_stops / planning_days_total * 100) if planning_days_total else 0)|round|int %}
+    <section class="dashboard-journey-cover accent-{{ planning_trip['accent'] }} upcoming-journey-cover">
+      <div class="journey-cover-copy">
+        <div class="journey-meta-line">
+          <span class="status-ticket">UPCOMING JOURNEY</span>
+          <span>{{ planning_trip['start_date'] }} → {{ planning_trip['end_date'] }}</span>
+        </div>
+        <span class="handwritten dashboard-hand">the next chapter</span>
+        <h2>{{ planning_trip['destination'] }}</h2>
+        <p class="journey-subtitle">{{ planning_trip['title'] }}</p>
+        <p class="journey-description">{{ planning_trip['description'] }}</p>
+        <div class="journey-progress-wrap">
+          <div class="journey-progress-copy"><span>Planning progress</span><strong>{{ planning_pct }}%</strong></div>
+          <div class="journey-progress editorial-progress"><span style="width:{{ planning_pct }}%"></span><i class="progress-plane" style="left:{{ [planning_pct,94]|min }}%">✦</i></div>
+        </div>
+        <div class="hero-actions">
+          <a class="button button-ink" href="{{ planning_next_href }}">{{ planning_next_label }}</a>
+          <a class="text-link" href="{{ url_for('trip_overview', trip_id=planning_trip['id']) }}">Open trip overview →</a>
+        </div>
+      </div>
+
+      <div class="journey-cover-collage">
+        <figure class="journey-main-photo">
+          <img src="{{ cover_for_trip(planning_trip) }}" alt="{{ planning_trip['destination'] }}">
+          <figcaption>{{ planning_trip['destination'] }}{% if countdown is not none %} · {{ countdown }} days to go{% endif %}</figcaption>
+        </figure>
+        <div class="journey-ticket">
+          <span>ROAMORY / NEXT</span>
+          <strong>{{ countdown if countdown is not none else 'SOON' }}</strong>
+          <small>{{ planning_next_label }}</small>
+        </div>
+        <div class="passport-stamp journey-stamp">UP NEXT<br>{{ planning_trip['destination'][:8]|upper }}</div>
+        <span class="tape journey-tape"></span>
+        <svg class="journey-doodle" viewBox="0 0 240 130" aria-hidden="true"><path d="M8 104 C 46 17, 127 8, 222 66"/><path d="M218 58 L229 68 L215 72"/></svg>
+      </div>
+    </section>
+
+    {% if upcoming|length > 1 %}
     <section class="dashboard-lower-grid dashboard-trips-only dashboard-upcoming-only">
       <div class="upcoming-section">
-        <div class="section-heading"><div><span class="eyebrow">COMING UP</span><h2>Your next trips.</h2></div><a href="{{ url_for('trips') }}">All trips →</a></div>
+        <div class="section-heading"><div><span class="eyebrow">AFTER THAT</span><h2>Later departures.</h2></div><a href="{{ url_for('trips') }}">All trips →</a></div>
         <div class="postcard-row rich-postcards">
-          {% for trip in upcoming[:3] %}
+          {% for trip in upcoming[1:4] %}
           <a class="trip-postcard rich-trip-postcard" href="{{ url_for('trip_overview', trip_id=trip['id']) }}">
             <div class="postcard-photo-wrap"><img src="{{ cover_for_trip(trip) }}" alt="{{ trip['destination'] }}"><span class="postcard-date">{{ trip['start_date'] }}</span></div>
-            <div><span class="eyebrow">{% if loop.first and countdown is not none %}IN {{ countdown }} DAYS{% else %}UPCOMING{% endif %}</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p></div>
+            <div><span class="eyebrow">UPCOMING</span><h3>{{ trip['destination'] }}</h3><p>{{ trip['title'] }}</p></div>
           </a>
           {% endfor %}
         </div>
       </div>
     </section>
+    {% endif %}
     {% else %}
     <section class="dashboard-empty-editorial">
       <div class="empty-copy"><span class="eyebrow">BLANK PASSPORT</span><h2>Your first trip gets the whole desk.</h2><p>Create a trip and Roamory will open the itinerary, Today, Wallet, Packing, Budget, Journal and Summary around it.</p><a class="button button-primary" href="{{ url_for('create_trip') }}">Create first trip</a></div>
