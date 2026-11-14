@@ -744,20 +744,36 @@ def delete_trip(trip_id):
 @login_required
 def trip_overview(trip_id):
     trip = get_trip_or_404(trip_id)
+    db = get_db()
+    _seed_smart_packing(db, trip)
     days = trip_days(trip_id)
-    activities = get_db().execute(
+    activities = db.execute(
         '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
            WHERE a.trip_id=? ORDER BY a.activity_date, a.start_time''', (trip_id,)
     ).fetchall()
-    expenses = get_db().execute('SELECT COALESCE(SUM(amount),0) spent FROM expenses WHERE trip_id=?', (trip_id,)).fetchone()['spent']
-    packing = get_db().execute(
-        'SELECT COUNT(*) total, COALESCE(SUM(packed),0) packed FROM packing_items WHERE trip_id=?', (trip_id,)
+    expenses = db.execute(
+        'SELECT COALESCE(SUM(amount),0) spent FROM expenses WHERE trip_id=?',
+        (trip_id,)
+    ).fetchone()['spent']
+    packing = db.execute(
+        'SELECT COUNT(*) total, COALESCE(SUM(packed),0) packed FROM packing_items WHERE trip_id=?',
+        (trip_id,)
     ).fetchone()
-    docs = get_db().execute('SELECT COUNT(*) c FROM documents WHERE trip_id=?', (trip_id,)).fetchone()['c']
-    memories = get_db().execute('SELECT * FROM memories WHERE trip_id=? ORDER BY memory_date DESC LIMIT 4', (trip_id,)).fetchall()
+    docs = db.execute(
+        'SELECT COUNT(*) c FROM documents WHERE trip_id=?',
+        (trip_id,)
+    ).fetchone()['c']
+    memories = db.execute(
+        'SELECT * FROM memories WHERE trip_id=? ORDER BY memory_date DESC,id DESC LIMIT 4',
+        (trip_id,)
+    ).fetchall()
     completed = sum(1 for a in activities if a['status'] == 'completed')
     current = next((a for a in activities if a['status'] in ('planned', 'changed')), None)
-    return render_template('overview.html', trip=trip, days=days, activities=activities, spent=expenses, packing=packing, docs=docs, memories=memories, completed=completed, current=current)
+    return render_template(
+        'overview.html', trip=trip, days=days, activities=activities,
+        spent=expenses, packing=packing, docs=docs, memories=memories,
+        completed=completed, current=current
+    )
 
 
 @app.route('/trips/<int:trip_id>/itinerary')
