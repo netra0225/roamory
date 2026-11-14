@@ -71,7 +71,7 @@
                 <span class="status-label">{{ activity['status'] }}</span>
               </div>
               <h2>{{ activity['name'] }}</h2>
-              <p>⌖ {{ activity['location'] or 'Location not added' }}</p>
+              <p>⌖ {{ activity['location'] or 'Location TBD' }}</p>
               {% if activity['notes'] %}<small>{{ activity['notes']|truncate(100) }}</small>{% endif %}
             </a>
           </article>
@@ -99,7 +99,7 @@
       <div class="route-map-empty">
         <div>
           <strong>No mapped stops yet.</strong>
-          <span>Add a location to an activity and Roamory will place it on this map automatically.</span>
+          <span>Add a location to a stop.</span>
         </div>
       </div>
       {% endif %}
