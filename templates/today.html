@@ -36,7 +36,7 @@
       </span>
       {% else %}
       <strong>Closer to the trip</strong>
-      <span>Live forecast will appear here.</span>
+      <span>Forecast unavailable for these dates.</span>
       {% endif %}
     </div>
     <div>
@@ -72,7 +72,7 @@
         <span class="status-label">{{ current['status'] }}</span>
       </div>
       <h2>{{ current['name'] }}</h2>
-      <p class="now-location">⌖ {{ current['location'] or 'Location not added' }}</p>
+      <p class="now-location">⌖ {{ current['location'] or 'Location TBD' }}</p>
       {% if current['notes'] %}<p>{{ current['notes'] }}</p>{% endif %}
 
       {% if current_document %}
@@ -108,8 +108,8 @@
       {% else %}
       <div class="empty-state compact">
         <span class="eyebrow">CLEAR DAY</span>
-        <h2>Nothing is waiting right now.</h2>
-        <p>Either today is complete or this day still needs a route.</p>
+        <h2>No current stop.</h2>
+        <p>Today is complete or still open.</p>
         <a class="button button-primary" href="{{ url_for('itinerary', trip_id=trip['id'], day=day['day_number'] if day else None) }}">Open itinerary</a>
       </div>
       {% endif %}
@@ -129,7 +129,7 @@
       <div class="route-map-empty">
         <div>
           <strong>No mapped stops yet.</strong>
-          <span>Add locations to today’s itinerary and they will appear here automatically.</span>
+          <span>Add a location to a stop.</span>
         </div>
       </div>
       {% endif %}
@@ -155,7 +155,7 @@
       <article class="today-day-stop {{ activity['status'] }}">
         <small>{{ activity['start_time'] or 'Anytime' }} · {{ activity['type']|upper }}</small>
         <strong>{{ activity['name'] }}</strong>
-        <span>{{ activity['location'] or 'Location pending' }}</span>
+        <span>{{ activity['location'] or 'Location TBD' }}</span>
       </article>
       {% else %}
       <div class="small-empty">No stops are planned for this day yet.</div>
