@@ -113,6 +113,10 @@ def build_trip_plan(
             used_food,
             count=MIN_RESTAURANTS_PER_DAY,
         )
+        if len(restaurants) < MIN_RESTAURANTS_PER_DAY:
+            raise RecommendationError(
+                f"Roamory could not find two verified food places close enough to the Day {offset + 1} route."
+            )
         for restaurant in restaurants:
             used_food.add(_place_key(restaurant))
 
