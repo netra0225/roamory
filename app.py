@@ -1321,34 +1321,70 @@ def edit_packing_item(trip_id, item_id):
 def budget(trip_id):
     trip = get_trip_or_404(trip_id)
     db = get_db()
-    expenses = db.execute('SELECT * FROM expenses WHERE trip_id=? ORDER BY expense_date DESC,id DESC', (trip_id,)).fetchall()
+    expenses = db.execute(
+        'SELECT * FROM expenses WHERE trip_id=? ORDER BY expense_date DESC,id DESC',
+        (trip_id,)
+    ).fetchall()
     spent = sum(row['amount'] for row in expenses)
-    category_totals = db.execute('SELECT category, SUM(amount) total FROM expenses WHERE trip_id=? GROUP BY category ORDER BY total DESC', (trip_id,)).fetchall()
-    return render_template('budget.html', trip=trip, expenses=expenses, spent=spent, category_totals=category_totals)
+    category_totals = db.execute(
+        'SELECT category, SUM(amount) total FROM expenses WHERE trip_id=? GROUP BY category ORDER BY total DESC',
+        (trip_id,)
+    ).fetchall()
+
+    planned = float(trip['planned_budget'] or 0)
+    remaining = max(0, planned - spent) if planned else 0
+    remaining_days = 0
+    daily_allowance = None
+    try:
+        start = datetime.strptime(trip['start_date'], '%Y-%m-%d').date()
+        end = datetime.strptime(trip['end_date'], '%Y-%m-%d').date()
+        today_value = date.today()
+        if end >= today_value:
+            effective_start = max(today_value, start)
+            remaining_days = max(1, (end - effective_start).days + 1)
+            if planned:
+                daily_allowance = remaining / remaining_days
+    except ValueError:
+        pass
+
+    return render_template(
+        'budget.html', trip=trip, expenses=expenses, spent=spent,
+        category_totals=category_totals, remaining_days=remaining_days,
+        daily_allowance=daily_allowance
+    )
 
 
 @app.post('/trips/<int:trip_id>/budget/expenses')
 @login_required
 def add_expense(trip_id):
     get_trip_or_404(trip_id)
-    name = request.form.get('name','').strip()
+    category = request.form.get('category','Other').strip() or 'Other'
+    name = request.form.get('name','').strip() or f"{category} expense"
+    expense_date = request.form.get('expense_date') or date.today().isoformat()
+
     try:
         amount = float(request.form.get('amount',''))
-        if amount < 0:
+        if amount <= 0:
             raise ValueError
     except ValueError:
-        flash('Enter a valid non-negative amount.', 'error')
+        flash('Enter an amount greater than zero.', 'error')
         return redirect(url_for('budget', trip_id=trip_id))
-    if not name or not request.form.get('expense_date'):
-        flash('Expense name and date are required.', 'error')
-        return redirect(url_for('budget', trip_id=trip_id))
+
     db = get_db()
     db.execute(
         'INSERT INTO expenses (trip_id,name,category,expense_date,amount,note) VALUES (?,?,?,?,?,?)',
-        (trip_id,name,request.form.get('category','Other'),request.form.get('expense_date'),amount,request.form.get('note','').strip())
+        (trip_id, name, category, expense_date, amount, request.form.get('note','').strip())
     )
     db.commit()
-    flash('Expense added — your travel spend has been recalculated.', 'budget')
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        totals = db.execute(
+            'SELECT COALESCE(SUM(amount),0) spent FROM expenses WHERE trip_id=?',
+            (trip_id,)
+        ).fetchone()
+        return jsonify({'ok': True, 'spent': float(totals['spent'])})
+
+    flash('Expense added.', 'budget')
     return redirect(url_for('budget', trip_id=trip_id))
 
 
