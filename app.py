@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 from db import get_db, init_app as init_db_app
 from starter_data import seed_starter_content, sync_curated_history
-from recommendations import RecommendationError, resolve_destination
+from recommendations import RecommendationError, resolve_destination, weather_forecast
 from trip_builder import build_trip_plan
 from trip_covers import destination_cover_url
 
@@ -190,6 +190,143 @@ def _backfill_activity_coordinates(db, trip, activities):
     if changed:
         db.commit()
     return changed
+
+
+def _trip_forecast(trip):
+    try:
+        resolved = resolve_destination(trip['destination'])
+        selected = resolved.get('selected') or {}
+        latitude = selected.get('latitude')
+        longitude = selected.get('longitude')
+        if latitude is None or longitude is None:
+            return {'available': False, 'days': []}
+        return weather_forecast(
+            float(latitude),
+            float(longitude),
+            trip['start_date'],
+            trip['end_date'],
+        )
+    except RecommendationError:
+        return {'available': False, 'days': []}
+
+
+def _meta_value(db, key: str):
+    return db.execute(
+        'SELECT meta_value FROM app_meta WHERE meta_key=?',
+        (key,)
+    ).fetchone()
+
+
+def _set_meta_value(db, key: str, value: str = '1'):
+    existing = _meta_value(db, key)
+    if existing:
+        db.execute(
+            'UPDATE app_meta SET meta_value=? WHERE meta_key=?',
+            (value, key)
+        )
+    else:
+        db.execute(
+            'INSERT INTO app_meta (meta_key, meta_value) VALUES (?, ?)',
+            (key, value)
+        )
+
+
+def _seed_smart_packing(db, trip):
+    meta_key = f"smart_packing_seeded:{trip['id']}"
+    if _meta_value(db, meta_key):
+        return False
+
+    existing_count = db.execute(
+        'SELECT COUNT(*) c FROM packing_items WHERE trip_id=?',
+        (trip['id'],)
+    ).fetchone()['c']
+    if existing_count:
+        _set_meta_value(db, meta_key)
+        db.commit()
+        return False
+
+    categories = db.execute(
+        'SELECT * FROM packing_categories WHERE trip_id=? ORDER BY sort_order,id',
+        (trip['id'],)
+    ).fetchall()
+    category_ids = {row['name']: row['id'] for row in categories}
+    if not category_ids:
+        create_default_packing(db, trip['id'])
+        categories = db.execute(
+            'SELECT * FROM packing_categories WHERE trip_id=? ORDER BY sort_order,id',
+            (trip['id'],)
+        ).fetchall()
+        category_ids = {row['name']: row['id'] for row in categories}
+
+    try:
+        start = datetime.strptime(trip['start_date'], '%Y-%m-%d').date()
+        end = datetime.strptime(trip['end_date'], '%Y-%m-%d').date()
+        day_count = max(1, (end - start).days + 1)
+    except ValueError:
+        day_count = 3
+
+    forecast = _trip_forecast(trip)
+    forecast_days = forecast.get('days') or []
+    wet = any(
+        day.get('condition') == 'wet'
+        or float(day.get('precipitation_probability') or 0) >= 40
+        for day in forecast_days
+    )
+    min_temperatures = [
+        float(day['temperature_min_c'])
+        for day in forecast_days
+        if day.get('temperature_min_c') is not None
+    ]
+    max_temperatures = [
+        float(day['temperature_max_c'])
+        for day in forecast_days
+        if day.get('temperature_max_c') is not None
+    ]
+
+    destination = (trip['destination'] or '').lower()
+    hill_destination = any(
+        word in destination
+        for word in (
+            'darjeeling', 'ooty', 'manali', 'shimla', 'mussoorie', 'nainital',
+            'munnar', 'gangtok', 'ladakh', 'sikkim', 'kashmir', 'mountain',
+            'hill', 'alps', 'banff',
+        )
+    )
+    cool = hill_destination or (min(min_temperatures) < 16 if min_temperatures else False)
+    warm = max(max_temperatures) > 26 if max_temperatures else False
+
+    outfit_qty = max(1, min(day_count, 7))
+    items = [
+        ('Essentials', 'ID / travel documents', 1),
+        ('Essentials', 'Medicines & personal essentials', 1),
+        ('Essentials', 'Reusable water bottle', 1),
+        ('Clothing', 'Everyday outfits', outfit_qty),
+        ('Clothing', 'Underwear & socks', outfit_qty),
+        ('Clothing', 'Comfortable walking shoes', 1),
+        ('Toiletries', 'Basic toiletries', 1),
+        ('Electronics', 'Phone charger', 1),
+        ('Electronics', 'Power bank', 1),
+        ('Documents', 'Booking confirmations', 1),
+    ]
+    if cool:
+        items.append(('Clothing', 'Light jacket / warm layer', 1))
+    if wet:
+        items.append(('Essentials', 'Compact umbrella / rain layer', 1))
+    elif warm:
+        items.append(('Toiletries', 'Sunscreen', 1))
+
+    for category_name, name, quantity in items[:12]:
+        category_id = category_ids.get(category_name)
+        if category_id is None:
+            continue
+        db.execute(
+            'INSERT INTO packing_items (trip_id,category_id,name,quantity) VALUES (?,?,?,?)',
+            (trip['id'], category_id, name, quantity)
+        )
+
+    _set_meta_value(db, meta_key)
+    db.commit()
+    return True
 
 
 def trip_status(trip) -> str:
