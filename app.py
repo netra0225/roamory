@@ -193,6 +193,21 @@ def _ensure_daily_restaurants(db, trip, days, activities):
     if not days:
         return activities
 
+    if not activities:
+        try:
+            plan = build_trip_plan(trip)
+        except RecommendationError:
+            return activities
+        inserted = _insert_plan_days(db, trip['id'], days, plan['days'])
+        if not inserted:
+            return activities
+        db.commit()
+        return db.execute(
+            '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
+               WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''',
+            (trip['id'],)
+        ).fetchall()
+
     restaurant_counts = {day['day_number']: 0 for day in days}
     for activity in activities:
         if activity['type'] == 'restaurant':
@@ -952,7 +967,7 @@ def build_trip(trip_id):
         return redirect(url_for('itinerary', trip_id=trip_id))
 
     db.commit()
-    flash(f'Roamory built a simple {len(plan["days"])}-day itinerary with {inserted} suggested stops.', 'success')
+    flash(f'Roamory built a {len(plan["days"])}-day itinerary with nearby sightseeing and at least two food stops per day.', 'success')
     return redirect(url_for('itinerary', trip_id=trip_id))
 
 
