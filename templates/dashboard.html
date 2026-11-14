@@ -70,20 +70,29 @@
 
     <div class="journey-cover-collage">
       <figure class="journey-main-photo">
+        {% if ongoing['destination'] == 'Udaipur' %}
+        <img src="{{ url_for('static', filename='uploads/udaipur-palace-hq.jpg') }}" alt="Udaipur palace beside the water">
+        {% else %}
         <img src="{{ cover_for_trip(ongoing) }}" alt="{{ ongoing['destination'] }}">
+        {% endif %}
         <figcaption>{{ ongoing['destination'] }} · Day {{ current_day['day_number'] if current_day else '—' }}</figcaption>
       </figure>
       {% if dashboard_memories %}
         {% set memory = dashboard_memories[0] %}
         <figure class="journey-polaroid">
-          {% if memory['image_filename'] %}
+          {% if ongoing['destination'] == 'Udaipur' %}
+          <img src="{{ url_for('static', filename='uploads/dashboard-pink-car.svg') }}" alt="Pink vintage car in a palace garden">
+          <figcaption>Pink wheels at the palace</figcaption>
+          {% elif memory['image_filename'] %}
           <img src="{{ url_for('static', filename='uploads/' + memory['image_filename']) }}" alt="{{ memory['title'] }}">
+          <figcaption>{{ memory['title'] }}</figcaption>
           {% elif memory['image_url'] %}
           <img src="{{ memory['image_url'] }}" alt="{{ memory['title'] }}">
+          <figcaption>{{ memory['title'] }}</figcaption>
           {% else %}
           <img src="{{ cover_for_trip(ongoing) }}" alt="{{ ongoing['destination'] }}">
-          {% endif %}
           <figcaption>{{ memory['title'] }}</figcaption>
+          {% endif %}
         </figure>
       {% endif %}
       <div class="journey-ticket"><span>ROAMORY / CURRENT</span><strong>{{ current_activity['start_time'] if current_activity else 'OPEN' }}</strong><small>{{ current_activity['name'] if current_activity else 'MAKE A NEW STOP' }}</small></div>
