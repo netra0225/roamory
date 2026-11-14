@@ -1,14 +1,152 @@
 {% extends 'base.html' %}
 {% block title %}Budget — {{ trip['destination'] }}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/experience.css') }}">
+{% endblock %}
 {% block content %}
 {% include '_trip_nav.html' %}
-<main class="page-shell trip-page budget-page">
-  {% set planned = trip['planned_budget'] %}{% set remaining = planned - spent %}{% set pct = ((spent / planned * 100) if planned else 0)|round|int %}
-  <section class="budget-editorial {{ 'over-budget' if planned and spent > planned else '' }}"><div class="budget-copy"><span class="eyebrow">TRIP SPEND</span><h1>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(spent) }} <em>spent so far</em></h1><p>{% if planned %}of {{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(planned) }} planned{% else %}No planned budget set yet.{% endif %}</p><div class="budget-track"><span style="width:{{ [pct,100]|min }}%"></span></div>{% if remaining >= 0 %}<strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(remaining) }} remaining</strong>{% else %}<strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(remaining|abs) }} over plan — worth a quick check.</strong>{% endif %}</div><div class="receipt-art"><span>ROAMORY RECEIPT</span><strong>{{ trip['destination'] }}</strong><hr><small>STAY · MOVE · EAT · SEE</small><b>{{ pct }}%</b></div></section>
-  <section class="budget-grid">
-    <form id="add-expense" method="post" action="{{ url_for('add_expense', trip_id=trip['id']) }}" class="paper-form expense-form" data-loading-form><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><span class="eyebrow">ADD EXPENSE</span><label>Name<input name="name" placeholder="Ferry tickets" required></label><label>Category<select name="category">{% for value in ['Stay','Transport','Food','Activities','Shopping','Other'] %}<option>{{ value }}</option>{% endfor %}</select></label><label>Date<input type="date" name="expense_date" value="{{ today_iso }}" required></label><label>Amount<input type="number" name="amount" min="0" step="0.01" required></label><label>Note<textarea name="note" rows="3" placeholder="Optional note"></textarea></label><button class="button button-primary" type="submit">Add expense</button></form>
-    <div class="category-totals"><span class="eyebrow">WHERE IT WENT</span>{% for row in category_totals %}<div class="category-total"><span>{{ row['category'] }}</span><strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(row['total']) }}</strong><div><i style="width:{{ ((row['total']/spent*100) if spent else 0)|round|int }}%"></i></div></div>{% else %}<div class="small-empty">Add an expense and the category story appears here.</div>{% endfor %}</div>
+<main class="page-shell trip-page budget-page budget-simple">
+  {% set planned = trip['planned_budget'] %}
+  {% set remaining = planned - spent %}
+  {% set pct = ((spent / planned * 100) if planned else 0)|round|int %}
+
+  <section class="budget-snapshot {{ 'over-budget' if planned and spent > planned else '' }}">
+    <div class="budget-snapshot-main">
+      <span class="eyebrow">TRIP BUDGET</span>
+      <h1>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(spent) }} <em>spent</em></h1>
+      {% if planned %}
+      <p>of {{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(planned) }} planned</p>
+      <div class="budget-track"><span style="width:{{ [pct,100]|min }}%"></span></div>
+      {% else %}
+      <p>No planned budget yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="budget-glance-grid">
+      <article>
+        <small>LEFT</small>
+        {% if planned %}
+        <strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format([remaining,0]|max) }}</strong>
+        <span>{{ 'Over budget' if remaining < 0 else 'available' }}</span>
+        {% else %}
+        <strong>—</strong>
+        <span>Set a trip budget first</span>
+        {% endif %}
+      </article>
+      <article>
+        <small>DAYS LEFT</small>
+        <strong>{{ remaining_days if remaining_days else '—' }}</strong>
+        <span>{{ 'in this trip' if remaining_days else 'trip completed' }}</span>
+      </article>
+      <article class="budget-can-spend">
+        <small>COMFORTABLE DAILY SPEND</small>
+        {% if daily_allowance is not none %}
+        <strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(daily_allowance) }}</strong>
+        <span>to stay within plan</span>
+        {% else %}
+        <strong>—</strong>
+        <span>appears when a budget is set</span>
+        {% endif %}
+      </article>
+    </div>
   </section>
-  <section class="expense-ledger"><div class="section-heading"><div><span class="eyebrow">TRAVEL LEDGER</span><h2>Expenses</h2></div><span>{{ expenses|length }} entries</span></div>{% for expense in expenses %}<article class="expense-row"><span class="expense-date">{{ expense['expense_date'][5:] }}</span><div><h3>{{ expense['name'] }}</h3><p>{{ expense['category'] }}{% if expense['note'] %} · {{ expense['note'] }}{% endif %}</p></div><strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(expense['amount']) }}</strong><div class="expense-actions"><a href="{{ url_for('edit_expense', trip_id=trip['id'], expense_id=expense['id']) }}">Edit</a><form method="post" action="{{ url_for('delete_expense', trip_id=trip['id'], expense_id=expense['id']) }}" data-confirm="Delete this expense?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-button danger-text">Delete</button></form></div></article>{% else %}<div class="empty-state compact"><h2>No expenses yet.</h2><p>Your budget stays pleasantly blank until the first coffee, ticket or hotel bill.</p></div>{% endfor %}</section>
+
+  <section class="quick-expense-card" id="add-expense">
+    <div class="quick-expense-copy">
+      <span class="eyebrow">QUICK EXPENSE</span>
+      <h2>Add it before you forget it.</h2>
+      <p>Amount and category are enough. Roamory handles the rest.</p>
+    </div>
+
+    <form method="post" action="{{ url_for('add_expense', trip_id=trip['id']) }}" class="quick-expense-form" data-loading-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="quick-amount">
+        <span>Amount</span>
+        <div class="money-input">
+          <b>{{ currency_symbol(g.settings['currency']) }}</b>
+          <input type="number" name="amount" min="0.01" step="0.01" inputmode="decimal" placeholder="0" required>
+        </div>
+      </label>
+      <label>
+        <span>Category</span>
+        <select name="category">
+          {% for value in ['Food','Transport','Stay','Activities','Shopping','Other'] %}
+          <option>{{ value }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="button button-primary" type="submit">Add expense</button>
+
+      <details class="expense-details">
+        <summary>+ Add details</summary>
+        <div>
+          <label>Name<input name="name" placeholder="Optional, e.g. Glenary's lunch"></label>
+          <label>Date<input type="date" name="expense_date" value="{{ today_iso }}"></label>
+          <label class="expense-note">Note<textarea name="note" rows="2" placeholder="Optional note"></textarea></label>
+        </div>
+      </details>
+    </form>
+  </section>
+
+  <section class="budget-grid budget-story-grid">
+    <div class="category-totals">
+      <span class="eyebrow">WHERE IT WENT</span>
+      {% for row in category_totals %}
+      <div class="category-total">
+        <span>{{ row['category'] }}</span>
+        <strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(row['total']) }}</strong>
+        <div><i style="width:{{ ((row['total']/spent*100) if spent else 0)|round|int }}%"></i></div>
+      </div>
+      {% else %}
+      <div class="small-empty">Your spending story will appear here after the first expense.</div>
+      {% endfor %}
+    </div>
+
+    <aside class="budget-guidance">
+      <span class="eyebrow">AT A GLANCE</span>
+      {% if planned and spent > planned %}
+      <h3>You’re over plan.</h3>
+      <p>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format((spent-planned)|abs) }} beyond the planned budget. Worth a quick look before the next big spend.</p>
+      {% elif planned and pct >= 75 and remaining_days %}
+      <h3>Keep an eye on the next few days.</h3>
+      <p>{{ pct }}% of the budget is already used with {{ remaining_days }} day{{ '' if remaining_days == 1 else 's' }} left.</p>
+      {% elif planned %}
+      <h3>You’re within plan.</h3>
+      <p>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format([remaining,0]|max) }} is still available for the rest of the trip.</p>
+      {% else %}
+      <h3>Set a budget only if you want one.</h3>
+      <p>Roamory can still track expenses without turning the trip into accounting.</p>
+      {% endif %}
+    </aside>
+  </section>
+
+  <section class="expense-ledger">
+    <div class="section-heading">
+      <div><span class="eyebrow">RECENT SPEND</span><h2>Expenses</h2></div>
+      <span>{{ expenses|length }} entries</span>
+    </div>
+    {% for expense in expenses %}
+    <article class="expense-row">
+      <span class="expense-date">{{ expense['expense_date'][5:] }}</span>
+      <div>
+        <h3>{{ expense['name'] }}</h3>
+        <p>{{ expense['category'] }}{% if expense['note'] %} · {{ expense['note'] }}{% endif %}</p>
+      </div>
+      <strong>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(expense['amount']) }}</strong>
+      <div class="expense-actions">
+        <a href="{{ url_for('edit_expense', trip_id=trip['id'], expense_id=expense['id']) }}">Edit</a>
+        <form method="post" action="{{ url_for('delete_expense', trip_id=trip['id'], expense_id=expense['id']) }}" data-confirm="Delete this expense?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="link-button danger-text">Delete</button>
+        </form>
+      </div>
+    </article>
+    {% else %}
+    <div class="empty-state compact">
+      <h2>No expenses yet.</h2>
+      <p>Add the first one in a few seconds using Quick Expense above.</p>
+    </div>
+    {% endfor %}
+  </section>
 </main>
 {% endblock %}
