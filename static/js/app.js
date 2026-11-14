@@ -235,6 +235,80 @@
   });
   document.querySelector('[data-close-memory-form]')?.addEventListener('click', () => memoryDialog?.close());
 
+  // Packing toggles save in the background so checking an item never reloads the page.
+  const packingPage = document.querySelector('[data-packing-page]');
+  if (packingPage) {
+    const packedCountEl = packingPage.querySelector('[data-packed-count]');
+    const totalEl = packingPage.querySelector('[data-packing-total]');
+    const meter = packingPage.querySelector('[data-packing-meter]');
+    const suitcase = packingPage.querySelector('[data-suitcase]');
+
+    const renderPackingSummary = (packedCount, total, percent) => {
+      if (packedCountEl) packedCountEl.textContent = String(packedCount);
+      if (totalEl) totalEl.textContent = String(total);
+      if (meter) meter.style.width = `${percent}%`;
+      if (suitcase) suitcase.style.setProperty('--fill', `${percent}%`);
+    };
+
+    const localSummary = () => {
+      const items = [...packingPage.querySelectorAll('[data-packing-item]')];
+      const packedCount = items.filter((item) => item.dataset.packed === '1').length;
+      const total = items.length;
+      const percent = total ? Math.round((packedCount / total) * 100) : 0;
+      renderPackingSummary(packedCount, total, percent);
+    };
+
+    packingPage.querySelectorAll('[data-packing-toggle]').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (form.dataset.busy === 'true') return;
+
+        const item = form.closest('[data-packing-item]');
+        const button = form.querySelector('[data-pack-check]');
+        if (!item || !button) return;
+
+        form.dataset.busy = 'true';
+        const wasPacked = item.dataset.packed === '1';
+        const nowPacked = !wasPacked;
+
+        item.dataset.packed = nowPacked ? '1' : '0';
+        item.classList.toggle('packed', nowPacked);
+        button.textContent = nowPacked ? '✓' : '';
+        button.setAttribute('aria-pressed', nowPacked ? 'true' : 'false');
+        button.classList.add('pack-check-pop');
+        window.setTimeout(() => button.classList.remove('pack-check-pop'), 180);
+        localSummary();
+
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json',
+            },
+            credentials: 'same-origin',
+          });
+          if (!response.ok) throw new Error('Packing update failed');
+          const result = await response.json();
+          item.dataset.packed = result.packed ? '1' : '0';
+          item.classList.toggle('packed', Boolean(result.packed));
+          button.textContent = result.packed ? '✓' : '';
+          button.setAttribute('aria-pressed', result.packed ? 'true' : 'false');
+          renderPackingSummary(result.packed_count, result.total, result.percent);
+        } catch (_error) {
+          item.dataset.packed = wasPacked ? '1' : '0';
+          item.classList.toggle('packed', wasPacked);
+          button.textContent = wasPacked ? '✓' : '';
+          button.setAttribute('aria-pressed', wasPacked ? 'true' : 'false');
+          localSummary();
+        } finally {
+          form.dataset.busy = 'false';
+        }
+      });
+    });
+  }
+
   // Keep flash messages from covering the app indefinitely.
   window.setTimeout(() => {
     document.querySelectorAll('.flash').forEach((flash) => {
