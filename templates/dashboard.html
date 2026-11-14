@@ -14,30 +14,26 @@
   </section>
 
   {% if planning_trip %}
-  {% set planning_pct = ((planning_days_with_stops / planning_days_total * 100) if planning_days_total else 0)|round|int %}
-  <section class="planning-focus-card">
+  <section class="planning-focus-card planning-focus-quiet">
     <div class="planning-focus-image">
       <img src="{{ cover_for_trip(planning_trip) }}" alt="{{ planning_trip['destination'] }}">
     </div>
     <div class="planning-focus-copy">
       <span class="eyebrow">NEXT TRIP{% if countdown is not none %} · IN {{ countdown }} DAYS{% endif %}</span>
       <h2>{{ planning_trip['destination'] }}</h2>
-      <p>
-        {% if planning_activity_total == 0 %}
-        The trip exists. The route does not yet. Let Roamory turn the dates into a first plan.
-        {% elif planning_days_with_stops < planning_days_total %}
-        {{ planning_days_with_stops }} of {{ planning_days_total }} days have plans. There is still room to shape the rest.
-        {% else %}
-        All {{ planning_days_total }} days have something planned. Open the route and fine-tune the details.
-        {% endif %}
-      </p>
-      <div class="journey-progress-wrap">
-        <div class="journey-progress-copy"><span>Trip planning</span><strong>{{ planning_pct }}%</strong></div>
-        <div class="journey-progress editorial-progress"><span style="width:{{ planning_pct }}%"></span></div>
+      <div class="readiness-line" aria-label="Trip readiness">
+        <span class="{{ 'ready' if planning_activity_total else '' }}">Route {{ '✓' if planning_activity_total else '—' }}</span>
+        <span class="{{ 'ready' if planning_packing_total and planning_packing_done == planning_packing_total else '' }}">Packing {{ planning_packing_done }}/{{ planning_packing_total }}</span>
+        <span class="{{ 'ready' if planning_docs else '' }}">Docs {{ '✓' if planning_docs else '—' }}</span>
+      </div>
+      <div class="next-action-copy">
+        <small>BEST NEXT STEP</small>
+        <strong>{{ planning_next_label }}</strong>
+        <p>{{ planning_next_note }}</p>
       </div>
       <div class="planning-focus-actions">
-        <a class="button button-primary" href="{{ url_for('itinerary', trip_id=planning_trip['id']) }}">{{ 'Build this trip' if planning_activity_total == 0 else 'Continue planning' }}</a>
-        <a class="text-link" href="{{ url_for('trip_overview', trip_id=planning_trip['id']) }}">Open trip overview →</a>
+        <a class="button button-primary" href="{{ planning_next_href }}">{{ planning_next_label }}</a>
+        <a class="text-link" href="{{ url_for('trip_overview', trip_id=planning_trip['id']) }}">View trip →</a>
       </div>
     </div>
   </section>
