@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 from db import get_db, init_app as init_db_app
 from starter_data import seed_starter_content, sync_curated_history
 from recommendations import RecommendationError, resolve_destination, weather_forecast
-from trip_builder import build_trip_plan
+from trip_builder import build_missing_restaurant_plan, build_trip_plan
 from trip_covers import destination_cover_url
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -153,6 +153,40 @@ def trip_days(trip_id: int):
     return get_db().execute(
         'SELECT * FROM trip_days WHERE trip_id = ? ORDER BY day_number', (trip_id,)
     ).fetchall()
+
+
+def _insert_plan_days(db, trip_id: int, days, planned_days) -> int:
+    day_rows = {row['day_number']: row for row in days}
+    inserted = 0
+    for planned_day in planned_days:
+        day = day_rows.get(planned_day['day_number'])
+        if day is None:
+            continue
+        for item in planned_day.get('items') or []:
+            db.execute(
+                '''INSERT INTO activities
+                (trip_id, day_id, name, type, activity_date, start_time, end_time, location,
+                 latitude, longitude, estimated_cost, actual_cost, notes, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (
+                    trip_id,
+                    day['id'],
+                    item['name'],
+                    item['type'],
+                    day['date'],
+                    item.get('start_time'),
+                    item.get('end_time'),
+                    item.get('location') or '',
+                    item.get('latitude'),
+                    item.get('longitude'),
+                    item.get('estimated_cost', 0),
+                    0,
+                    item.get('notes') or '',
+                    'planned',
+                )
+            )
+            inserted += 1
+    return inserted
 
 
 def _location_coordinates(location: str | None, destination: str | None = None):
@@ -657,7 +691,24 @@ def create_trip():
             ensure_trip_days(db, trip_id, start_date, end_date)
             create_default_packing(db, trip_id)
             db.commit()
-            flash('Trip created. Start shaping the route.', 'success')
+
+            trip = db.execute(
+                'SELECT * FROM trips WHERE id=? AND user_id=?',
+                (trip_id, g.user['id'])
+            ).fetchone()
+            inserted = 0
+            try:
+                plan = build_trip_plan(trip)
+                inserted = _insert_plan_days(db, trip_id, trip_days(trip_id), plan['days'])
+                db.commit()
+            except RecommendationError:
+                # The trip still exists; opening the itinerary retries restaurant enrichment later.
+                pass
+
+            if inserted:
+                flash('Trip created with a day-by-day route and at least two nearby food stops per day.', 'success')
+            else:
+                flash('Trip created. Roamory will complete the route and nearby food stops when itinerary data is available.', 'success')
             return redirect(url_for('trip_overview', trip_id=trip_id))
     return render_template('trip_form.html', trip=None)
 
@@ -804,6 +855,33 @@ def itinerary(trip_id):
             if activity['day_number'] == selected_day
         ]
 
+    restaurant_counts = {day['day_number']: 0 for day in days}
+    for activity in activities:
+        if activity['type'] == 'restaurant':
+            restaurant_counts[activity['day_number']] = restaurant_counts.get(activity['day_number'], 0) + 1
+
+    if any(count < 2 for count in restaurant_counts.values()):
+        try:
+            missing_food_days = build_missing_restaurant_plan(
+                trip,
+                [dict(day) for day in days],
+                [dict(activity) for activity in activities],
+            )
+        except RecommendationError:
+            missing_food_days = []
+
+        if missing_food_days:
+            _insert_plan_days(db, trip_id, days, missing_food_days)
+            db.commit()
+            activities = db.execute(
+                '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
+                   WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''', (trip_id,)
+            ).fetchall()
+            selected_activities = [
+                activity for activity in activities
+                if activity['day_number'] == selected_day
+            ]
+
     map_points = [
         {
             'name': activity['name'],
@@ -842,36 +920,7 @@ def build_trip(trip_id):
         flash(str(exc), 'error')
         return redirect(url_for('itinerary', trip_id=trip_id))
 
-    day_rows = {row['day_number']: row for row in trip_days(trip_id)}
-    inserted = 0
-    for planned_day in plan['days']:
-        day = day_rows.get(planned_day['day_number'])
-        if day is None:
-            continue
-        for item in planned_day['items']:
-            db.execute(
-                '''INSERT INTO activities
-                (trip_id, day_id, name, type, activity_date, start_time, end_time, location,
-                 latitude, longitude, estimated_cost, actual_cost, notes, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                (
-                    trip_id,
-                    day['id'],
-                    item['name'],
-                    item['type'],
-                    day['date'],
-                    item['start_time'],
-                    None,
-                    item['location'],
-                    item.get('latitude'),
-                    item.get('longitude'),
-                    item['estimated_cost'],
-                    0,
-                    item['notes'],
-                    'planned',
-                )
-            )
-            inserted += 1
+    inserted = _insert_plan_days(db, trip_id, trip_days(trip_id), plan['days'])
 
     if not inserted:
         flash('We found the destination, but not enough verified places to build this trip.', 'error')
