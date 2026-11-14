@@ -189,6 +189,51 @@ def _insert_plan_days(db, trip_id: int, days, planned_days) -> int:
     return inserted
 
 
+def _ensure_daily_restaurants(db, trip, days, activities):
+    if not days:
+        return activities
+
+    restaurant_counts = {day['day_number']: 0 for day in days}
+    for activity in activities:
+        if activity['type'] == 'restaurant':
+            restaurant_counts[activity['day_number']] = restaurant_counts.get(activity['day_number'], 0) + 1
+
+    if all(count >= 2 for count in restaurant_counts.values()):
+        return activities
+
+    # Existing/manual trips may not have coordinates yet. Resolve them once so food
+    # suggestions can be centred on the actual places planned for each day.
+    if _backfill_activity_coordinates(db, trip, activities):
+        activities = db.execute(
+            '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
+               WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''',
+            (trip['id'],)
+        ).fetchall()
+
+    try:
+        missing_food_days = build_missing_restaurant_plan(
+            trip,
+            [dict(day) for day in days],
+            [dict(activity) for activity in activities],
+        )
+    except RecommendationError:
+        return activities
+
+    if not missing_food_days:
+        return activities
+
+    inserted = _insert_plan_days(db, trip['id'], days, missing_food_days)
+    if not inserted:
+        return activities
+
+    db.commit()
+    return db.execute(
+        '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
+           WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''',
+        (trip['id'],)
+    ).fetchall()
+
+
 def _location_coordinates(location: str | None, destination: str | None = None):
     location = (location or '').strip()
     if not location:
@@ -802,6 +847,7 @@ def trip_overview(trip_id):
         '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
            WHERE a.trip_id=? ORDER BY a.activity_date, a.start_time''', (trip_id,)
     ).fetchall()
+    activities = _ensure_daily_restaurants(db, trip, days, activities)
     expenses = db.execute(
         'SELECT COALESCE(SUM(amount),0) spent FROM expenses WHERE trip_id=?',
         (trip_id,)
@@ -855,32 +901,11 @@ def itinerary(trip_id):
             if activity['day_number'] == selected_day
         ]
 
-    restaurant_counts = {day['day_number']: 0 for day in days}
-    for activity in activities:
-        if activity['type'] == 'restaurant':
-            restaurant_counts[activity['day_number']] = restaurant_counts.get(activity['day_number'], 0) + 1
-
-    if any(count < 2 for count in restaurant_counts.values()):
-        try:
-            missing_food_days = build_missing_restaurant_plan(
-                trip,
-                [dict(day) for day in days],
-                [dict(activity) for activity in activities],
-            )
-        except RecommendationError:
-            missing_food_days = []
-
-        if missing_food_days:
-            _insert_plan_days(db, trip_id, days, missing_food_days)
-            db.commit()
-            activities = db.execute(
-                '''SELECT a.*, d.day_number FROM activities a JOIN trip_days d ON d.id=a.day_id
-                   WHERE a.trip_id=? ORDER BY d.day_number, COALESCE(a.start_time,'23:59'), a.id''', (trip_id,)
-            ).fetchall()
-            selected_activities = [
-                activity for activity in activities
-                if activity['day_number'] == selected_day
-            ]
+    activities = _ensure_daily_restaurants(db, trip, days, activities)
+    selected_activities = [
+        activity for activity in activities
+        if activity['day_number'] == selected_day
+    ]
 
     map_points = [
         {
