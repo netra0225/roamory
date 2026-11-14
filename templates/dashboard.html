@@ -100,7 +100,7 @@
     <a href="{{ url_for('wallet', trip_id=ongoing['id']) }}"><span>04</span><strong>Wallet</strong><small>{{ readiness['docs'] }} documents</small></a>
     <a href="{{ url_for('packing', trip_id=ongoing['id']) }}"><span>05</span><strong>Packing</strong><small>{{ packing_pct }}% ready</small></a>
     <a href="{{ url_for('budget', trip_id=ongoing['id']) }}"><span>06</span><strong>Budget</strong><small>{{ currency_symbol(g.settings['currency']) }}{{ '%.0f'|format(spent) }} spent</small></a>
-    <a href="{{ url_for('journal', trip_id=ongoing['id']) }}"><span>07</span><strong>Journal</strong><small>{{ dashboard_memories|length }} memories</small></a>
+    <a href="{{ url_for('common_journal') }}"><span>07</span><strong>Journal</strong><small>{{ dashboard_memories|length }} memories</small></a>
     <a href="{{ url_for('summary', trip_id=ongoing['id']) }}"><span>08</span><strong>Summary</strong><small>trip edition</small></a>
   </section>
 
@@ -151,7 +151,7 @@
     </article>
 
     <article class="desk-card journal-preview-card">
-      <div class="desk-card-top"><span class="eyebrow">JOURNAL · DEVELOPING</span><a href="{{ url_for('journal', trip_id=ongoing['id']) }}">Open book →</a></div>
+      <div class="desk-card-top"><span class="eyebrow">JOURNAL · DEVELOPING</span><a href="{{ url_for('common_journal') }}">Open book →</a></div>
       <div class="dashboard-journal-book">
         <div class="dash-journal-left">
           <span class="tape"></span>
