@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS activities (
     start_time TEXT,
     end_time TEXT,
     location TEXT,
+    latitude REAL,
+    longitude REAL,
     estimated_cost REAL NOT NULL DEFAULT 0,
     actual_cost REAL NOT NULL DEFAULT 0,
     notes TEXT,
