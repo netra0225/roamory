@@ -1,20 +1,123 @@
 {% extends 'base.html' %}
 {% block title %}Today — {{ trip['destination'] }}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/experience.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="{{ url_for('static', filename='js/experience.js') }}"></script>
+{% endblock %}
 {% block content %}
 {% include '_trip_nav.html' %}
-<main class="today-shell trip-page">
-  <header class="today-header" style="--today-image:url('{{ cover_for_trip(trip) }}')"><div><span class="eyebrow">TRAVEL MODE</span><h1>{{ trip['destination'] }}</h1><p>{% if day %}Day {{ day['day_number'] }} · {{ day['date'] }}{% else %}No travel day available{% endif %}</p></div><span class="today-pin">YOU ARE HERE</span></header>
-  <section class="today-grid">
-    <article class="now-card">
-      <span class="handwritten">right now</span>
-      {% if current %}<div class="now-time">{{ current['start_time'] or 'Anytime' }}</div><span class="activity-type">{{ current['type']|upper }}</span><h2>{{ current['name'] }}</h2><p class="now-location">⌖ {{ current['location'] or 'Location not added' }}</p><p>{{ current['notes'] or 'No extra notes for this stop.' }}</p>
-      {% if current_document %}<div class="today-document"><div><span>RELEVANT TICKET</span><strong>{{ current_document['title'] }}</strong></div><a href="{{ url_for('open_document', trip_id=trip['id'], document_id=current_document['id']) }}" target="_blank">Open ticket →</a></div>{% endif %}
-      <div class="today-actions"><form method="post" action="{{ url_for('set_activity_status', trip_id=trip['id'], activity_id=current['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="status" value="completed"><button class="button button-primary" type="submit">Complete</button></form><form method="post" action="{{ url_for('set_activity_status', trip_id=trip['id'], activity_id=current['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="status" value="skipped"><button class="button button-secondary" type="submit">Skip</button></form><form method="post" action="{{ url_for('set_activity_status', trip_id=trip['id'], activity_id=current['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="status" value="changed"><button class="button button-secondary" type="submit">Change</button></form></div>
-      {% else %}<div class="empty-state compact"><h2>Nothing waiting right now.</h2><p>Either the day is complete or the itinerary is still blank.</p><a class="button button-primary" href="{{ url_for('itinerary', trip_id=trip['id']) }}">Open itinerary</a></div>{% endif %}
-    </article>
-    <aside class="next-card"><span class="eyebrow">UP NEXT</span>{% if next_activity %}<span>{{ next_activity['start_time'] or 'Later' }}</span><h3>{{ next_activity['name'] }}</h3><p>{{ next_activity['location'] or 'Location pending' }}</p>{% else %}<h3>No next stop</h3><p>The route is clear after this.</p>{% endif %}</aside>
+<main class="today-shell trip-page experience-today">
+  <section class="today-hero" style="background-image:url('{{ cover_for_trip(trip) }}')">
+    <div class="today-hero-copy">
+      <span class="eyebrow">TRAVEL MODE</span>
+      <h1>{{ trip['destination'] }}</h1>
+      <p>{% if day %}Day {{ day['day_number'] }} · {{ day['date'] }}{% else %}No travel day available{% endif %}</p>
+    </div>
+    <span class="today-mode-pill">{{ activities|length }} stop{{ '' if activities|length == 1 else 's' }} today</span>
   </section>
-  <nav class="today-shortcuts" aria-label="Travel shortcuts"><a href="{{ url_for('wallet', trip_id=trip['id']) }}"><span>01</span><strong>Wallet</strong><small>tickets & docs</small></a><a href="{{ url_for('budget', trip_id=trip['id']) }}#add-expense"><span>02</span><strong>Add expense</strong><small>keep spend current</small></a><a href="{{ url_for('journal', trip_id=trip['id']) }}#add-memory"><span>03</span><strong>Add memory</strong><small>keep this moment</small></a></nav>
-  <section class="today-route-mini">{% for activity in activities %}<div class="today-stop {{ activity['status'] }}"><span></span><div><small>{{ activity['start_time'] or '—' }}</small><strong>{{ activity['name'] }}</strong></div></div>{% endfor %}</section>
+
+  <section class="today-focus-grid">
+    <article class="now-card now-card-experience">
+      <span class="handwritten">right now</span>
+
+      {% if current %}
+      <div class="now-time">{{ current['start_time'] or 'Anytime' }}</div>
+      <div class="now-stop-kicker">
+        <span class="activity-type">{{ current['type']|upper }}</span>
+        <span class="status-label">{{ current['status'] }}</span>
+      </div>
+      <h2>{{ current['name'] }}</h2>
+      <p class="now-location">⌖ {{ current['location'] or 'Location not added' }}</p>
+      {% if current['notes'] %}<p>{{ current['notes'] }}</p>{% endif %}
+
+      {% if current_document %}
+      <div class="today-document">
+        <div><span>RELEVANT TICKET</span><strong>{{ current_document['title'] }}</strong></div>
+        <a href="{{ url_for('open_document', trip_id=trip['id'], document_id=current_document['id']) }}" target="_blank">Open ticket →</a>
+      </div>
+      {% endif %}
+
+      {% if next_activity %}
+      <div class="today-next-inline">
+        <div>
+          <span>UP NEXT</span>
+          <strong>{{ next_activity['name'] }}</strong>
+        </div>
+        <time>{{ next_activity['start_time'] or 'Later' }}</time>
+      </div>
+      {% endif %}
+
+      <div class="today-actions">
+        <form method="post" action="{{ url_for('set_activity_status', trip_id=trip['id'], activity_id=current['id']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="status" value="completed">
+          <button class="button button-primary" type="submit">Complete</button>
+        </form>
+        <form method="post" action="{{ url_for('set_activity_status', trip_id=trip['id'], activity_id=current['id']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="status" value="skipped">
+          <button class="button button-secondary" type="submit">Skip</button>
+        </form>
+        <a class="button button-secondary" href="{{ url_for('edit_activity', trip_id=trip['id'], activity_id=current['id']) }}">Change details</a>
+      </div>
+      {% else %}
+      <div class="empty-state compact">
+        <span class="eyebrow">CLEAR DAY</span>
+        <h2>Nothing is waiting right now.</h2>
+        <p>Either today is complete or this day still needs a route.</p>
+        <a class="button button-primary" href="{{ url_for('itinerary', trip_id=trip['id'], day=day['day_number'] if day else None) }}">Open itinerary</a>
+      </div>
+      {% endif %}
+    </article>
+
+    <aside class="today-map-card">
+      <div class="today-map-head">
+        <div>
+          <span class="eyebrow">TODAY · MAP</span>
+          <h3>See the day before you move.</h3>
+        </div>
+        <span class="route-map-count">{{ map_points|length }} mapped</span>
+      </div>
+      {% if map_points %}
+      <div class="roamory-map" data-roamory-map data-points='{{ map_points|tojson|forceescape }}' aria-label="Map of today's stops"></div>
+      {% else %}
+      <div class="route-map-empty">
+        <div>
+          <strong>No mapped stops yet.</strong>
+          <span>Add locations to today’s itinerary and they will appear here automatically.</span>
+        </div>
+      </div>
+      {% endif %}
+    </aside>
+  </section>
+
+  <nav class="today-shortcuts" aria-label="Travel shortcuts">
+    <a href="{{ url_for('wallet', trip_id=trip['id']) }}"><span>01</span><strong>Wallet</strong><small>tickets & docs</small></a>
+    <a href="{{ url_for('budget', trip_id=trip['id']) }}#add-expense"><span>02</span><strong>Add expense</strong><small>keep spend current</small></a>
+    <a href="{{ url_for('journal', trip_id=trip['id']) }}#add-memory"><span>03</span><strong>Add memory</strong><small>keep this moment</small></a>
+  </nav>
+
+  <section class="today-day-strip">
+    <div class="today-day-strip-head">
+      <div>
+        <span class="eyebrow">THE WHOLE DAY</span>
+        <h2>What the route looks like.</h2>
+      </div>
+      <a class="text-link" href="{{ url_for('itinerary', trip_id=trip['id'], day=day['day_number'] if day else None) }}">Edit itinerary →</a>
+    </div>
+    <div class="today-day-timeline">
+      {% for activity in activities %}
+      <article class="today-day-stop {{ activity['status'] }}">
+        <small>{{ activity['start_time'] or 'Anytime' }} · {{ activity['type']|upper }}</small>
+        <strong>{{ activity['name'] }}</strong>
+        <span>{{ activity['location'] or 'Location pending' }}</span>
+      </article>
+      {% else %}
+      <div class="small-empty">No stops are planned for this day yet.</div>
+      {% endfor %}
+    </div>
+  </section>
 </main>
 {% endblock %}
