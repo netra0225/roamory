@@ -1447,6 +1447,50 @@ def edit_expense(trip_id, expense_id):
     return render_template('expense_form.html', trip=trip, expense=expense)
 
 
+@app.route('/journal')
+@login_required
+def common_journal():
+    db = get_db()
+
+    udaipur_trip = db.execute(
+        '''SELECT * FROM trips
+           WHERE user_id=? AND LOWER(destination)=?
+           ORDER BY start_date DESC LIMIT 1''',
+        (g.user['id'], 'udaipur')
+    ).fetchone()
+    if udaipur_trip is None:
+        udaipur_trip = {
+            'start_date': '',
+            'end_date': '',
+        }
+
+    darjeeling_trip = db.execute(
+        '''SELECT * FROM trips
+           WHERE user_id=?
+             AND LOWER(destination)=?
+             AND end_date < ?
+           ORDER BY end_date DESC LIMIT 1''',
+        (g.user['id'], 'darjeeling', date.today().isoformat())
+    ).fetchone()
+
+    darjeeling_memories = []
+    if darjeeling_trip:
+        darjeeling_memories = db.execute(
+            '''SELECT * FROM memories
+               WHERE trip_id=?
+               ORDER BY COALESCE(memory_date, created_at), id
+               LIMIT 6''',
+            (darjeeling_trip['id'],)
+        ).fetchall()
+
+    return render_template(
+        'common_journal.html',
+        udaipur_trip=udaipur_trip,
+        darjeeling_trip=darjeeling_trip,
+        darjeeling_memories=darjeeling_memories,
+    )
+
+
 @app.route('/trips/<int:trip_id>/journal', methods=('GET','POST'))
 @login_required
 def journal(trip_id):
