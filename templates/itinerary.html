@@ -79,16 +79,7 @@
           <div class="empty-state route-empty">
             <span class="doodle-arrow">↝</span>
             <span class="eyebrow">DAY {{ selected_day }}</span>
-            <h2>Nothing planned here yet.</h2>
-            <p>Add something yourself or let Roamory build the first version of the trip.</p>
-            {% if not activities %}
-            <form method="post" action="{{ url_for('build_trip', trip_id=trip['id']) }}">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="button button-primary" type="submit">Build my trip</button>
-            </form>
-            {% else %}
-            <a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">Add something</a>
-            {% endif %}
+            <h2>Nothing planned for this day yet.</h2>
           </div>
         {% endfor %}
       </section>
