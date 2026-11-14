@@ -106,7 +106,8 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
         (5, 'Hathipole Market farewell stop', 'activity', '11:30', '13:00', 'Hathipole Market', 1500, 0, 'Pick up small souvenirs before heading back.', 'planned'),
         (5, 'Lunch at Natraj Dining Hall & Restaurant', 'restaurant', '13:15', '14:30', 'Natraj Dining Hall & Restaurant', 700, 0, 'Traditional Rajasthani-Gujarati thali for lunch.', 'planned'),
         (5, 'Dinner at Jagat Niwas Palace Restaurant', 'restaurant', '19:30', '21:00', 'Jagat Niwas Palace Restaurant', 1600, 0, 'Final lake-view dinner in the old city.', 'planned'),
-    ]    activity_ids = []
+    ]
+    activity_ids = []
     for day_index, name, kind, start, end, location, estimated, actual, note, status in ongoing_activities:
         day = days[min(day_index, len(days) - 1)]
         cur = db.execute(
