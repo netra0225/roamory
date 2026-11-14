@@ -1,10 +1,19 @@
 {% extends 'base.html' %}
 {% block title %}Itinerary — {{ trip['destination'] }}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/experience.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="{{ url_for('static', filename='js/experience.js') }}"></script>
+{% endblock %}
 {% block content %}
 {% include '_trip_nav.html' %}
 <main class="page-shell trip-page itinerary-page">
   <section class="page-intro itinerary-intro">
-    <div><span class="eyebrow">THE JOURNEY ROUTE</span><h1>{{ trip['destination'] }}, day by day.</h1></div>
+    <div>
+      <span class="eyebrow">THE JOURNEY ROUTE</span>
+      <h1>{{ trip['destination'] }}, day by day.</h1>
+    </div>
     <div class="itinerary-actions">
       {% if not activities %}
       <form class="build-trip-inline" method="post" action="{{ url_for('build_trip', trip_id=trip['id']) }}">
@@ -17,28 +26,93 @@
       {% endif %}
     </div>
   </section>
+
   <nav class="day-tabs" aria-label="Trip days">
-    {% for day in days %}<a class="{{ 'active' if day['day_number']==selected_day else '' }}" href="{{ url_for('itinerary', trip_id=trip['id'], day=day['day_number']) }}"><span>Day {{ day['day_number'] }}</span><small>{{ day['date'][5:] }}</small></a>{% endfor %}
-  </nav>
-  <section class="itinerary-route" data-route>
-    {% set day_activities = activities|selectattr('day_number','equalto',selected_day)|list %}
-    {% set ns = namespace(current_found=false) %}
-    {% for activity in day_activities %}
-      {% set is_current = activity['status'] in ['planned','changed'] and not ns.current_found %}
-      {% if is_current %}{% set ns.current_found = true %}{% endif %}
-      <article class="route-activity status-{{ activity['status'] }} {{ 'is-current' if is_current else '' }}">
-        <div class="route-axis"><span class="route-node"></span>{% if not loop.last %}<span class="route-segment"></span>{% endif %}</div>
-        <div class="activity-time"><strong>{{ activity['start_time'] or '—' }}</strong><span>{{ activity['end_time'] or '' }}</span></div>
-        <a class="activity-paper" href="{{ url_for('activity_detail', trip_id=trip['id'], activity_id=activity['id']) }}">
-          <div class="activity-meta"><span class="activity-type">{{ activity['type']|upper }}</span><span class="status-label">{{ activity['status'] }}</span></div>
-          <h2>{{ activity['name'] }}</h2><p>{{ activity['location'] or 'Location not added' }}</p>
-          {% if activity['notes'] %}<small>{{ activity['notes']|truncate(92) }}</small>{% endif %}
-        </a>
-      </article>
-    {% else %}
-      <div class="empty-state route-empty"><span class="doodle-arrow">↝</span><span class="eyebrow">DAY {{ selected_day }}</span><h2>No stops on this route yet.</h2><p>Add a stay, meal, activity, transport or anything else that matters.</p><a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">Add first activity</a></div>
+    {% for day in days %}
+    <a class="{{ 'active' if day['day_number']==selected_day else '' }}" href="{{ url_for('itinerary', trip_id=trip['id'], day=day['day_number']) }}">
+      <span>Day {{ day['day_number'] }}</span>
+      <small>{{ day['date'][5:] }}</small>
+    </a>
     {% endfor %}
+  </nav>
+
+  {% set day_activities = activities|selectattr('day_number','equalto',selected_day)|list %}
+  {% set selected_day_row = days|selectattr('day_number','equalto',selected_day)|first %}
+
+  <section class="itinerary-experience">
+    <div class="route-board">
+      <div class="route-day-cover" style="--route-cover:url('{{ cover_for_trip(trip) }}')">
+        <div>
+          <span class="eyebrow">DAY {{ selected_day }}</span>
+          <h2>{{ trip['destination'] }}</h2>
+          <small>{{ selected_day_row['date'] if selected_day_row else '' }} · {{ day_activities|length }} stop{{ '' if day_activities|length == 1 else 's' }}</small>
+        </div>
+        <span class="route-day-badge">{{ 'ROUTE READY' if day_activities else 'OPEN DAY' }}</span>
+      </div>
+
+      <section class="itinerary-route visual-route" data-route>
+        {% set ns = namespace(current_found=false) %}
+        {% for activity in day_activities %}
+          {% set is_current = activity['status'] in ['planned','changed'] and not ns.current_found %}
+          {% if is_current %}{% set ns.current_found = true %}{% endif %}
+          <article class="route-activity status-{{ activity['status'] }} {{ 'is-current' if is_current else '' }}">
+            <div class="route-axis">
+              <span class="route-node">{{ loop.index }}</span>
+              {% if not loop.last %}<span class="route-segment"></span>{% endif %}
+            </div>
+            <div class="activity-time">
+              <strong>{{ activity['start_time'] or 'Anytime' }}</strong>
+              <span>{{ activity['end_time'] or '' }}</span>
+            </div>
+            <a class="activity-paper" href="{{ url_for('activity_detail', trip_id=trip['id'], activity_id=activity['id']) }}">
+              <span class="route-stop-number">0{{ loop.index }}</span>
+              <div class="activity-meta">
+                <span class="activity-type">{{ activity['type']|upper }}</span>
+                <span class="status-label">{{ activity['status'] }}</span>
+              </div>
+              <h2>{{ activity['name'] }}</h2>
+              <p>⌖ {{ activity['location'] or 'Location not added' }}</p>
+              {% if activity['notes'] %}<small>{{ activity['notes']|truncate(100) }}</small>{% endif %}
+            </a>
+          </article>
+        {% else %}
+          <div class="empty-state route-empty">
+            <span class="doodle-arrow">↝</span>
+            <span class="eyebrow">DAY {{ selected_day }}</span>
+            <h2>Nothing planned here yet.</h2>
+            <p>Add something yourself or let Roamory build the first version of the trip.</p>
+            {% if not activities %}
+            <form method="post" action="{{ url_for('build_trip', trip_id=trip['id']) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="button button-primary" type="submit">Build my trip</button>
+            </form>
+            {% else %}
+            <a class="button button-primary" href="{{ url_for('add_activity', trip_id=trip['id']) }}">Add something</a>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </section>
+    </div>
+
+    <aside class="route-map-card">
+      <div class="route-map-head">
+        <div>
+          <span class="eyebrow">DAY {{ selected_day }} · MAP</span>
+          <h3>Your route at a glance.</h3>
+        </div>
+        <span class="route-map-count">{{ map_points|length }} mapped</span>
+      </div>
+      {% if map_points %}
+      <div class="roamory-map" data-roamory-map data-points='{{ map_points|tojson|forceescape }}' aria-label="Map of itinerary stops"></div>
+      {% else %}
+      <div class="route-map-empty">
+        <div>
+          <strong>No mapped stops yet.</strong>
+          <span>Add a location to an activity and Roamory will place it on this map automatically.</span>
+        </div>
+      </div>
+      {% endif %}
+    </aside>
   </section>
-  <p class="map-data-attribution">Place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a></p>
 </main>
 {% endblock %}
