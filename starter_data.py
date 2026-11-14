@@ -70,7 +70,7 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
         'Udaipur',
         today - timedelta(days=2),
         today + timedelta(days=3),
-        'A sunlit five-day city break with lake mornings, old architecture, local food and evenings left intentionally unhurried.',
+        'A sunlit six-day city break with lake mornings, old architecture, local food and evenings left intentionally unhurried.',
         IMAGE_MAP['udaipur'],
         'sunflower',
         65000,
@@ -78,22 +78,35 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
     # ---------- Ongoing Udaipur trip ----------
     days = db.execute('SELECT * FROM trip_days WHERE trip_id=? ORDER BY day_number', (ongoing_id,)).fetchall()
     ongoing_activities = [
-        (0, 'Breakfast by Lake Pichola', 'restaurant', '08:30', '09:45', 'Ambrai Road', 1200, 1100, 'Ask for the outdoor table. Keep the camera nearby.', 'completed'),
+        (0, 'Breakfast at Ambrai Restaurant', 'restaurant', '08:30', '09:45', 'Ambrai Restaurant', 1200, 1100, 'Lake-facing breakfast before City Palace.', 'completed'),
         (0, 'City Palace morning walk', 'activity', '10:30', '13:00', 'City Palace', 900, 900, 'Audio guide first, then wander the courtyards.', 'completed'),
+        (0, 'Lunch at Millets of Mewar', 'restaurant', '13:30', '14:45', 'Millets of Mewar Restaurant', 700, 0, 'A lighter millet-based lunch near the old city.', 'planned'),
+
+        (1, "Breakfast at Jheel's Ginger Coffee Bar & Bakery", 'restaurant', '08:30', '09:15', "Jheel's Ginger Coffee Bar & Bakery", 600, 0, 'Coffee, bakery food and a lake-side start.', 'planned'),
         (1, 'Saheliyon-ki-Bari gardens', 'destination', '09:30', '11:00', 'Saheliyon-ki-Bari', 300, 300, 'A quieter morning stop before the lake.', 'completed'),
         (1, 'Boat ride to Jag Mandir', 'activity', '11:30', '13:00', 'Lake Pichola', 1800, 0, 'Ticket counter near the main jetty.', 'planned'),
         (1, 'Old city blue-hour walk', 'destination', '17:40', '19:00', 'Gangaur Ghat', 0, 0, 'Carry the small camera, not the whole backpack.', 'changed'),
-        (2, 'Coffee and sketchbook hour', 'restaurant', '10:00', '11:15', 'Hanuman Ghat', 850, 850, 'Window seat if possible.', 'completed'),
+        (1, 'Dinner at Upre by 1559 AD', 'restaurant', '19:30', '21:00', 'Upre by 1559 AD', 1800, 0, 'Book a rooftop table for the lake view.', 'planned'),
+
+        (2, 'Coffee at Cafe Edelweiss', 'restaurant', '10:00', '11:15', 'Cafe Edelweiss', 600, 600, 'Coffee, bakery food and an easy start to the day.', 'completed'),
         (2, 'Sunset at Sajjangarh', 'activity', '16:30', '19:00', 'Monsoon Palace', 1600, 0, 'Leave before traffic builds near the hill road.', 'planned'),
-        (2, 'Dinner overlooking the lake', 'restaurant', '20:15', '21:45', 'Hanuman Ghat', 2600, 0, 'Reservation under the trip name.', 'planned'),
+        (2, 'Dinner at Tribute Restaurant', 'restaurant', '20:15', '21:45', 'Tribute Restaurant', 1800, 0, 'Lakeside dinner after the Monsoon Palace sunset.', 'planned'),
+
         (3, 'Jagdish Temple and old city lanes', 'destination', '09:00', '10:45', 'Jagdish Temple', 0, 0, 'Start early, then wander the lanes toward the lake.', 'planned'),
+        (3, 'Lunch at Savage Garden Restaurant', 'restaurant', '12:30', '14:00', 'Savage Garden Restaurant', 900, 0, 'Relaxed old-city lunch before the afternoon break.', 'planned'),
         (3, 'Bagore Ki Haveli and Gangaur Ghat', 'activity', '16:30', '18:30', 'Bagore Ki Haveli', 300, 0, 'Stay through golden hour by the ghat.', 'planned'),
+        (3, 'Dinner at Sun N Moon Cafe & Restaurant', 'restaurant', '19:00', '20:30', 'Sun N Moon Cafe & Restaurant', 1200, 0, 'Rooftop dinner near Jagdish Temple.', 'planned'),
+
         (4, 'Shilpgram arts village', 'activity', '10:00', '12:30', 'Shilpgram', 500, 0, 'Keep time for the craft stalls and open-air exhibits.', 'planned'),
+        (4, 'Lunch at 1559 AD', 'restaurant', '13:15', '14:45', '1559 AD', 1500, 0, 'Heritage-style lunch near Fateh Sagar.', 'planned'),
         (4, 'Fateh Sagar Lake sunset walk', 'destination', '17:00', '19:00', 'Fateh Sagar Lake', 0, 0, 'Walk the promenade and stop for something cold.', 'planned'),
+        (4, 'Dinner at Khamma Ghani Restaurant', 'restaurant', '19:30', '21:00', 'Khamma Ghani Restaurant', 1600, 0, 'Lakeside Rajasthani dinner after the sunset walk.', 'planned'),
+
         (5, 'Badi Lake morning drive', 'destination', '08:00', '10:30', 'Badi Lake', 1200, 0, 'A quieter last morning outside the old city.', 'planned'),
         (5, 'Hathipole Market farewell stop', 'activity', '11:30', '13:00', 'Hathipole Market', 1500, 0, 'Pick up small souvenirs before heading back.', 'planned'),
-    ]
-    activity_ids = []
+        (5, 'Lunch at Natraj Dining Hall & Restaurant', 'restaurant', '13:15', '14:30', 'Natraj Dining Hall & Restaurant', 700, 0, 'Traditional Rajasthani-Gujarati thali for lunch.', 'planned'),
+        (5, 'Dinner at Jagat Niwas Palace Restaurant', 'restaurant', '19:30', '21:00', 'Jagat Niwas Palace Restaurant', 1600, 0, 'Final lake-view dinner in the old city.', 'planned'),
+    ]    activity_ids = []
     for day_index, name, kind, start, end, location, estimated, actual, note, status in ongoing_activities:
         day = days[min(day_index, len(days) - 1)]
         cur = db.execute(
