@@ -5,16 +5,16 @@
 {% endblock %}
 {% block content %}
 {% include '_trip_nav.html' %}
-<main class="page-shell trip-page packing-page">
+<main class="page-shell trip-page packing-page" data-packing-page>
   {% set pct = ((packed / total * 100) if total else 0)|round|int %}
   <section class="packing-hero">
     <div>
       <span class="eyebrow">SMART PACKING</span>
-      <h1>{{ packed }} / {{ total }} packed.</h1>
+      <h1><span data-packed-count>{{ packed }}</span> / <span data-packing-total>{{ total }}</span> packed.</h1>
       <p>Roamory prepared a short starter list for {{ trip_length }} day{{ '' if trip_length == 1 else 's' }} in {{ trip['destination'] }}. Tick what is done; change only what you need.</p>
-      <div class="packing-meter"><span style="width:{{ pct }}%"></span></div>
+      <div class="packing-meter"><span data-packing-meter style="width:{{ pct }}%"></span></div>
     </div>
-    <div class="suitcase-illustration" style="--fill:{{ pct }}%">
+    <div class="suitcase-illustration" data-suitcase style="--fill:{{ pct }}%">
       <div class="suitcase-handle"></div>
       <div class="suitcase-body"><div class="suitcase-fill"></div><span>ROAMORY</span><small>{{ trip['destination'] }}</small></div>
     </div>
@@ -46,10 +46,10 @@
       <div class="category-title"><span>0{{ loop.index }}</span><h2>{{ cat['name'] }}</h2></div>
       <div class="packing-items">
         {% for item in cat_items %}
-        <div class="packing-item {{ 'packed' if item['packed'] else '' }}">
-          <form method="post" action="{{ url_for('toggle_packing_item', trip_id=trip['id'], item_id=item['id']) }}">
+        <div class="packing-item {{ 'packed' if item['packed'] else '' }}" data-packing-item data-packed="{{ 1 if item['packed'] else 0 }}">
+          <form method="post" action="{{ url_for('toggle_packing_item', trip_id=trip['id'], item_id=item['id']) }}" data-packing-toggle>
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="pack-check" type="submit" aria-label="Toggle {{ item['name'] }} packed">{{ '✓' if item['packed'] else '' }}</button>
+            <button class="pack-check" data-pack-check type="submit" aria-label="Toggle {{ item['name'] }} packed" aria-pressed="{{ 'true' if item['packed'] else 'false' }}">{{ '✓' if item['packed'] else '' }}</button>
           </form>
           <div>
             <strong>{{ item['name'] }}</strong>
