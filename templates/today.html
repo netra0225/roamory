@@ -18,6 +18,49 @@
     <span class="today-mode-pill">{{ activities|length }} stop{{ '' if activities|length == 1 else 's' }} today</span>
   </section>
 
+  <section class="today-brief" aria-label="Today at a glance">
+    <div>
+      <small>WEATHER</small>
+      {% if today_weather %}
+      <strong>
+        {% if today_weather['condition'] == 'wet' %}Rain likely
+        {% elif today_weather['condition'] == 'clear' %}Clear
+        {% elif today_weather['condition'] == 'partly_cloudy' %}Partly cloudy
+        {% elif today_weather['condition'] == 'overcast' %}Overcast
+        {% else %}Mixed{% endif %}
+      </strong>
+      <span>
+        {% if today_weather['temperature_min_c'] is not none and today_weather['temperature_max_c'] is not none %}
+        {{ today_weather['temperature_min_c']|round|int }}°–{{ today_weather['temperature_max_c']|round|int }}°C
+        {% else %}Forecast available{% endif %}
+      </span>
+      {% else %}
+      <strong>Closer to the trip</strong>
+      <span>Live forecast will appear here.</span>
+      {% endif %}
+    </div>
+    <div>
+      <small>FIRST STOP</small>
+      {% if activities %}
+      <strong>{{ activities[0]['start_time'] or 'Anytime' }}</strong>
+      <span>{{ activities[0]['name'] }}</span>
+      {% else %}
+      <strong>Open day</strong>
+      <span>No stop planned yet.</span>
+      {% endif %}
+    </div>
+    <div>
+      <small>KEEP HANDY</small>
+      {% if carry_items %}
+      <strong>{{ carry_items[0]['name'] }}</strong>
+      <span>{% if carry_items|length > 1 %}+ {{ carry_items[1]['name'] }}{% else %}Still unpacked{% endif %}</span>
+      {% else %}
+      <strong>You’re set</strong>
+      <span>No packing reminder right now.</span>
+      {% endif %}
+    </div>
+  </section>
+
   <section class="today-focus-grid">
     <article class="now-card now-card-experience">
       <span class="handwritten">right now</span>
