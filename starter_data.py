@@ -86,6 +86,12 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
         (2, 'Coffee and sketchbook hour', 'restaurant', '10:00', '11:15', 'Hanuman Ghat', 850, 850, 'Window seat if possible.', 'completed'),
         (2, 'Sunset at Sajjangarh', 'activity', '16:30', '19:00', 'Monsoon Palace', 1600, 0, 'Leave before traffic builds near the hill road.', 'planned'),
         (2, 'Dinner overlooking the lake', 'restaurant', '20:15', '21:45', 'Hanuman Ghat', 2600, 0, 'Reservation under the trip name.', 'planned'),
+        (3, 'Jagdish Temple and old city lanes', 'destination', '09:00', '10:45', 'Jagdish Temple', 0, 0, 'Start early, then wander the lanes toward the lake.', 'planned'),
+        (3, 'Bagore Ki Haveli and Gangaur Ghat', 'activity', '16:30', '18:30', 'Bagore Ki Haveli', 300, 0, 'Stay through golden hour by the ghat.', 'planned'),
+        (4, 'Shilpgram arts village', 'activity', '10:00', '12:30', 'Shilpgram', 500, 0, 'Keep time for the craft stalls and open-air exhibits.', 'planned'),
+        (4, 'Fateh Sagar Lake sunset walk', 'destination', '17:00', '19:00', 'Fateh Sagar Lake', 0, 0, 'Walk the promenade and stop for something cold.', 'planned'),
+        (5, 'Badi Lake morning drive', 'destination', '08:00', '10:30', 'Badi Lake', 1200, 0, 'A quieter last morning outside the old city.', 'planned'),
+        (5, 'Hathipole Market farewell stop', 'activity', '11:30', '13:00', 'Hathipole Market', 1500, 0, 'Pick up small souvenirs before heading back.', 'planned'),
     ]
     activity_ids = []
     for day_index, name, kind, start, end, location, estimated, actual, note, status in ongoing_activities:
