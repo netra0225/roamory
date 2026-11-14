@@ -175,11 +175,20 @@ def seed_starter_content(db, user_id: int) -> dict[str, int]:
            VALUES (?,?,?,?,?,?,?)''',
         (ongoing_id, 'Monsoon Palace sunset entry', 'activity', today.isoformat(), 'Entry window 16:00–18:30.', palace_file, 'Monsoon-Palace-Entry.txt'),
     ).lastrowid
-    # Link itinerary stops to wallet documents so Today and Activity Details demonstrate the relationship.
-    if len(activity_ids) > 3:
-        db.execute('UPDATE activities SET document_id=? WHERE id=?', (doc2, activity_ids[3]))
-    if len(activity_ids) > 6:
-        db.execute('UPDATE activities SET document_id=? WHERE id=?', (doc3, activity_ids[6]))
+    # Link wallet documents by activity name so adding itinerary stops never shifts the relationship.
+    boat_activity = db.execute(
+        'SELECT id FROM activities WHERE trip_id=? AND name=? LIMIT 1',
+        (ongoing_id, 'Boat ride to Jag Mandir'),
+    ).fetchone()
+    if boat_activity:
+        db.execute('UPDATE activities SET document_id=? WHERE id=?', (doc2, boat_activity['id']))
+
+    palace_activity = db.execute(
+        'SELECT id FROM activities WHERE trip_id=? AND name=? LIMIT 1',
+        (ongoing_id, 'Sunset at Sajjangarh'),
+    ).fetchone()
+    if palace_activity:
+        db.execute('UPDATE activities SET document_id=? WHERE id=?', (doc3, palace_activity['id']))
 
     ongoing_memories = [
         ('Blue hour from the ghat', today.isoformat(), 'Gangaur Ghat', 'The lake turned silver just before the palace lights appeared.', IMAGE_MAP['udaipur'], 'lake'),
