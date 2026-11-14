@@ -65,7 +65,7 @@
         <div>
           <span>{{ current['activity_date'] }} · {{ current['start_time'] or 'Anytime' }}</span>
           <strong>{{ current['location'] or 'Location to be decided' }}</strong>
-          <p>{{ current['notes'] or 'No notes yet.' }}</p>
+          {% if current['notes'] %}<p>{{ current['notes'] }}</p>{% endif %}
         </div>
       </div>
       {% else %}
@@ -105,20 +105,10 @@
         <figcaption>{{ memory['title'] }}</figcaption>
       </figure>
       {% else %}
-      <div class="small-empty">No memories yet. The journal will grow from this trip only.</div>
+      <div class="small-empty">No memories yet.</div>
       {% endfor %}
     </div>
   </section>
 
-  <section class="danger-zone">
-    <div>
-      <span class="eyebrow">TRIP ADMIN</span>
-      <h2>Need to remove this trip?</h2>
-    </div>
-    <form action="{{ url_for('delete_trip', trip_id=trip['id']) }}" method="post" data-confirm="Delete this entire trip, including itinerary, expenses, documents and memories?">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="button button-danger" type="submit">Delete trip</button>
-    </form>
-  </section>
 </main>
 {% endblock %}
