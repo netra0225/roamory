@@ -7,37 +7,16 @@
   <section class="dashboard-masthead">
     <div>
       <span class="eyebrow">YOUR TRAVEL DESK · PLAN → TRAVEL → REMEMBER</span>
+      {% if ongoing %}
+      <h1>Your trip, <em>right now.</em></h1>
+      <p style="padding-top:.9rem">Start with the trip you are in. What comes next sits lower on the page.</p>
+      {% else %}
       <h1>Where are we <em>going</em> next?</h1>
       <p style="padding-top:.9rem">One desk for the route, the practical bits, and the pages you keep afterwards.</p>
+      {% endif %}
     </div>
     <a class="button button-primary masthead-create" href="{{ url_for('create_trip') }}">+ Create a trip</a>
   </section>
-
-  {% if planning_trip %}
-  <section class="planning-focus-card planning-focus-quiet">
-    <div class="planning-focus-image">
-      <img src="{{ cover_for_trip(planning_trip) }}" alt="{{ planning_trip['destination'] }}">
-    </div>
-    <div class="planning-focus-copy">
-      <span class="eyebrow">NEXT TRIP{% if countdown is not none %} · IN {{ countdown }} DAYS{% endif %}</span>
-      <h2>{{ planning_trip['destination'] }}</h2>
-      <div class="readiness-line" aria-label="Trip readiness">
-        <span class="{{ 'ready' if planning_activity_total else '' }}">Route {{ '✓' if planning_activity_total else '—' }}</span>
-        <span class="{{ 'ready' if planning_packing_total and planning_packing_done == planning_packing_total else '' }}">Packing {{ planning_packing_done }}/{{ planning_packing_total }}</span>
-        <span class="{{ 'ready' if planning_docs else '' }}">Docs {{ '✓' if planning_docs else '—' }}</span>
-      </div>
-      <div class="next-action-copy">
-        <small>BEST NEXT STEP</small>
-        <strong>{{ planning_next_label }}</strong>
-        <p>{{ planning_next_note }}</p>
-      </div>
-      <div class="planning-focus-actions">
-        <a class="button button-primary" href="{{ planning_next_href }}">{{ planning_next_label }}</a>
-        <a class="text-link" href="{{ url_for('trip_overview', trip_id=planning_trip['id']) }}">View trip →</a>
-      </div>
-    </div>
-  </section>
-  {% endif %}
 
   {% if ongoing %}
   {% set activity_total = readiness['activities'] if readiness else 0 %}
