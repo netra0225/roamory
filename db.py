@@ -181,6 +181,69 @@ def _configure_persistent_secret(db):
     current_app.config['SECRET_KEY'] = generated
 
 
+def _backfill_udaipur_showcase_itinerary(db):
+    """Fill the previously empty final days of the built-in Udaipur showcase once."""
+    migration_key = 'udaipur_showcase_days_4_6_v1'
+    applied = db.execute(
+        'SELECT id FROM app_meta WHERE meta_key = ?',
+        (migration_key,),
+    ).fetchone()
+    if applied:
+        return
+
+    specs = {
+        4: [
+            ('Jagdish Temple and old city lanes', 'destination', '09:00', '10:45', 'Jagdish Temple', 24.5795, 73.6835, 0, 'Start early, then wander the lanes toward the lake.'),
+            ('Bagore Ki Haveli and Gangaur Ghat', 'activity', '16:30', '18:30', 'Bagore Ki Haveli', 24.5799, 73.6814, 300, 'Stay through golden hour by the ghat.'),
+        ],
+        5: [
+            ('Shilpgram arts village', 'activity', '10:00', '12:30', 'Shilpgram', 24.6086, 73.6505, 500, 'Keep time for the craft stalls and open-air exhibits.'),
+            ('Fateh Sagar Lake sunset walk', 'destination', '17:00', '19:00', 'Fateh Sagar Lake', 24.6012, 73.6836, 0, 'Walk the promenade and stop for something cold.'),
+        ],
+        6: [
+            ('Badi Lake morning drive', 'destination', '08:00', '10:30', 'Badi Lake', 24.6406, 73.6209, 1200, 'A quieter last morning outside the old city.'),
+            ('Hathipole Market farewell stop', 'activity', '11:30', '13:00', 'Hathipole Market', 24.5858, 73.6907, 1500, 'Pick up small souvenirs before heading back.'),
+        ],
+    }
+
+    trips = db.execute(
+        '''SELECT id FROM trips
+           WHERE LOWER(destination)=? AND title=?''',
+        ('udaipur', 'Palaces, Lakes & Late Sunsets'),
+    ).fetchall()
+
+    for trip in trips:
+        days = db.execute(
+            '''SELECT id, day_number, date FROM trip_days
+               WHERE trip_id=? AND day_number IN (4,5,6)
+               ORDER BY day_number''',
+            (trip['id'],),
+        ).fetchall()
+        for day in days:
+            existing = db.execute(
+                'SELECT COUNT(*) AS c FROM activities WHERE trip_id=? AND day_id=?',
+                (trip['id'], day['id']),
+            ).fetchone()['c']
+            if existing:
+                continue
+            for name, kind, start, end, location, latitude, longitude, estimated, note in specs.get(day['day_number'], []):
+                db.execute(
+                    '''INSERT INTO activities
+                       (trip_id,day_id,name,type,activity_date,start_time,end_time,location,
+                        latitude,longitude,estimated_cost,actual_cost,notes,status)
+                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+                    (
+                        trip['id'], day['id'], name, kind, day['date'], start, end, location,
+                        latitude, longitude, estimated, 0, note, 'planned',
+                    ),
+                )
+
+    db.execute(
+        'INSERT INTO app_meta (meta_key, meta_value) VALUES (?, ?)',
+        (migration_key, '1'),
+    )
+
+
 def init_db():
     db = get_db()
     schema_path = Path(current_app.root_path) / 'schema.sql'
@@ -202,6 +265,7 @@ def init_db():
         ),
     )
     _configure_persistent_secret(db)
+    _backfill_udaipur_showcase_itinerary(db)
     db.commit()
 
 
