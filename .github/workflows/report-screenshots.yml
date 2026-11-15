@@ -1,0 +1,39 @@
+name: Capture Roamory Report Screenshots
+
+on:
+  push:
+    branches: [report-screenshots]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out report branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+
+      - name: Install project and screenshot dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install playwright pillow
+          python -m playwright install --with-deps chromium
+
+      - name: Capture final Roamory screens
+        run: python report_capture.py
+
+      - name: Upload screenshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: roamory-final-report-screenshots
+          path: report_screenshots/
+          if-no-files-found: error
