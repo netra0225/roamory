@@ -140,3 +140,5 @@ finally:
         server.wait(timeout=10)
     except subprocess.TimeoutExpired:
         server.kill()
+
+# trigger screenshot workflow
